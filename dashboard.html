@@ -9,68 +9,25 @@
     <link rel="icon" href="img/logo.png" type="image/png">
     
     <style>
-        :root {
-            --surface: #FDFCF4;
-            --primary-container: #FFE16D;
-            --secondary-container: #E8DEF8;
-            --tertiary-container: #FFD8E4;
-            --on-surface: #1C1B1F;
-        }
-
-        /* 字體設定：優先使用小米字體，沒有則用系統預設黑體 */
-        body {
-            font-family: 'MiSans', 'Xiaomi Lan Ting Pro', 'Noto Sans TC', 'Roboto', sans-serif;
-            background-color: var(--surface);
-            margin: 0; padding: 20px; padding-bottom: 100px;
-            color: var(--on-surface);
-            /* 增加一個漸入動畫，讓畫面切換更順暢 */
-            animation: fadeIn 0.3s ease-in-out;
-        }
+        :root { --surface: #FDFCF4; --primary-container: #FFE16D; --secondary-container: #E8DEF8; --tertiary-container: #FFD8E4; --on-surface: #1C1B1F; }
+        body { font-family: 'MiSans', 'Xiaomi Lan Ting Pro', 'Noto Sans TC', 'Roboto', sans-serif; background-color: var(--surface); margin: 0; padding: 20px; padding-bottom: 100px; color: var(--on-surface); animation: fadeIn 0.3s ease-in-out; }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-
-        .top-bar {
-            display: flex; justify-content: space-between; align-items: center;
-            margin-bottom: 25px; margin-top: 10px;
-        }
+        .top-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; margin-top: 10px; }
         .greeting h2 { margin: 0; font-size: 20px; font-weight: normal; color: #666; }
-        /* 預設隱藏名字，等資料讀取到再顯示，避免出現 ... */
         .greeting span { font-weight: bold; font-size: 28px; color: #000; visibility: hidden; }
         .greeting span.loaded { visibility: visible; }
-        
-        /* === 藝術文字頭像設計 === */
-        .text-avatar {
-            width: 60px; height: 60px; border-radius: 50%;
-            background: #6F5D00; /* 深金色背景 */
-            color: white;
-            display: flex; justify-content: center; align-items: center;
-            font-size: 22px; font-weight: bold;
-            border: 3px solid #fff; box-shadow: 0 4px 10px rgba(0,0,0,0.15);
-            letter-spacing: 1px;
-            visibility: hidden; /* 預設隱藏 */
-        }
+        .text-avatar { width: 60px; height: 60px; border-radius: 50%; background: #6F5D00; color: white; display: flex; justify-content: center; align-items: center; font-size: 22px; font-weight: bold; border: 3px solid #fff; box-shadow: 0 4px 10px rgba(0,0,0,0.15); letter-spacing: 1px; visibility: hidden; }
         .text-avatar.loaded { visibility: visible; }
-
-        .category-label {
-            font-size: 14px; font-weight: bold; color: #666;
-            margin-bottom: 10px; margin-left: 5px; margin-top: 25px;
-        }
-
+        .category-label { font-size: 14px; font-weight: bold; color: #666; margin-bottom: 10px; margin-left: 5px; margin-top: 25px; }
         .card-container { display: flex; flex-direction: column; gap: 12px; }
-
-        .menu-item {
-            display: flex; align-items: center; justify-content: space-between;
-            padding: 20px 24px; border-radius: 24px;
-            text-decoration: none; color: #1C1B1F; transition: 0.2s;
-        }
+        .menu-item { display: flex; align-items: center; justify-content: space-between; padding: 20px 24px; border-radius: 24px; text-decoration: none; color: #1C1B1F; transition: 0.2s; }
         .menu-item:active { transform: scale(0.98); opacity: 0.8; }
         .menu-item span { font-size: 16px; font-weight: 500; }
         .menu-item::after { content: '➜'; opacity: 0.2; }
-
         .bg-yellow { background-color: var(--primary-container); }
         .bg-yellow-light { background-color: #FFF4CB; }
         .bg-pink { background-color: var(--tertiary-container); }
         .bg-purple { background-color: var(--secondary-container); }
-
         .btn-logout { display: block; width: 100%; text-align: center; padding: 15px; margin-bottom: 80px; color: #999; text-decoration: none; font-size: 14px; }
     </style>
 </head>
@@ -81,98 +38,74 @@
             <h2>早安，</h2>
             <span id="user-name">...</span>
         </div>
-        <div id="avatar-box" class="text-avatar">
-            員
-        </div>
+        <div id="avatar-box" class="text-avatar">員</div>
     </div>
 
     <div class="category-label">📂 重要表單快速檢索</div>
     <div class="card-container">
-        <a href="insurance.html" class="menu-item bg-yellow">
-            <span>🛡️ 員工保險表單生產器</span>
-        </a>
-        <a href="schedule.html" class="menu-item bg-yellow-light">
-            <span>📅 員工班表 (內部用)</span>
-        </a>
-        <a href="schedule.html" class="menu-item bg-yellow-light">
-            <span>🕒 員工班表 (外部含時數)</span>
-        </a>
+        <a href="insurance.html" class="menu-item bg-yellow"><span>🛡️ 員工保險表單生產器</span></a>
+        <a href="schedule.html" class="menu-item bg-yellow-light"><span>📅 員工班表 (內部用)</span></a>
+        <a href="schedule.html" class="menu-item bg-yellow-light"><span>🕒 員工班表 (外部含時數)</span></a>
     </div>
 
     <div class="category-label">🎨 美編文案</div>
     <div class="card-container">
-        <a href="copywriter.html" class="menu-item bg-pink">
-            <span>📢 公告文生產器</span>
-        </a>
-        <a href="schedule.html" class="menu-item bg-pink">
-            <span>💬 LINE 內部階段公告</span>
-        </a>
+        <a href="copywriter.html" class="menu-item bg-pink"><span>📢 公告文生產器</span></a>
+        <a href="schedule.html" class="menu-item bg-pink"><span>💬 LINE 內部階段公告</span></a>
     </div>
 
     <div class="category-label">👥 人事表單</div>
     <div class="card-container">
-        <a href="schedule.html" class="menu-item bg-purple">
-            <span>📁 員工資料庫</span>
-        </a>
-        <a href="schedule.html" class="menu-item bg-purple">
-            <span>📝 員工徵選資料庫</span>
-        </a>
-        <a href="schedule.html" class="menu-item bg-purple">
-            <span>💰 員工薪資資料庫</span>
-        </a>
+        <a href="schedule.html" class="menu-item bg-purple"><span>📁 員工資料庫</span></a>
+        <a href="schedule.html" class="menu-item bg-purple"><span>📝 員工徵選資料庫</span></a>
+        <a href="schedule.html" class="menu-item bg-purple"><span>💰 員工薪資資料庫</span></a>
     </div>
 
     <a href="#" class="btn-logout" onclick="logout()">🔒 登出系統</a>
 
-    <script src="staffData.js"></script>
     <script>
-        // === 核心穩定性修復 ===
-
-        // 0. 確保資料庫已載入
-        if (typeof STAFF_DB === 'undefined') {
-            // 如果資料庫沒載入，強制重新整理網頁，不卡住
-            console.error("Database not loaded. Retrying...");
-            window.location.reload();
+        // 1. 讀取資料庫 (從 LocalStorage 讀取，因為 index.html 已經抓下來了)
+        const cachedDB = localStorage.getItem('STAFF_DB_CACHE');
+        let STAFF_DB = {};
+        
+        if (cachedDB) {
+            STAFF_DB = JSON.parse(cachedDB);
+        } else {
+            // 如果沒有資料，踢回首頁重新載入
+            window.location.replace('index.html');
         }
 
-        // 1. 檢查登入紀錄
+        // 2. 檢查登入
         const loggedInPhone = localStorage.getItem('loginPhone');
-
-        // 如果沒紀錄，直接踢回首頁，不要猶豫
         if (!loggedInPhone) {
-            window.location.replace('index.html'); // 使用 replace 不留上一頁紀錄
+            window.location.replace('index.html');
         } else {
-            // 2. 有紀錄，嘗試從資料庫抓資料
             const userData = STAFF_DB[loggedInPhone];
 
             if (userData) {
-                // ✅ 成功抓到資料：更新 UI 並顯示
                 const nameSpan = document.getElementById('user-name');
                 const avatarBox = document.getElementById('avatar-box');
                 
                 nameSpan.innerText = userData.name;
                 avatarBox.innerText = getAvatarName(userData.name);
                 
-                // 加上 loaded class 讓它們顯示出來
                 nameSpan.classList.add('loaded');
                 avatarBox.classList.add('loaded');
-
             } else {
-                // ❌ 危險狀況：有登入紀錄，但資料庫找不到這個人！
-                // 這就是造成卡住的元兇。
-                console.error("User record corrupted. Logging out.");
-                // 清除壞掉的紀錄
+                // 資料異常
                 localStorage.removeItem('loginPhone');
-                // 立刻踢回首頁
                 window.location.replace('index.html');
             }
         }
 
-        // 3. 登出功能 (不囉嗦版)
+        function getAvatarName(fullName) {
+            if (!fullName) return "員";
+            if (/^[a-zA-Z0-9\s]+$/.test(fullName)) return fullName.substring(0, 2).toUpperCase();
+            return fullName.length > 2 ? fullName.slice(-2) : fullName;
+        }
+
         function logout() {
-            // 不問了，直接登出
             localStorage.removeItem('loginPhone');
-            // 使用 replace 跳轉，避免使用者按「上一頁」又跑回來
             window.location.replace('index.html');
         }
     </script>
