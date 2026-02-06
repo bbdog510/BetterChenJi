@@ -3,130 +3,119 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>陳記元宵戰情室</title>
+    <title>陳記元宵登入</title>
     <link rel="manifest" href="manifest.json">
-    <meta name="theme-color" content="#e67e22">
+    <meta name="theme-color" content="#fdfcf4">
     <link rel="icon" href="img/logo.png" type="image/png">
     <link rel="apple-touch-icon" href="img/logo.png">
     
     <style>
-        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif; background-color: #f0f2f5; margin: 0; padding: 20px; color: #333; }
-        
-        /* LOGO 區 */
-        .header { text-align: center; margin-bottom: 30px; margin-top: 20px; }
-        .logo-img { width: 80px; height: 80px; border-radius: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); margin-bottom: 10px; }
-        h1 { margin: 0; color: #d35400; font-size: 1.5rem; letter-spacing: 1px; }
-        .subtitle { font-size: 0.9rem; color: #777; }
+        /* Android 16 風格基礎色調 */
+        :root {
+            --md-sys-color-primary: #6F5D00;
+            --md-sys-color-on-primary: #FFFFFF;
+            --md-sys-color-primary-container: #FFE16D;
+            --md-sys-color-background: #FDFCF4;
+            --md-sys-color-surface: #FDFCF4;
+        }
 
-        /* 卡片通用樣式 */
-        .section-card { background: white; border-radius: 16px; padding: 20px; box-shadow: 0 2px 12px rgba(0,0,0,0.08); margin-bottom: 20px; transition: 0.3s; }
-        
-        /* 標題樣式 */
-        .section-title { font-size: 1.1rem; font-weight: bold; color: #444; margin-bottom: 15px; display: flex; align-items: center; }
-        .section-title::before { content: ''; display: inline-block; width: 4px; height: 18px; background: #e67e22; margin-right: 10px; border-radius: 2px; }
-
-        /* 按鈕網格 */
-        .menu-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; }
-        
-        /* 功能按鈕 */
-        .app-btn {
+        body {
+            font-family: 'Google Sans', Roboto, sans-serif;
+            background-color: var(--md-sys-color-background);
             display: flex; flex-direction: column; align-items: center; justify-content: center;
-            background: #fff; border: 2px solid #eee; border-radius: 12px;
-            height: 100px; text-decoration: none; color: #555; transition: 0.2s;
-            position: relative; overflow: hidden;
-        }
-        .app-btn:active { transform: scale(0.96); background: #f9f9f9; border-color: #e67e22; }
-        .app-btn i { font-size: 24px; margin-bottom: 8px; }
-        .app-btn span { font-size: 14px; font-weight: bold; }
-        
-        /* 待開發標籤 */
-        .tag-soon {
-            position: absolute; top: 0; right: 0; background: #95a5a6; color: white;
-            font-size: 10px; padding: 2px 6px; border-bottom-left-radius: 8px;
+            height: 100vh; margin: 0; color: #484649;
         }
 
-        /* 老闆專區 (預設隱藏) */
-        #boss-section { display: none; border: 2px solid #e67e22; background: #fff8f0; }
-        .boss-header { color: #d35400; }
-        
-        /* 登入按鈕區 */
-        .login-trigger { text-align: center; margin-top: 40px; }
-        .btn-login { background: transparent; border: 1px solid #ccc; padding: 8px 20px; border-radius: 20px; color: #999; font-size: 12px; cursor: pointer; }
+        .login-card {
+            background: #fff;
+            padding: 40px 30px;
+            border-radius: 28px; /* Android 大圓角 */
+            width: 80%; max-width: 320px;
+            text-align: center;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+        }
 
+        .logo { width: 80px; height: 80px; border-radius: 20px; margin-bottom: 20px; }
+        h1 { font-size: 24px; margin-bottom: 10px; color: #1C1B1F; }
+        p { color: #666; font-size: 14px; margin-bottom: 30px; }
+
+        input {
+            width: 100%; padding: 16px; margin-bottom: 20px;
+            border: 2px solid #E0E2E0; border-radius: 16px;
+            font-size: 16px; box-sizing: border-box; outline: none;
+            background: #F4F6F4; transition: 0.3s;
+        }
+        input:focus { border-color: var(--md-sys-color-primary); background: #fff; }
+
+        .btn-main {
+            width: 100%; padding: 16px;
+            background-color: var(--md-sys-color-primary); color: white;
+            border: none; border-radius: 100px;
+            font-size: 16px; font-weight: bold; cursor: pointer;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        .btn-main:active { transform: scale(0.98); opacity: 0.9; }
+
+        /* 安裝按鈕 (預設隱藏，支援 PWA 才會出現) */
+        #install-btn {
+            display: none; margin-top: 20px;
+            color: var(--md-sys-color-primary);
+            background: var(--md-sys-color-primary-container);
+            padding: 10px 20px; border-radius: 100px;
+            font-size: 13px; font-weight: bold; cursor: pointer; border: none;
+        }
     </style>
 </head>
 <body>
 
-    <div class="header">
-        <img src="img/logo.png" alt="Logo" class="logo-img">
+    <div class="login-card">
+        <img src="img/logo.png" class="logo">
         <h1>陳記元宵</h1>
-        <div class="subtitle">數位戰情中心</div>
-    </div>
-
-    <div class="section-card">
-        <div class="section-title">📂 重要表單</div>
-        <div class="menu-grid">
-            <a href="schedule.html" class="app-btn">
-                <i>📅</i>
-                <span>員工班表</span>
-                <span class="tag-soon">建置中...</span>
-            </a>
-            
-            <a href="#" class="app-btn" style="opacity:0.5; pointer-events:none;">
-                <i>📋</i>
-                <span>請假單</span>
-                <span class="tag-soon">未來</span>
-            </a>
-        </div>
-    </div>
-
-    <div id="boss-section" class="section-card">
-        <div class="section-title boss-header">🦁 管理層專區</div>
+        <p>數位戰情中心</p>
         
-        <p style="font-size:12px; color:#d35400; margin-bottom:10px;">🔸 開業前準備</p>
-        <div class="menu-grid">
-            <a href="copywriter.html" class="app-btn">
-                <i>✍️</i>
-                <span>公告文產生器</span>
-            </a>
-            
-            <a href="#" class="app-btn" style="opacity:0.5; pointer-events:none;">
-                <i>💰</i>
-                <span>薪資設定</span>
-                <span class="tag-soon">未來</span>
-            </a>
-        </div>
-    </div>
-
-    <div class="login-trigger">
-        <button class="btn-login" onclick="toggleBossMode()">🔒 管理員登入</button>
+        <input type="password" id="pwd" placeholder="請輸入訪問密碼">
+        <button class="btn-main" onclick="login()">登入系統</button>
+        
+        <button id="install-btn">📲 點我安裝於桌面</button>
     </div>
 
     <script>
-        // 簡單的障眼法登入
-        function toggleBossMode() {
-            let bossSec = document.getElementById('boss-section');
-            
-            if (bossSec.style.display === 'block') {
-                // 如果已經開了，就關起來
-                bossSec.style.display = 'none';
-                document.querySelector('.btn-login').innerText = '🔒 管理員登入';
+        // 1. 自動登入檢查
+        // 如果瀏覽器記得你登入過，直接送去主控台
+        if (localStorage.getItem('isLoggedIn') === 'true') {
+            window.location.href = 'dashboard.html';
+        }
+
+        // 2. 登入邏輯
+        function login() {
+            const pwd = document.getElementById('pwd').value;
+            // 這裡設定你的密碼，目前是 888
+            if (pwd === "888") {
+                localStorage.setItem('isLoggedIn', 'true'); // 記住登入狀態
+                window.location.href = 'dashboard.html';
             } else {
-                // 如果沒開，要求密碼
-                let pwd = prompt("請輸入管理員密碼：", "");
-                if (pwd === "888") {
-                    bossSec.style.display = 'block';
-                    document.querySelector('.btn-login').innerText = '🔓 登出管理員';
-                    // 自動捲動到老闆區
-                    setTimeout(() => {
-                        bossSec.scrollIntoView({ behavior: 'smooth' });
-                    }, 100);
-                } else {
-                    if(pwd !== null) alert("密碼錯誤！");
-                }
+                alert("密碼錯誤！");
             }
         }
-    </script>
 
+        // 3. PWA 安裝按鈕邏輯
+        let deferredPrompt;
+        const installBtn = document.getElementById('install-btn');
+
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            installBtn.style.display = 'inline-block'; // 顯示按鈕
+        });
+
+        installBtn.addEventListener('click', async () => {
+            if (deferredPrompt) {
+                deferredPrompt.prompt();
+                const { outcome } = await deferredPrompt.userChoice;
+                deferredPrompt = null;
+                installBtn.style.display = 'none';
+            }
+        });
+    </script>
 </body>
 </html>
