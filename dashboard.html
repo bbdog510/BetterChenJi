@@ -5,37 +5,86 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>戰情室主頁</title>
     <link rel="manifest" href="manifest.json">
-    <meta name="theme-color" content="#fdfcf4">
+    <meta name="theme-color" content="#121212">
     <link rel="icon" href="img/logo.png" type="image/png">
     
     <style>
-        :root { --surface: #FDFCF4; --primary-container: #FFE16D; --secondary-container: #E8DEF8; --tertiary-container: #FFD8E4; --on-surface: #1C1B1F; }
-        body { font-family: 'MiSans', 'Xiaomi Lan Ting Pro', 'Noto Sans TC', 'Roboto', sans-serif; background-color: var(--surface); margin: 0; padding: 20px; padding-bottom: 100px; color: var(--on-surface); animation: fadeIn 0.3s ease-in-out; }
+        /* === 預設暗黑模式 === */
+        :root {
+            --bg-color: #121212;
+            --text-main: #E0E0E0;
+            --text-sub: #AAAAAA;
+            --yellow-card: #3E3820; --yellow-text: #FFD54F;
+            --pink-card: #3E2028; --pink-text: #F48FB1;
+            --purple-card: #2D203E; --purple-text: #CE93D8;
+            --avatar-border: #333;
+        }
+        /* 白天模式 */
+        body.light-mode {
+            --bg-color: #FDFCF4;
+            --text-main: #1C1B1F;
+            --text-sub: #666666;
+            --yellow-card: #FFE16D; --yellow-text: #221B00;
+            --pink-card: #FFD8E4; --pink-text: #31111D;
+            --purple-card: #E8DEF8; --purple-text: #1D192B;
+            --avatar-border: #fff;
+        }
+
+        body {
+            font-family: 'MiSans', sans-serif;
+            background-color: var(--bg-color);
+            margin: 0; padding: 20px; padding-bottom: 100px;
+            color: var(--text-main);
+            transition: background-color 0.3s;
+            animation: fadeIn 0.3s;
+        }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
         .top-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; margin-top: 10px; }
-        .greeting h2 { margin: 0; font-size: 20px; font-weight: normal; color: #666; }
-        .greeting span { font-weight: bold; font-size: 28px; color: #000; visibility: hidden; }
-        .greeting span.loaded { visibility: visible; }
-        .text-avatar { width: 60px; height: 60px; border-radius: 50%; background: #6F5D00; color: white; display: flex; justify-content: center; align-items: center; font-size: 22px; font-weight: bold; border: 3px solid #fff; box-shadow: 0 4px 10px rgba(0,0,0,0.15); letter-spacing: 1px; visibility: hidden; }
-        .text-avatar.loaded { visibility: visible; }
-        .category-label { font-size: 14px; font-weight: bold; color: #666; margin-bottom: 10px; margin-left: 5px; margin-top: 25px; }
+        .greeting h2 { margin: 0; font-size: 20px; font-weight: normal; color: var(--text-sub); }
+        .greeting span { font-weight: bold; font-size: 28px; color: var(--text-main); }
+        
+        .text-avatar { 
+            width: 60px; height: 60px; border-radius: 50%; 
+            background: #FFD54F; color: #333; 
+            display: flex; justify-content: center; align-items: center; 
+            font-size: 22px; font-weight: bold; 
+            border: 3px solid var(--avatar-border); 
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2); 
+        }
+
+        .category-label { font-size: 14px; font-weight: bold; color: var(--text-sub); margin-bottom: 10px; margin-left: 5px; margin-top: 25px; }
         .card-container { display: flex; flex-direction: column; gap: 12px; }
-        .menu-item { display: flex; align-items: center; justify-content: space-between; padding: 20px 24px; border-radius: 24px; text-decoration: none; color: #1C1B1F; transition: 0.2s; }
+
+        .menu-item { 
+            display: flex; align-items: center; justify-content: space-between; 
+            padding: 20px 24px; border-radius: 24px; 
+            text-decoration: none; font-weight: 500;
+        }
         .menu-item:active { transform: scale(0.98); opacity: 0.8; }
-        .menu-item span { font-size: 16px; font-weight: 500; }
-        .menu-item::after { content: '➜'; opacity: 0.2; }
-        .bg-yellow { background-color: var(--primary-container); }
-        .bg-yellow-light { background-color: #FFF4CB; }
-        .bg-pink { background-color: var(--tertiary-container); }
-        .bg-purple { background-color: var(--secondary-container); }
-        .btn-logout { display: block; width: 100%; text-align: center; padding: 15px; margin-bottom: 80px; color: #999; text-decoration: none; font-size: 14px; }
+        
+        /* 權限控制 Class：vip-only 的東西預設通通藏起來 */
+        .vip-only { display: none; } 
+
+        .bg-yellow { background-color: var(--yellow-card); color: var(--yellow-text); }
+        .bg-pink { background-color: var(--pink-card); color: var(--pink-text); }
+        .bg-purple { background-color: var(--purple-card); color: var(--purple-text); }
+
+        .btn-logout { display: block; width: 100%; text-align: center; padding: 15px; margin-bottom: 80px; color: var(--text-sub); text-decoration: none; font-size: 14px; }
+        
+        .theme-toggle {
+            position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
+            background: rgba(125,125,125,0.2); color: var(--text-sub);
+            padding: 8px 16px; border-radius: 20px; font-size: 12px; cursor: pointer;
+            backdrop-filter: blur(5px); border: 1px solid rgba(255,255,255,0.1);
+        }
     </style>
 </head>
 <body>
 
     <div class="top-bar">
         <div class="greeting">
-            <h2>早安，</h2>
+            <h2 id="greet-text">早安，</h2>
             <span id="user-name">...</span>
         </div>
         <div id="avatar-box" class="text-avatar">員</div>
@@ -43,67 +92,85 @@
 
     <div class="category-label">📂 重要表單快速檢索</div>
     <div class="card-container">
-        <a href="insurance.html" class="menu-item bg-yellow"><span>🛡️ 員工保險表單生產器</span></a>
-        <a href="schedule.html" class="menu-item bg-yellow-light"><span>📅 員工班表 (內部用)</span></a>
-        <a href="schedule.html" class="menu-item bg-yellow-light"><span>🕒 員工班表 (外部含時數)</span></a>
+        <a href="schedule.html" class="menu-item bg-yellow"><span>🕒 員工班表 (外部含時數)</span></a>
+        
+        <a href="inventory.html" class="menu-item bg-yellow vip-only"><span>📦 每日盤點回報系統</span></a>
+        <a href="insurance.html" class="menu-item bg-yellow vip-only"><span>🛡️ 員工保險表單生產器</span></a>
+        <a href="schedule.html" class="menu-item bg-yellow vip-only"><span>📅 員工班表 (內部用)</span></a>
     </div>
 
-    <div class="category-label">🎨 美編文案</div>
-    <div class="card-container">
+    <div class="category-label vip-only">🎨 美編文案</div>
+    <div class="card-container vip-only">
         <a href="copywriter.html" class="menu-item bg-pink"><span>📢 公告文生產器</span></a>
         <a href="schedule.html" class="menu-item bg-pink"><span>💬 LINE 內部階段公告</span></a>
     </div>
 
-    <div class="category-label">👥 人事表單</div>
-    <div class="card-container">
+    <div class="category-label vip-only">👥 人事表單</div>
+    <div class="card-container vip-only">
         <a href="schedule.html" class="menu-item bg-purple"><span>📁 員工資料庫</span></a>
         <a href="schedule.html" class="menu-item bg-purple"><span>📝 員工徵選資料庫</span></a>
         <a href="schedule.html" class="menu-item bg-purple"><span>💰 員工薪資資料庫</span></a>
     </div>
 
     <a href="#" class="btn-logout" onclick="logout()">🔒 登出系統</a>
+    <div class="theme-toggle" onclick="toggleTheme()">🌙 / ☀️ 切換</div>
 
     <script>
-        // 1. 讀取資料庫 (從 LocalStorage 讀取，因為 index.html 已經抓下來了)
-        const cachedDB = localStorage.getItem('STAFF_DB_CACHE');
-        let STAFF_DB = {};
-        
-        if (cachedDB) {
-            STAFF_DB = JSON.parse(cachedDB);
-        } else {
-            // 如果沒有資料，踢回首頁重新載入
-            window.location.replace('index.html');
+        // 日夜切換
+        function toggleTheme() {
+            document.body.classList.toggle('light-mode');
+            localStorage.setItem('theme', document.body.classList.contains('light-mode') ? 'light' : 'dark');
         }
+        if (localStorage.getItem('theme') === 'light') document.body.classList.add('light-mode');
 
-        // 2. 檢查登入
+        // 資料庫讀取檢查
+        const cachedDB = localStorage.getItem('STAFF_DB_CACHE');
+        if (!cachedDB) window.location.replace('index.html');
+        
+        const STAFF_DB = JSON.parse(cachedDB);
         const loggedInPhone = localStorage.getItem('loginPhone');
-        if (!loggedInPhone) {
+        
+        if (!loggedInPhone || !STAFF_DB[loggedInPhone]) {
             window.location.replace('index.html');
         } else {
-            const userData = STAFF_DB[loggedInPhone];
+            const user = STAFF_DB[loggedInPhone];
+            
+            // 1. 設定名字
+            document.getElementById('user-name').innerText = user.name;
+            document.getElementById('avatar-box').innerText = getAvatarName(user.name);
 
-            if (userData) {
-                const nameSpan = document.getElementById('user-name');
-                const avatarBox = document.getElementById('avatar-box');
-                
-                nameSpan.innerText = userData.name;
-                avatarBox.innerText = getAvatarName(userData.name);
-                
-                nameSpan.classList.add('loaded');
-                avatarBox.classList.add('loaded');
-            } else {
-                // 資料異常
-                localStorage.removeItem('loginPhone');
-                window.location.replace('index.html');
+            // 2. 自動問候 (早/午/晚)
+            const hour = new Date().getHours();
+            let greeting = "早安，";
+            if (hour >= 11 && hour < 17) greeting = "午安，";
+            else if (hour >= 17 || hour < 5) greeting = "晚安，";
+            document.getElementById('greet-text').innerText = greeting;
+
+            // 3. 權限判斷 (ADMIN 邏輯)
+            // 先確保 role 是字串，並轉成大寫，這樣你填 "admin" 或 "ADMIN" 都通
+            const role = user.role ? String(user.role).toUpperCase() : "";
+            
+            // 判斷條件：
+            // A. W欄位裡面有寫 "ADMIN"
+            // B. 或是你是老闆本人 (0936588349)
+            const isVip = role.includes("ADMIN") || loggedInPhone === "0936588349";
+
+            if (isVip) {
+                // 如果是 VIP，把所有藏起來的東西 (vip-only) 打開
+                document.querySelectorAll('.vip-only').forEach(el => {
+                    // 如果是標題用 block，如果是按鈕用 flex
+                    if(el.classList.contains('category-label')) {
+                        el.style.display = 'block';
+                    } else {
+                        el.style.display = 'flex';
+                    }
+                });
             }
         }
 
-        function getAvatarName(fullName) {
-            if (!fullName) return "員";
-            if (/^[a-zA-Z0-9\s]+$/.test(fullName)) return fullName.substring(0, 2).toUpperCase();
-            return fullName.length > 2 ? fullName.slice(-2) : fullName;
+        function getAvatarName(name) {
+            return name.length > 2 ? name.slice(-2) : name;
         }
-
         function logout() {
             localStorage.removeItem('loginPhone');
             window.location.replace('index.html');
