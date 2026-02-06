@@ -5,28 +5,99 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>陳記元宵登入</title>
     <link rel="manifest" href="manifest.json">
-    <meta name="theme-color" content="#fdfcf4">
+    <meta name="theme-color" content="#121212">
     <link rel="icon" href="img/logo.png" type="image/png">
     <link rel="apple-touch-icon" href="img/logo.png">
     
     <style>
-        :root { --primary: #6F5D00; --background: #FDFCF4; }
-        body { font-family: 'MiSans', sans-serif; background-color: var(--background); display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; margin: 0; color: #484649; }
-        .login-card { background: #fff; padding: 40px 30px; border-radius: 28px; width: 80%; max-width: 320px; text-align: center; box-shadow: 0 4px 20px rgba(0,0,0,0.05); }
+        /* === 核心配色變數 (預設暗黑) === */
+        :root {
+            --bg-color: #121212;
+            --card-bg: #1E1E1E;
+            --text-main: #E0E0E0;
+            --text-sub: #A0A0A0;
+            --input-bg: #2C2C2C;
+            --input-border: #444;
+            --primary: #FFD54F; /* 金黃色 (暗黑模式用亮一點) */
+            --primary-text: #000;
+            --btn-text: #000;
+        }
+
+        /* === 白天模式 (Light Mode) === */
+        body.light-mode {
+            --bg-color: #FDFCF4;
+            --card-bg: #FFFFFF;
+            --text-main: #333333;
+            --text-sub: #666666;
+            --input-bg: #F4F6F4;
+            --input-border: #E0E2E0;
+            --primary: #6F5D00;
+            --primary-text: #FFFFFF;
+            --btn-text: #FFFFFF;
+        }
+
+        body {
+            font-family: 'MiSans', 'Microsoft JhengHei', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            height: 100vh; margin: 0; 
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        .login-card {
+            background: var(--card-bg);
+            padding: 40px 30px;
+            border-radius: 28px;
+            width: 80%; max-width: 320px;
+            text-align: center;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+            border: 1px solid rgba(255,255,255,0.05);
+            transition: 0.3s;
+        }
+
         .logo { width: 80px; height: 80px; border-radius: 20px; margin-bottom: 20px; }
-        h1 { font-size: 24px; margin-bottom: 5px; color: #1C1B1F; }
-        p { color: #666; font-size: 14px; margin-bottom: 30px; }
+        h1 { font-size: 24px; margin-bottom: 5px; color: var(--text-main); }
+        p { color: var(--text-sub); font-size: 14px; margin-bottom: 30px; }
+
         .input-group { text-align: left; margin-bottom: 15px; }
-        label { font-size: 12px; color: #666; margin-left: 10px; display: block; margin-bottom: 5px; }
-        input { width: 100%; padding: 16px; border: 2px solid #E0E2E0; border-radius: 16px; font-size: 16px; box-sizing: border-box; outline: none; background: #F4F6F4; transition: 0.3s; }
-        input:focus { border-color: var(--primary); background: #fff; }
-        .btn-main { width: 100%; padding: 16px; margin-top: 10px; background-color: var(--primary); color: white; border: none; border-radius: 100px; font-size: 16px; font-weight: bold; cursor: pointer; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
-        .btn-main:active { transform: scale(0.98); opacity: 0.9; }
-        .btn-main:disabled { background-color: #ccc; cursor: not-allowed; }
-        #install-btn { display: none; margin-top: 20px; color: var(--primary); background: #FFE16D; padding: 10px 20px; border-radius: 100px; font-size: 13px; font-weight: bold; cursor: pointer; border: none; }
+        label { font-size: 12px; color: var(--text-sub); margin-left: 10px; display: block; margin-bottom: 5px; }
         
-        /* 更新狀態提示 */
-        #status-msg { font-size: 12px; color: #999; margin-top: 15px; min-height: 18px; }
+        input {
+            width: 100%; padding: 16px;
+            border: 2px solid var(--input-border); border-radius: 16px;
+            font-size: 16px; box-sizing: border-box; outline: none;
+            background: var(--input-bg); color: var(--text-main);
+            transition: 0.3s;
+        }
+        input:focus { border-color: var(--primary); }
+
+        .btn-main {
+            width: 100%; padding: 16px; margin-top: 10px;
+            background-color: var(--primary); color: var(--btn-text);
+            border: none; border-radius: 100px;
+            font-size: 16px; font-weight: bold; cursor: pointer;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+            transition: 0.2s;
+        }
+        .btn-main:active { transform: scale(0.98); opacity: 0.9; }
+        .btn-main:disabled { background-color: #555; color: #888; cursor: not-allowed; }
+
+        #status-msg { font-size: 12px; color: var(--text-sub); margin-top: 15px; min-height: 18px; }
+
+        /* === 日夜切換按鈕 (底部) === */
+        .theme-toggle {
+            position: fixed; bottom: 20px;
+            background: rgba(125, 125, 125, 0.2);
+            color: var(--text-sub);
+            padding: 8px 16px; border-radius: 20px;
+            font-size: 12px; cursor: pointer;
+            border: 1px solid rgba(255,255,255,0.1);
+            backdrop-filter: blur(5px);
+            transition: 0.3s;
+            user-select: none;
+        }
+        .theme-toggle:hover { background: rgba(255,255,255,0.2); }
     </style>
 </head>
 <body>
@@ -48,56 +119,62 @@
 
         <button id="loginBtn" class="btn-main" onclick="login()" disabled>資料庫連線中...</button>
         <div id="status-msg">正在同步最新員工名單...</div>
-        
-        <button id="install-btn">📲 點我安裝於桌面</button>
+    </div>
+
+    <div class="theme-toggle" onclick="toggleTheme()">
+        🌙 / ☀️ 切換風格
     </div>
 
     <script>
-        // ==========================================
-        // ⚠️ 請在這裡貼上你剛剛複製的 Google Apps Script 網址 ⚠️
+        // === 1. 日夜模式邏輯 ===
+        function toggleTheme() {
+            document.body.classList.toggle('light-mode');
+            const isLight = document.body.classList.contains('light-mode');
+            localStorage.setItem('theme', isLight ? 'light' : 'dark');
+        }
+        // 初始化讀取設定 (如果沒設定過，預設就是暗黑，不加 light-mode)
+        if (localStorage.getItem('theme') === 'light') {
+            document.body.classList.add('light-mode');
+        }
+
+        // === 2. API 設定 (已填入你的網址) ===
         const API_URL = "https://script.google.com/macros/s/AKfycbx6l8uA3uuCxNmLLhUJkbU7km1W8R5Of6JTR279-AdKRZ1RmLKLkhAqAlbQX-MyQGGcJA/exec"; 
         // ==========================================
 
-        // 1. 初始化：嘗試讀取快取，並背景更新
         let STAFF_DB = {};
         
-        // 先讀取本地快取 (讓畫面不用等)
+        // 讀取快取
         const cachedData = localStorage.getItem('STAFF_DB_CACHE');
         if (cachedData) {
             STAFF_DB = JSON.parse(cachedData);
             enableLogin("已載入快取資料");
         }
 
-        // 2. 啟動時立刻去 Google Sheet 抓最新的 (背景執行)
+        // 背景更新
         fetchStaffData();
 
         function fetchStaffData() {
             const btn = document.getElementById('loginBtn');
             const msg = document.getElementById('status-msg');
             
-            if(!cachedData) msg.innerText = "正在下載最新名單 (首次會比較久)...";
+            if(!cachedData) msg.innerText = "正在下載最新名單...";
 
             fetch(API_URL)
                 .then(response => response.json())
                 .then(data => {
                     console.log("資料庫更新成功", data);
                     STAFF_DB = data;
-                    // 存入快取
                     localStorage.setItem('STAFF_DB_CACHE', JSON.stringify(data));
-                    // 啟用按鈕
                     enableLogin("資料庫已同步最新版 ✅");
-                    
-                    // 自動登入檢查 (確保資料庫載入後才執行)
                     checkAutoLogin();
                 })
                 .catch(error => {
                     console.error("更新失敗", error);
                     if (cachedData) {
                         msg.innerText = "無法連線，使用舊版資料 ⚠️";
-                        msg.style.color = "orange";
                     } else {
-                        msg.innerText = "連線失敗，請檢查網路或 API 網址 ❌";
-                        msg.style.color = "red";
+                        msg.innerText = "連線失敗，請檢查網路或 API ❌";
+                        msg.style.color = "#FF5252";
                         btn.innerText = "連線失敗";
                     }
                 });
@@ -109,7 +186,7 @@
             btn.disabled = false;
             btn.innerText = "登入系統";
             msg.innerText = text;
-            msg.style.color = "#2ecc71";
+            msg.style.color = document.body.classList.contains('light-mode') ? "#27ae60" : "#81C784";
         }
 
         function checkAutoLogin() {
@@ -119,15 +196,13 @@
             }
         }
 
-        // 3. 登入邏輯
         function login() {
             const acc = document.getElementById('account').value;
             const pwd = document.getElementById('pwd').value;
 
-            // 管理員後門 (以防 API 壞掉你進不去)
+            // 管理員後門
             if (acc === "0936588349" && pwd === "831222") {
                  localStorage.setItem('loginPhone', acc);
-                 // 補上管理員資料以免報錯
                  if(!STAFF_DB[acc]) {
                      STAFF_DB[acc] = { name: "NICK", role: "admin", origin: "管理員" };
                      localStorage.setItem('STAFF_DB_CACHE', JSON.stringify(STAFF_DB));
@@ -144,25 +219,9 @@
                     alert("密碼錯誤！請輸入生日 (例如 851206)");
                 }
             } else {
-                alert("找不到此帳號！請確認 Google Sheet 資料已更新");
+                alert("找不到此帳號！請確認資料已更新");
             }
         }
-
-        // PWA
-        let deferredPrompt;
-        const installBtn = document.getElementById('install-btn');
-        window.addEventListener('beforeinstallprompt', (e) => {
-            e.preventDefault();
-            deferredPrompt = e;
-            installBtn.style.display = 'inline-block';
-        });
-        installBtn.addEventListener('click', async () => {
-            if (deferredPrompt) {
-                deferredPrompt.prompt();
-                deferredPrompt = null;
-                installBtn.style.display = 'none';
-            }
-        });
     </script>
 </body>
 </html>
