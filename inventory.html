@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>每日盤點回報</title>
+    <link rel="icon" href="img/logo.png" type="image/png">
+    <style>
+        :root { --bg-color: #121212; --text-main: #E0E0E0; --card-bg: #1E1E1E; }
+        body.light-mode { --bg-color: #FDFCF4; --text-main: #333; --card-bg: #fff; }
+        
+        body { font-family: 'MiSans', sans-serif; background: var(--bg-color); color: var(--text-main); padding: 20px; text-align: center; height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; margin: 0; }
+        .card { background: var(--card-bg); padding: 30px; border-radius: 20px; box-shadow: 0 4px 10px rgba(0,0,0,0.3); }
+        h1 { color: #FFD54F; }
+        .btn-back { margin-top: 20px; display: inline-block; padding: 10px 20px; background: #333; color: white; text-decoration: none; border-radius: 20px; }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <h1>📦 每日盤點回報系統</h1>
+        <p>系統建置中...</p>
+        <p>這裡未來會讓店長回報每日庫存數據。</p>
+        <a href="dashboard.html" class="btn-back">⬅️ 返回戰情室</a>
+    </div>
+    <script>
+        if (localStorage.getItem('theme') === 'light') document.body.classList.add('light-mode');
+    </script>
+</body>
+</html>
