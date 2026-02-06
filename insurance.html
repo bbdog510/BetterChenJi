@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>保險資料填寫</title>
+    <link rel="icon" href="img/logo.png" type="image/png">
+    <style>
+        body {
+            font-family: 'MiSans', sans-serif;
+            background-color: #FDFCF4;
+            padding: 20px; color: #333;
+        }
+        .container {
+            max-width: 600px; margin: 0 auto;
+            background: white; padding: 25px; border-radius: 20px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+        }
+        h2 { text-align: center; color: #6F5D00; margin-top: 0; }
+        
+        .info-box {
+            background: #FFF4CB; padding: 15px; border-radius: 12px;
+            margin-bottom: 20px; font-size: 14px; color: #555;
+            border-left: 4px solid #FFE16D;
+        }
+
+        .form-group { margin-bottom: 15px; }
+        label { display: block; font-weight: bold; margin-bottom: 5px; font-size: 14px; }
+        input {
+            width: 100%; padding: 12px; border: 1px solid #ddd;
+            border-radius: 10px; box-sizing: border-box; font-size: 16px;
+            background: #f9f9f9;
+        }
+        input[readonly] { background: #eee; color: #777; }
+
+        .btn-copy {
+            width: 100%; padding: 15px; background: #6F5D00; color: white;
+            border: none; border-radius: 50px; font-size: 16px; font-weight: bold;
+            cursor: pointer; margin-top: 20px;
+        }
+        .btn-back {
+            display: block; text-align: center; margin-top: 15px;
+            color: #999; text-decoration: none; font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h2>🛡️ 員工保險資料確認</h2>
+        
+        <div class="info-box">
+            請確認以下資料是否正確，若有誤請直接聯繫管理員 (NICK)。
+            <br>確認無誤後，請點擊下方按鈕複製，並傳送至群組。
+        </div>
+
+        <div class="form-group">
+            <label>來源 (店點)</label>
+            <input type="text" id="origin" readonly>
+        </div>
+
+        <div class="form-group">
+            <label>姓名</label>
+            <input type="text" id="name" readonly>
+        </div>
+
+        <div class="form-group">
+            <label>身分證字號</label>
+            <input type="text" id="uid" readonly>
+        </div>
+
+        <div class="form-group">
+            <label>生日 (民國年)</label>
+            <input type="text" id="birthday" readonly>
+        </div>
+
+        <div class="form-group">
+            <label>手機號碼</label>
+            <input type="text" id="phone" readonly>
+        </div>
+
+        <button class="btn-copy" onclick="copyData()">📋 確認無誤，一鍵複製</button>
+        <a href="dashboard.html" class="btn-back">⬅️ 返回主選單</a>
+    </div>
+
+    <script src="staffData.js"></script>
+    <script>
+        // 1. 抓取登入者資料
+        const loginPhone = localStorage.getItem('loginPhone');
+        if (!loginPhone || !STAFF_DB[loginPhone]) {
+            alert("請先登入！");
+            window.location.href = 'index.html';
+        }
+
+        const user = STAFF_DB[loginPhone];
+
+        // 2. 自動填入表單
+        document.getElementById('origin').value = user.origin || "未設定";
+        document.getElementById('name').value = user.name;
+        document.getElementById('uid').value = user.id;
+        document.getElementById('birthday').value = user.birthday;
+        document.getElementById('phone').value = loginPhone;
+
+        // 3. 複製功能
+        function copyData() {
+            // 組合出你要的格式
+            const textToCopy = `【保險資料回報】\n姓名：${user.name}\n身分證：${user.id}\n生日：${user.birthday}\n手機：${loginPhone}\n來源：${user.origin}`;
+            
+            navigator.clipboard.writeText(textToCopy).then(() => {
+                alert("✅ 資料已複製！請切換到 LINE 貼上。");
+            }).catch(err => {
+                alert("複製失敗，請手動截圖。");
+            });
+        }
+    </script>
+
+</body>
+</html>
