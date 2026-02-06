@@ -119,11 +119,31 @@
 
     <script src="staffData.js"></script>
     <script>
-        // 1. 檢查登入
-        const loggedInPhone = localStorage.getItem('loginPhone');
-        if (!loggedInPhone) {
-            window.location.href = 'index.html';
-        }
+        // === 修改 dashboard.html 的資料讀取邏輯 ===
+
+// 1. 檢查登入
+const loggedInPhone = localStorage.getItem('loginPhone');
+if (!loggedInPhone) {
+    window.location.href = 'index.html';
+}
+
+// 2. 從資料庫抓取最新資料
+const userData = STAFF_DB[loggedInPhone];
+
+if (userData) {
+    // === 正常登入成功 ===
+    // 設定名字
+    document.getElementById('user-name').innerText = userData.name;
+    // 設定文字頭像
+    document.getElementById('avatar-box').innerText = getAvatarName(userData.name);
+} else {
+    // === 異常狀況：有登入紀錄，但資料庫沒這個人 (造成迴圈的主因) ===
+    alert("您的帳號資料已更新或失效，請重新登入！");
+    
+    // 關鍵修正：馬上清除壞掉的紀錄，再踢回首頁
+    localStorage.removeItem('loginPhone');
+    window.location.href = 'index.html';
+}
 
         // 2. 從資料庫抓取最新資料
         // 注意：我們改用手機號碼當作 Key 去資料庫撈資料，確保資料是最新的
