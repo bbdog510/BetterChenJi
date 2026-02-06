@@ -9,83 +9,62 @@
     <link rel="icon" href="img/logo.png" type="image/png">
     
     <style>
-        /* Android 16 Material You 配色 */
         :root {
             --surface: #FDFCF4;
-            --surface-variant: #F4F6F4; /* 淺灰底 */
-            --primary: #6F5D00;
-            --primary-container: #FFE16D; /* 強調色 */
-            --on-primary-container: #221B00;
-            --secondary-container: #E8DEF8; /* 次要區塊色 (人事) */
-            --tertiary-container: #FFD8E4; /* 第三區塊色 (美編) */
+            --primary-container: #FFE16D;
+            --secondary-container: #E8DEF8;
+            --tertiary-container: #FFD8E4;
+            --on-surface: #1C1B1F;
         }
 
+        /* 字體設定：優先使用小米字體，沒有則用系統預設黑體 */
         body {
-            font-family: 'Google Sans', Roboto, sans-serif;
+            font-family: 'MiSans', 'Xiaomi Lan Ting Pro', 'Noto Sans TC', 'Roboto', sans-serif;
             background-color: var(--surface);
-            margin: 0; padding: 20px; padding-bottom: 50px;
-            color: #1C1B1F;
+            margin: 0; padding: 20px; padding-bottom: 100px;
+            color: var(--on-surface);
         }
 
-        /* 頂部導航列 (人頭像) */
         .top-bar {
             display: flex; justify-content: space-between; align-items: center;
-            margin-bottom: 30px; margin-top: 10px;
+            margin-bottom: 25px; margin-top: 10px;
         }
-        .greeting h2 { margin: 0; font-size: 22px; font-weight: normal; }
-        .greeting span { font-weight: bold; font-size: 26px; }
+        .greeting h2 { margin: 0; font-size: 20px; font-weight: normal; color: #666; }
+        .greeting span { font-weight: bold; font-size: 28px; color: #000; }
         
-        .avatar {
-            width: 56px; height: 56px; border-radius: 50%;
-            background: #eee; object-fit: cover;
-            border: 3px solid #fff; box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-            cursor: pointer;
+        /* === 藝術文字頭像設計 === */
+        .text-avatar {
+            width: 60px; height: 60px; border-radius: 50%;
+            background: #6F5D00; /* 深金色背景 */
+            color: white;
+            display: flex; justify-content: center; align-items: center;
+            font-size: 22px; font-weight: bold;
+            border: 3px solid #fff; box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+            letter-spacing: 1px;
         }
 
-        /* 分類標題 */
         .category-label {
             font-size: 14px; font-weight: bold; color: #666;
-            margin-bottom: 10px; margin-left: 5px; letter-spacing: 0.5px;
+            margin-bottom: 10px; margin-left: 5px; margin-top: 25px;
         }
 
-        /* 大圓角卡片容器 */
-        .card-container {
-            display: flex; flex-direction: column; gap: 12px;
-            margin-bottom: 30px;
-        }
+        .card-container { display: flex; flex-direction: column; gap: 12px; }
 
-        /* 按鈕樣式 (仿 Android 列表) */
         .menu-item {
             display: flex; align-items: center; justify-content: space-between;
-            padding: 20px 24px;
-            border-radius: 24px; /* Android 16 大圓角 */
-            text-decoration: none; color: #1C1B1F;
-            transition: 0.2s;
-            position: relative; overflow: hidden;
+            padding: 20px 24px; border-radius: 24px;
+            text-decoration: none; color: #1C1B1F; transition: 0.2s;
         }
-        
         .menu-item:active { transform: scale(0.98); opacity: 0.8; }
         .menu-item span { font-size: 16px; font-weight: 500; }
         .menu-item::after { content: '➜'; opacity: 0.2; }
 
-        /* 各區塊配色 */
-        /* 1. 重要表單 - 黃色系 */
-        .bg-yellow { background-color: var(--primary-container); color: var(--on-primary-container); }
-        .bg-yellow-light { background-color: #FFF4CB; } /* 子選項淺一點 */
+        .bg-yellow { background-color: var(--primary-container); }
+        .bg-yellow-light { background-color: #FFF4CB; }
+        .bg-pink { background-color: var(--tertiary-container); }
+        .bg-purple { background-color: var(--secondary-container); }
 
-        /* 2. 美編文案 - 粉色系 */
-        .bg-pink { background-color: var(--tertiary-container); color: #31111D; }
-        
-        /* 3. 人事表單 - 紫色系 */
-        .bg-purple { background-color: var(--secondary-container); color: #1D192B; }
-
-        /* 登出按鈕 */
-        .btn-logout {
-            display: block; width: 100%; text-align: center;
-            padding: 15px; margin-top: 40px;
-            color: #999; text-decoration: none; font-size: 14px;
-        }
-
+        .btn-logout { display: block; width: 100%; text-align: center; padding: 15px; margin-bottom: 80px; color: #999; text-decoration: none; font-size: 14px; }
     </style>
 </head>
 <body>
@@ -93,14 +72,16 @@
     <div class="top-bar">
         <div class="greeting">
             <h2>早安，</h2>
-            <span>元宵夥伴</span>
+            <span id="user-name">...</span>
         </div>
-        <img src="img/avatar.png" class="avatar" onclick="alert('這裡是個人設定頁面(尚未開發)')">
+        <div id="avatar-box" class="text-avatar">
+            員
+        </div>
     </div>
 
     <div class="category-label">📂 重要表單快速檢索</div>
     <div class="card-container">
-        <a href="schedule.html" class="menu-item bg-yellow">
+        <a href="insurance.html" class="menu-item bg-yellow">
             <span>🛡️ 員工保險表單生產器</span>
         </a>
         <a href="schedule.html" class="menu-item bg-yellow-light">
@@ -136,17 +117,35 @@
 
     <a href="#" class="btn-logout" onclick="logout()">🔒 登出系統</a>
 
+    <script src="staffData.js"></script>
     <script>
-        // 安全檢查：如果沒登入，踢回首頁
-        if (localStorage.getItem('isLoggedIn') !== 'true') {
+        // 1. 檢查登入
+        const loggedInPhone = localStorage.getItem('loginPhone');
+        if (!loggedInPhone) {
             window.location.href = 'index.html';
+        }
+
+        // 2. 從資料庫抓取最新資料
+        // 注意：我們改用手機號碼當作 Key 去資料庫撈資料，確保資料是最新的
+        const userData = STAFF_DB[loggedInPhone];
+
+        if (userData) {
+            // 設定名字
+            document.getElementById('user-name').innerText = userData.name;
+            // 設定文字頭像 (使用我們剛剛寫好的 getAvatarName)
+            document.getElementById('avatar-box').innerText = getAvatarName(userData.name);
+        } else {
+            // 如果資料庫找不到人 (例外狀況)
+            document.getElementById('user-name').innerText = "訪客";
+            document.getElementById('avatar-box').innerText = "訪";
         }
 
         function logout() {
-            localStorage.removeItem('isLoggedIn');
-            window.location.href = 'index.html';
+            if(confirm('確定要登出嗎？')) {
+                localStorage.removeItem('loginPhone'); // 清除紀錄
+                window.location.href = 'index.html';
+            }
         }
     </script>
-
 </body>
 </html>
