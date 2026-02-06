@@ -23,14 +23,19 @@
             background-color: var(--surface);
             margin: 0; padding: 20px; padding-bottom: 100px;
             color: var(--on-surface);
+            /* 增加一個漸入動畫，讓畫面切換更順暢 */
+            animation: fadeIn 0.3s ease-in-out;
         }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
         .top-bar {
             display: flex; justify-content: space-between; align-items: center;
             margin-bottom: 25px; margin-top: 10px;
         }
         .greeting h2 { margin: 0; font-size: 20px; font-weight: normal; color: #666; }
-        .greeting span { font-weight: bold; font-size: 28px; color: #000; }
+        /* 預設隱藏名字，等資料讀取到再顯示，避免出現 ... */
+        .greeting span { font-weight: bold; font-size: 28px; color: #000; visibility: hidden; }
+        .greeting span.loaded { visibility: visible; }
         
         /* === 藝術文字頭像設計 === */
         .text-avatar {
@@ -41,7 +46,9 @@
             font-size: 22px; font-weight: bold;
             border: 3px solid #fff; box-shadow: 0 4px 10px rgba(0,0,0,0.15);
             letter-spacing: 1px;
+            visibility: hidden; /* 預設隱藏 */
         }
+        .text-avatar.loaded { visibility: visible; }
 
         .category-label {
             font-size: 14px; font-weight: bold; color: #666;
@@ -119,52 +126,54 @@
 
     <script src="staffData.js"></script>
     <script>
-        // === 修改 dashboard.html 的資料讀取邏輯 ===
+        // === 核心穩定性修復 ===
 
-// 1. 檢查登入
-const loggedInPhone = localStorage.getItem('loginPhone');
-if (!loggedInPhone) {
-    window.location.href = 'index.html';
-}
-
-// 2. 從資料庫抓取最新資料
-const userData = STAFF_DB[loggedInPhone];
-
-if (userData) {
-    // === 正常登入成功 ===
-    // 設定名字
-    document.getElementById('user-name').innerText = userData.name;
-    // 設定文字頭像
-    document.getElementById('avatar-box').innerText = getAvatarName(userData.name);
-} else {
-    // === 異常狀況：有登入紀錄，但資料庫沒這個人 (造成迴圈的主因) ===
-    alert("您的帳號資料已更新或失效，請重新登入！");
-    
-    // 關鍵修正：馬上清除壞掉的紀錄，再踢回首頁
-    localStorage.removeItem('loginPhone');
-    window.location.href = 'index.html';
-}
-
-        // 2. 從資料庫抓取最新資料
-        // 注意：我們改用手機號碼當作 Key 去資料庫撈資料，確保資料是最新的
-        const userData = STAFF_DB[loggedInPhone];
-
-        if (userData) {
-            // 設定名字
-            document.getElementById('user-name').innerText = userData.name;
-            // 設定文字頭像 (使用我們剛剛寫好的 getAvatarName)
-            document.getElementById('avatar-box').innerText = getAvatarName(userData.name);
-        } else {
-            // 如果資料庫找不到人 (例外狀況)
-            document.getElementById('user-name').innerText = "訪客";
-            document.getElementById('avatar-box').innerText = "訪";
+        // 0. 確保資料庫已載入
+        if (typeof STAFF_DB === 'undefined') {
+            // 如果資料庫沒載入，強制重新整理網頁，不卡住
+            console.error("Database not loaded. Retrying...");
+            window.location.reload();
         }
 
-        function logout() {
-            if(confirm('確定要登出嗎？')) {
-                localStorage.removeItem('loginPhone'); // 清除紀錄
-                window.location.href = 'index.html';
+        // 1. 檢查登入紀錄
+        const loggedInPhone = localStorage.getItem('loginPhone');
+
+        // 如果沒紀錄，直接踢回首頁，不要猶豫
+        if (!loggedInPhone) {
+            window.location.replace('index.html'); // 使用 replace 不留上一頁紀錄
+        } else {
+            // 2. 有紀錄，嘗試從資料庫抓資料
+            const userData = STAFF_DB[loggedInPhone];
+
+            if (userData) {
+                // ✅ 成功抓到資料：更新 UI 並顯示
+                const nameSpan = document.getElementById('user-name');
+                const avatarBox = document.getElementById('avatar-box');
+                
+                nameSpan.innerText = userData.name;
+                avatarBox.innerText = getAvatarName(userData.name);
+                
+                // 加上 loaded class 讓它們顯示出來
+                nameSpan.classList.add('loaded');
+                avatarBox.classList.add('loaded');
+
+            } else {
+                // ❌ 危險狀況：有登入紀錄，但資料庫找不到這個人！
+                // 這就是造成卡住的元兇。
+                console.error("User record corrupted. Logging out.");
+                // 清除壞掉的紀錄
+                localStorage.removeItem('loginPhone');
+                // 立刻踢回首頁
+                window.location.replace('index.html');
             }
+        }
+
+        // 3. 登出功能 (不囉嗦版)
+        function logout() {
+            // 不問了，直接登出
+            localStorage.removeItem('loginPhone');
+            // 使用 replace 跳轉，避免使用者按「上一頁」又跑回來
+            window.location.replace('index.html');
         }
     </script>
 </body>
