@@ -7,12 +7,12 @@
   "theme_color": "#e67e22",
   "icons": [
     {
-      "src": "https://cdn-icons-png.flaticon.com/512/3063/3063822.png",
+      "src": "img/logo.png",  <-- 改這裡！
       "sizes": "192x192",
       "type": "image/png"
     },
     {
-      "src": "https://cdn-icons-png.flaticon.com/512/3063/3063822.png",
+      "src": "img/logo.png",  <-- 改這裡！
       "sizes": "512x512",
       "type": "image/png"
     }
