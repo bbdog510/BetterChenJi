@@ -24,7 +24,7 @@
         .btn-group { display: flex; gap: 10px; margin-bottom: 10px; }
         button { flex: 1; padding: 12px; border: none; border-radius: 8px; font-size: 16px; font-weight: bold; cursor: pointer; transition: 0.2s; }
         
-        .btn-paste { background: #95a5a6; color: white; flex: 0 0 30%; } /* 貼上按鈕比較小 */
+        .btn-paste { background: #95a5a6; color: white; flex: 0 0 30%; } 
         .btn-gen { background: #e67e22; color: white; flex: 1; }
         .btn-copy { background: #27ae60; color: white; width: 100%; }
         
@@ -33,10 +33,10 @@
         /* 結果區 */
         #result { background: #fafafa; border: 2px dashed #ccc; }
 
-        /* === 圖片下載區 (新增) === */
+        /* 圖片下載區 */
         .img-grid {
             display: grid;
-            grid-template-columns: repeat(3, 1fr); /* 一排三張 */
+            grid-template-columns: repeat(3, 1fr);
             gap: 10px;
         }
         .img-item {
@@ -44,9 +44,10 @@
             background: #eee;
             border-radius: 8px;
             overflow: hidden;
-            aspect-ratio: 1 / 1; /* 正方形 */
+            aspect-ratio: 1 / 1; 
             cursor: pointer;
             border: 2px solid transparent;
+            text-decoration: none; /* 移除超連結底線 */
         }
         .img-item img {
             width: 100%;
@@ -107,11 +108,11 @@
                 <img src="img/3.jpg" alt="圖3">
                 <div class="download-hint">點擊下載</div>
             </a>
-            </div>
+        </div>
     </div>
 
     <div class="footer">
-        陳記元宵系統 v2.0 | <span onclick="adminCheck()">⚙️</span>
+        陳記元宵系統 v2.1 | <span onclick="adminCheck()">⚙️</span>
     </div>
 
     <script>
@@ -150,11 +151,11 @@
                 const text = await navigator.clipboard.readText();
                 document.getElementById('rawInput').value = text;
             } catch (err) {
-                alert('您的瀏覽器不支援自動貼上，請手動長按輸入框貼上。');
+                alert('請手動貼上');
             }
         }
 
-        // 產生文案 (已更新年份邏輯)
+        // 產生文案 (核心邏輯修改處)
         function generatePost() {
             const raw = document.getElementById('rawInput').value;
             const lines = raw.split('\n');
@@ -166,13 +167,12 @@
                 let match = line.match(/^(.+?)[\s]*(\d{1,2}\/\d{1,2})-(\d{1,2}\/\d{1,2})/);
                 if (match) {
                     let key = match[1].trim();
-                    let start = match[2]; // 格式 2/24
-                    let end = match[3];   // 格式 3/3
+                    let start = match[2];
+                    let end = match[3];
                     let info = storeDB[key] || { name: key, addr: "地址待補", region: "📍其他📍" };
                     
                     if (!data[info.region]) data[info.region] = [];
                     
-                    // 這裡修改了顯示格式：加入 ${year}/
                     let displayTime = `${year}/${start}（${getW(year, start)}）- ${year}/${end}（${getW(year, end)}）`;
 
                     data[info.region].push({
@@ -190,8 +190,16 @@
             order.forEach(r => {
                 if (data[r]) {
                     out += `${r}\n`;
-                    data[r].sort((a,b) => a.sortKey - b.sortKey).forEach((item, i) => {
-                        out += `${i+1}.${item.name}\n時間：${item.time}\n地址：${item.addr}\n\n`;
+                    // 取得該區所有店鋪並排序
+                    let stores = data[r].sort((a,b) => a.sortKey - b.sortKey);
+                    
+                    // === 這裡就是判斷邏輯 ===
+                    // 如果該區超過 1 家店，就顯示編號，否則不顯示
+                    let showNumbering = stores.length > 1;
+
+                    stores.forEach((item, i) => {
+                        let prefix = showNumbering ? `${i+1}.` : ""; // 條件式編號
+                        out += `${prefix}${item.name}\n時間：${item.time}\n地址：${item.addr}\n\n`;
                     });
                 }
             });
