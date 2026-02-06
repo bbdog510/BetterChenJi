@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>戰情室主頁</title>
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#fdfcf4">
+    <link rel="icon" href="img/logo.png" type="image/png">
+    
+    <style>
+        /* Android 16 Material You 配色 */
+        :root {
+            --surface: #FDFCF4;
+            --surface-variant: #F4F6F4; /* 淺灰底 */
+            --primary: #6F5D00;
+            --primary-container: #FFE16D; /* 強調色 */
+            --on-primary-container: #221B00;
+            --secondary-container: #E8DEF8; /* 次要區塊色 (人事) */
+            --tertiary-container: #FFD8E4; /* 第三區塊色 (美編) */
+        }
+
+        body {
+            font-family: 'Google Sans', Roboto, sans-serif;
+            background-color: var(--surface);
+            margin: 0; padding: 20px; padding-bottom: 50px;
+            color: #1C1B1F;
+        }
+
+        /* 頂部導航列 (人頭像) */
+        .top-bar {
+            display: flex; justify-content: space-between; align-items: center;
+            margin-bottom: 30px; margin-top: 10px;
+        }
+        .greeting h2 { margin: 0; font-size: 22px; font-weight: normal; }
+        .greeting span { font-weight: bold; font-size: 26px; }
+        
+        .avatar {
+            width: 56px; height: 56px; border-radius: 50%;
+            background: #eee; object-fit: cover;
+            border: 3px solid #fff; box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            cursor: pointer;
+        }
+
+        /* 分類標題 */
+        .category-label {
+            font-size: 14px; font-weight: bold; color: #666;
+            margin-bottom: 10px; margin-left: 5px; letter-spacing: 0.5px;
+        }
+
+        /* 大圓角卡片容器 */
+        .card-container {
+            display: flex; flex-direction: column; gap: 12px;
+            margin-bottom: 30px;
+        }
+
+        /* 按鈕樣式 (仿 Android 列表) */
+        .menu-item {
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 20px 24px;
+            border-radius: 24px; /* Android 16 大圓角 */
+            text-decoration: none; color: #1C1B1F;
+            transition: 0.2s;
+            position: relative; overflow: hidden;
+        }
+        
+        .menu-item:active { transform: scale(0.98); opacity: 0.8; }
+        .menu-item span { font-size: 16px; font-weight: 500; }
+        .menu-item::after { content: '➜'; opacity: 0.2; }
+
+        /* 各區塊配色 */
+        /* 1. 重要表單 - 黃色系 */
+        .bg-yellow { background-color: var(--primary-container); color: var(--on-primary-container); }
+        .bg-yellow-light { background-color: #FFF4CB; } /* 子選項淺一點 */
+
+        /* 2. 美編文案 - 粉色系 */
+        .bg-pink { background-color: var(--tertiary-container); color: #31111D; }
+        
+        /* 3. 人事表單 - 紫色系 */
+        .bg-purple { background-color: var(--secondary-container); color: #1D192B; }
+
+        /* 登出按鈕 */
+        .btn-logout {
+            display: block; width: 100%; text-align: center;
+            padding: 15px; margin-top: 40px;
+            color: #999; text-decoration: none; font-size: 14px;
+        }
+
+    </style>
+</head>
+<body>
+
+    <div class="top-bar">
+        <div class="greeting">
+            <h2>早安，</h2>
+            <span>元宵夥伴</span>
+        </div>
+        <img src="img/avatar.png" class="avatar" onclick="alert('這裡是個人設定頁面(尚未開發)')">
+    </div>
+
+    <div class="category-label">📂 重要表單快速檢索</div>
+    <div class="card-container">
+        <a href="schedule.html" class="menu-item bg-yellow">
+            <span>🛡️ 員工保險表單生產器</span>
+        </a>
+        <a href="schedule.html" class="menu-item bg-yellow-light">
+            <span>📅 員工班表 (內部用)</span>
+        </a>
+        <a href="schedule.html" class="menu-item bg-yellow-light">
+            <span>🕒 員工班表 (外部含時數)</span>
+        </a>
+    </div>
+
+    <div class="category-label">🎨 美編文案</div>
+    <div class="card-container">
+        <a href="copywriter.html" class="menu-item bg-pink">
+            <span>📢 公告文生產器</span>
+        </a>
+        <a href="schedule.html" class="menu-item bg-pink">
+            <span>💬 LINE 內部階段公告</span>
+        </a>
+    </div>
+
+    <div class="category-label">👥 人事表單</div>
+    <div class="card-container">
+        <a href="schedule.html" class="menu-item bg-purple">
+            <span>📁 員工資料庫</span>
+        </a>
+        <a href="schedule.html" class="menu-item bg-purple">
+            <span>📝 員工徵選資料庫</span>
+        </a>
+        <a href="schedule.html" class="menu-item bg-purple">
+            <span>💰 員工薪資資料庫</span>
+        </a>
+    </div>
+
+    <a href="#" class="btn-logout" onclick="logout()">🔒 登出系統</a>
+
+    <script>
+        // 安全檢查：如果沒登入，踢回首頁
+        if (localStorage.getItem('isLoggedIn') !== 'true') {
+            window.location.href = 'index.html';
+        }
+
+        function logout() {
+            localStorage.removeItem('isLoggedIn');
+            window.location.href = 'index.html';
+        }
+    </script>
+
+</body>
+</html>
