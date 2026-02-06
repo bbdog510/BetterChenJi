@@ -87,11 +87,22 @@
     <script src="staffData.js"></script>
 
     <script>
-        // 1. 自動登入檢查
-        // 如果 localStorage 裡已經有紀錄手機號碼，直接跳轉到主控台
-        if (localStorage.getItem('loginPhone')) {
-            window.location.href = 'dashboard.html';
-        }
+       // === 修改 index.html 的自動登入邏輯 ===
+
+// 1. 自動登入檢查
+const savedPhone = localStorage.getItem('loginPhone');
+
+if (savedPhone) {
+    // 關鍵修正：必須檢查這個號碼是否「真的存在」於資料庫 (STAFF_DB)
+    // 如果資料庫沒載入，或者資料庫裡沒這個人，就不准自動跳轉
+    if (typeof STAFF_DB !== 'undefined' && STAFF_DB[savedPhone]) {
+        window.location.href = 'dashboard.html';
+    } else {
+        // 如果是無效的舊號碼，直接清除，讓使用者重新登入
+        console.log("發現無效的舊帳號，清除紀錄...");
+        localStorage.removeItem('loginPhone');
+    }
+}
 
         // 2. 登入邏輯
         function login() {
