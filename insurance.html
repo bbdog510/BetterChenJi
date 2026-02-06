@@ -85,19 +85,30 @@
 
     <script src="staffData.js"></script>
     <script>
-        // 1. 抓取登入者資料
-        const loginPhone = localStorage.getItem('loginPhone');
-        if (!loginPhone || !STAFF_DB[loginPhone]) {
-            alert("請先登入！");
-            window.location.href = 'index.html';
-        }
+<script>
+    // 1. 讀取資料庫
+    const cachedDB = localStorage.getItem('STAFF_DB_CACHE');
+    const loginPhone = localStorage.getItem('loginPhone');
+    
+    if (!cachedDB || !loginPhone) {
+        alert("資料庫未載入，請重新登入");
+        window.location.href = 'index.html';
+    }
 
-        const user = STAFF_DB[loginPhone];
+    const STAFF_DB = JSON.parse(cachedDB);
+    const user = STAFF_DB[loginPhone];
 
-        // 2. 自動填入表單
-        document.getElementById('origin').value = user.origin || "未設定";
-        document.getElementById('name').value = user.name;
-        document.getElementById('uid').value = user.id;
+    if (!user) {
+        alert("找不到您的資料");
+        window.location.href = 'index.html';
+    }
+
+    // 2. 自動填入表單
+    document.getElementById('origin').value = user.origin || "未設定";
+    document.getElementById('name').value = user.name;
+    document.getElementById('uid').value = user.id;
+    // ... (後面保持一樣)
+</script>
         document.getElementById('birthday').value = user.birthday;
         document.getElementById('phone').value = loginPhone;
 
