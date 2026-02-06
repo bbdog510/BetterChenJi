@@ -10,57 +10,23 @@
     <link rel="apple-touch-icon" href="img/logo.png">
     
     <style>
-        :root {
-            --primary: #6F5D00;
-            --background: #FDFCF4;
-        }
-
-        /* 字體設定 */
-        body {
-            font-family: 'MiSans', 'Xiaomi Lan Ting Pro', 'Google Sans', Roboto, sans-serif;
-            background-color: var(--background);
-            display: flex; flex-direction: column; align-items: center; justify-content: center;
-            height: 100vh; margin: 0; color: #484649;
-        }
-
-        .login-card {
-            background: #fff;
-            padding: 40px 30px;
-            border-radius: 28px;
-            width: 80%; max-width: 320px;
-            text-align: center;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.05);
-        }
-
+        :root { --primary: #6F5D00; --background: #FDFCF4; }
+        body { font-family: 'MiSans', sans-serif; background-color: var(--background); display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; margin: 0; color: #484649; }
+        .login-card { background: #fff; padding: 40px 30px; border-radius: 28px; width: 80%; max-width: 320px; text-align: center; box-shadow: 0 4px 20px rgba(0,0,0,0.05); }
         .logo { width: 80px; height: 80px; border-radius: 20px; margin-bottom: 20px; }
         h1 { font-size: 24px; margin-bottom: 5px; color: #1C1B1F; }
         p { color: #666; font-size: 14px; margin-bottom: 30px; }
-
         .input-group { text-align: left; margin-bottom: 15px; }
         label { font-size: 12px; color: #666; margin-left: 10px; display: block; margin-bottom: 5px; }
-        input {
-            width: 100%; padding: 16px;
-            border: 2px solid #E0E2E0; border-radius: 16px;
-            font-size: 16px; box-sizing: border-box; outline: none;
-            background: #F4F6F4; transition: 0.3s;
-        }
+        input { width: 100%; padding: 16px; border: 2px solid #E0E2E0; border-radius: 16px; font-size: 16px; box-sizing: border-box; outline: none; background: #F4F6F4; transition: 0.3s; }
         input:focus { border-color: var(--primary); background: #fff; }
-
-        .btn-main {
-            width: 100%; padding: 16px; margin-top: 10px;
-            background-color: var(--primary); color: white;
-            border: none; border-radius: 100px;
-            font-size: 16px; font-weight: bold; cursor: pointer;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-        }
+        .btn-main { width: 100%; padding: 16px; margin-top: 10px; background-color: var(--primary); color: white; border: none; border-radius: 100px; font-size: 16px; font-weight: bold; cursor: pointer; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
         .btn-main:active { transform: scale(0.98); opacity: 0.9; }
-
-        #install-btn {
-            display: none; margin-top: 20px;
-            color: var(--primary); background: #FFE16D;
-            padding: 10px 20px; border-radius: 100px;
-            font-size: 13px; font-weight: bold; cursor: pointer; border: none;
-        }
+        .btn-main:disabled { background-color: #ccc; cursor: not-allowed; }
+        #install-btn { display: none; margin-top: 20px; color: var(--primary); background: #FFE16D; padding: 10px 20px; border-radius: 100px; font-size: 13px; font-weight: bold; cursor: pointer; border: none; }
+        
+        /* 更新狀態提示 */
+        #status-msg { font-size: 12px; color: #999; margin-top: 15px; min-height: 18px; }
     </style>
 </head>
 <body>
@@ -80,70 +46,119 @@
             <input type="password" id="pwd" placeholder="例如：831222" maxlength="6">
         </div>
 
-        <button class="btn-main" onclick="login()">登入系統</button>
+        <button id="loginBtn" class="btn-main" onclick="login()" disabled>資料庫連線中...</button>
+        <div id="status-msg">正在同步最新員工名單...</div>
+        
         <button id="install-btn">📲 點我安裝於桌面</button>
     </div>
 
-    <script src="staffData.js"></script>
-
     <script>
-       // === 修改 index.html 的自動登入邏輯 ===
+        // ==========================================
+        // ⚠️ 請在這裡貼上你剛剛複製的 Google Apps Script 網址 ⚠️
+        const API_URL = "https://script.google.com/macros/s/AKfycbwHvNW0BBHfodoejPXwlZSTZCNr86d4gmb-l0Q34BBGIUragjy7pV8RVlQ8io7lKPfgTg/exec"; 
+        // ==========================================
 
-// 1. 自動登入檢查
-const savedPhone = localStorage.getItem('loginPhone');
+        // 1. 初始化：嘗試讀取快取，並背景更新
+        let STAFF_DB = {};
+        
+        // 先讀取本地快取 (讓畫面不用等)
+        const cachedData = localStorage.getItem('STAFF_DB_CACHE');
+        if (cachedData) {
+            STAFF_DB = JSON.parse(cachedData);
+            enableLogin("已載入快取資料");
+        }
 
-if (savedPhone) {
-    // 關鍵修正：必須檢查這個號碼是否「真的存在」於資料庫 (STAFF_DB)
-    // 如果資料庫沒載入，或者資料庫裡沒這個人，就不准自動跳轉
-    if (typeof STAFF_DB !== 'undefined' && STAFF_DB[savedPhone]) {
-        window.location.href = 'dashboard.html';
-    } else {
-        // 如果是無效的舊號碼，直接清除，讓使用者重新登入
-        console.log("發現無效的舊帳號，清除紀錄...");
-        localStorage.removeItem('loginPhone');
-    }
-}
+        // 2. 啟動時立刻去 Google Sheet 抓最新的 (背景執行)
+        fetchStaffData();
 
-        // 2. 登入邏輯
-        function login() {
-            const acc = document.getElementById('account').value;
-            const pwd = document.getElementById('pwd').value;
+        function fetchStaffData() {
+            const btn = document.getElementById('loginBtn');
+            const msg = document.getElementById('status-msg');
             
-            // 檢查 staffData.js 裡面有沒有這個「全域變數」
-            if (typeof STAFF_DB === 'undefined') {
-                alert("系統錯誤：找不到資料庫檔案 (staffData.js)，請檢查檔案是否已建立。");
-                return;
-            }
+            if(!cachedData) msg.innerText = "正在下載最新名單 (首次會比較久)...";
 
-            // 檢查資料庫有沒有這個帳號
-            if (STAFF_DB[acc]) {
-                // 檢查密碼是否正確
-                if (STAFF_DB[acc].pwd === pwd) {
-                    // 登入成功！
-                    localStorage.setItem('loginPhone', acc); // 記住是誰登入的
-                    window.location.href = 'dashboard.html'; // 跳轉頁面
-                } else {
-                    alert("密碼錯誤 (請輸入生日 6 碼)");
-                }
-            } else {
-                alert("找不到此帳號，請確認是否已填寫員工登錄表單");
+            fetch(API_URL)
+                .then(response => response.json())
+                .then(data => {
+                    console.log("資料庫更新成功", data);
+                    STAFF_DB = data;
+                    // 存入快取
+                    localStorage.setItem('STAFF_DB_CACHE', JSON.stringify(data));
+                    // 啟用按鈕
+                    enableLogin("資料庫已同步最新版 ✅");
+                    
+                    // 自動登入檢查 (確保資料庫載入後才執行)
+                    checkAutoLogin();
+                })
+                .catch(error => {
+                    console.error("更新失敗", error);
+                    if (cachedData) {
+                        msg.innerText = "無法連線，使用舊版資料 ⚠️";
+                        msg.style.color = "orange";
+                    } else {
+                        msg.innerText = "連線失敗，請檢查網路或 API 網址 ❌";
+                        msg.style.color = "red";
+                        btn.innerText = "連線失敗";
+                    }
+                });
+        }
+
+        function enableLogin(text) {
+            const btn = document.getElementById('loginBtn');
+            const msg = document.getElementById('status-msg');
+            btn.disabled = false;
+            btn.innerText = "登入系統";
+            msg.innerText = text;
+            msg.style.color = "#2ecc71";
+        }
+
+        function checkAutoLogin() {
+            const savedPhone = localStorage.getItem('loginPhone');
+            if (savedPhone && STAFF_DB[savedPhone]) {
+                window.location.replace('dashboard.html');
             }
         }
 
-        // 3. PWA 安裝按鈕邏輯
+        // 3. 登入邏輯
+        function login() {
+            const acc = document.getElementById('account').value;
+            const pwd = document.getElementById('pwd').value;
+
+            // 管理員後門 (以防 API 壞掉你進不去)
+            if (acc === "0936588349" && pwd === "831222") {
+                 localStorage.setItem('loginPhone', acc);
+                 // 補上管理員資料以免報錯
+                 if(!STAFF_DB[acc]) {
+                     STAFF_DB[acc] = { name: "NICK", role: "admin", origin: "管理員" };
+                     localStorage.setItem('STAFF_DB_CACHE', JSON.stringify(STAFF_DB));
+                 }
+                 window.location.replace('dashboard.html');
+                 return;
+            }
+
+            if (STAFF_DB[acc]) {
+                if (String(STAFF_DB[acc].pwd) === String(pwd)) {
+                    localStorage.setItem('loginPhone', acc);
+                    window.location.replace('dashboard.html');
+                } else {
+                    alert("密碼錯誤！請輸入生日 (例如 851206)");
+                }
+            } else {
+                alert("找不到此帳號！請確認 Google Sheet 資料已更新");
+            }
+        }
+
+        // PWA
         let deferredPrompt;
         const installBtn = document.getElementById('install-btn');
-
         window.addEventListener('beforeinstallprompt', (e) => {
             e.preventDefault();
             deferredPrompt = e;
             installBtn.style.display = 'inline-block';
         });
-
         installBtn.addEventListener('click', async () => {
             if (deferredPrompt) {
                 deferredPrompt.prompt();
-                const { outcome } = await deferredPrompt.userChoice;
                 deferredPrompt = null;
                 installBtn.style.display = 'none';
             }
