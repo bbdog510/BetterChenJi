@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>陳記元宵戰情室</title>
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#e67e22">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/3063/3063822.png"> 
+    
+    <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; background-color: #f0f2f5; margin: 0; padding: 20px; color: #333; }
+        .card { background: white; border-radius: 12px; padding: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); margin-bottom: 20px; }
+        h2 { text-align: center; color: #d35400; margin-top: 0; }
+        
+        /* 時鐘 */
+        .clock-box { background: #2c3e50; color: #2ecc71; padding: 15px; border-radius: 8px; text-align: center; font-family: monospace; font-size: 1.2rem; font-weight: bold; margin-bottom: 20px; }
+        .clock-label { display: block; font-size: 0.8rem; color: #bdc3c7; margin-bottom: 5px; }
+
+        /* 輸入區 */
+        textarea { width: 100%; height: 120px; padding: 10px; border: 1px solid #ddd; border-radius: 8px; font-size: 16px; margin-bottom: 10px; box-sizing: border-box; }
+        button { width: 100%; padding: 15px; border: none; border-radius: 8px; font-size: 16px; font-weight: bold; cursor: pointer; transition: 0.2s; margin-bottom: 10px; }
+        .btn-gen { background: #e67e22; color: white; }
+        .btn-gen:active { background: #d35400; transform: scale(0.98); }
+        .btn-copy { background: #27ae60; color: white; }
+        .btn-copy:active { background: #219150; transform: scale(0.98); }
+        
+        /* 結果區 */
+        #result { background: #fafafa; border: 2px dashed #ccc; }
+        
+        /* 頁尾 */
+        .footer { text-align: center; font-size: 12px; color: #aaa; margin-top: 30px; }
+    </style>
+</head>
+<body>
+
+    <div class="clock-box">
+        <span class="clock-label">台灣標準時間 (TST)</span>
+        <div id="clock">Loading...</div>
+    </div>
+
+    <div class="card">
+        <h2>🏮 文案產生器</h2>
+        <p style="font-size:14px; color:#666;">貼上原始班表 (如：巨蛋 2/24-3/3)：</p>
+        <textarea id="rawInput" placeholder="在此貼上..."></textarea>
+        <button class="btn-gen" onclick="generatePost()">✨ 一鍵產生公告文案</button>
+        
+        <hr style="border:0; border-top:1px solid #eee; margin:20px 0;">
+        
+        <p style="font-size:14px; color:#666;">生成結果：</p>
+        <textarea id="result" readonly></textarea>
+        <button class="btn-copy" onclick="copyResult()">📋 複製到剪貼簿</button>
+    </div>
+
+    <div class="footer">
+        陳記元宵系統 v1.0 | <span onclick="adminCheck()">⚙️</span>
+    </div>
+
+    <script>
+        // 1. PWA Service Worker 註冊
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('./sw.js');
+        }
+
+        // 2. 資料庫 (地址對照表)
+        const storeDB = {
+            "Br4": { name: "City’Super 復興SOGO店", addr: "106台北市大安區忠孝東路三段300號遠東SOGO台北復興館B3", region: "📍台北 Taipei📍" },
+            "美福": { name: "美福食集", addr: "114 台北市內湖區民善街 128 號 1F", region: "📍台北 Taipei📍" },
+            "美麗華": { name: "美麗華", addr: "114 台北市中山區敬業三路 22 號 B1", region: "📍台北 Taipei📍" },
+            "天母": { name: "City’Super 天母SOGO店", addr: "111 台北市士林區中山北路六段 77 號 B1", region: "📍台北 Taipei📍" },
+            "統一": { name: "統一時代百貨台北店", addr: "110 台北市信義區忠孝東路五段 8 號 B2", region: "📍台北 Taipei📍" },
+            "松山": { name: "松山車站", addr: "105 台北市松山區松山路 11 號 1F", region: "📍台北 Taipei📍" },
+            "微風": { name: "微風超市", addr: "105 台北市松山區復興南路一段 39 號 B4", region: "📍台北 Taipei📍" },
+            "大葉": { name: "大葉高島屋", addr: "111 台北市士林區忠誠路二段 55 號 B1", region: "📍台北 Taipei📍" },
+            "宏匯廣場": { name: "宏匯廣場", addr: "242 新北市新莊區新北大道四段3號 B2", region: "📍台北 Taipei📍" },
+            "中和環球": { name: "中和環球", addr: "235 新北市中和區中山路三段122號 B2", region: "📍台北 Taipei📍" },
+            "新竹": { name: "新竹巨城 Big City", addr: "300 新竹市東區中央路 229 號 B1", region: "📍新竹 Hsinchu📍" },
+            "竹北": { name: "竹北大遠百", addr: "302 新竹縣竹北市莊敬北路18號", region: "📍新竹 Hsinchu📍" },
+            "台中": { name: "台中大遠百 Top City", addr: "407 台中市西屯區台灣大道三段 251 號 B2", region: "📍台中 Taichung📍" },
+            "大樂": { name: "大樂購物中心", addr: "807 高雄市三民區民族一路 463 號", region: "📍高雄 Kaohsiung📍" },
+            "巨蛋": { name: "漢神巨蛋購物廣場", addr: "813 高雄市左營區博愛二路777號 B1", region: "📍高雄 Kaohsiung📍" }
+        };
+
+        // 3. 時鐘功能
+        function updateClock() {
+            const now = new Date();
+            const options = { timeZone: "Asia/Taipei", hour12: false, hour: '2-digit', minute: '2-digit', second: '2-digit' };
+            document.getElementById('clock').innerText = now.toLocaleTimeString('zh-TW', options);
+        }
+        setInterval(updateClock, 1000);
+        updateClock();
+
+        // 4. 文案生成邏輯
+        function generatePost() {
+            const raw = document.getElementById('rawInput').value;
+            const lines = raw.split('\n');
+            const year = 2026;
+            let data = {};
+
+            lines.forEach(line => {
+                line = line.trim();
+                let match = line.match(/^(.+?)[\s]*(\d{1,2}\/\d{1,2})-(\d{1,2}\/\d{1,2})/);
+                if (match) {
+                    let key = match[1].trim();
+                    let start = match[2];
+                    let end = match[3];
+                    let info = storeDB[key] || { name: key, addr: "地址待補", region: "📍其他📍" };
+                    
+                    if (!data[info.region]) data[info.region] = [];
+                    data[info.region].push({
+                        name: info.name,
+                        time: `${start}（${getW(year, start)}）- ${end}（${getW(year, end)}）`,
+                        addr: info.addr,
+                        sortKey: parseD(year, start)
+                    });
+                }
+            });
+
+            let out = `元宵開賣啦～我們要相見啦～\n以下為${year}元宵實演的檔期^_^\n歡迎來找我們歐\n\n`;
+            const order = ["📍台北 Taipei📍", "📍新竹 Hsinchu📍", "📍台中 Taichung📍", "📍高雄 Kaohsiung📍", "📍其他📍"];
+
+            order.forEach(r => {
+                if (data[r]) {
+                    out += `${r}\n`;
+                    data[r].sort((a,b) => a.sortKey - b.sortKey).forEach((item, i) => {
+                        out += `${i+1}.${item.name}\n時間：${item.time}\n地址：${item.addr}\n\n`;
+                    });
+                }
+            });
+            document.getElementById('result').value = out;
+        }
+
+        function getW(y, d) { return ['日','一','二','三','四','五','六'][new Date(y, d.split('/')[0]-1, d.split('/')[1]).getDay()]; }
+        function parseD(y, d) { return new Date(y, d.split('/')[0]-1, d.split('/')[1]); }
+        function copyResult() { 
+            let t = document.getElementById("result"); t.select(); document.execCommand("copy"); alert("複製成功！"); 
+        }
+        function adminCheck() { if(prompt("密碼")=="888") alert("歡迎老闆！"); }
+    </script>
+</body>
+</html>
