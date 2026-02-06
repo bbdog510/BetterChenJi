@@ -7,64 +7,118 @@
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#e67e22">
     <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/3063/3063822.png"> 
     
     <style>
-        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; background-color: #f0f2f5; margin: 0; padding: 20px; color: #333; }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif; background-color: #f0f2f5; margin: 0; padding: 20px; color: #333; padding-bottom: 80px;}
         .card { background: white; border-radius: 12px; padding: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); margin-bottom: 20px; }
         h2 { text-align: center; color: #d35400; margin-top: 0; }
         
         /* 時鐘 */
         .clock-box { background: #2c3e50; color: #2ecc71; padding: 15px; border-radius: 8px; text-align: center; font-family: monospace; font-size: 1.2rem; font-weight: bold; margin-bottom: 20px; }
-        .clock-label { display: block; font-size: 0.8rem; color: #bdc3c7; margin-bottom: 5px; }
 
-        /* 輸入區 */
+        /* 輸入區與按鈕 */
         textarea { width: 100%; height: 120px; padding: 10px; border: 1px solid #ddd; border-radius: 8px; font-size: 16px; margin-bottom: 10px; box-sizing: border-box; }
-        button { width: 100%; padding: 15px; border: none; border-radius: 8px; font-size: 16px; font-weight: bold; cursor: pointer; transition: 0.2s; margin-bottom: 10px; }
-        .btn-gen { background: #e67e22; color: white; }
-        .btn-gen:active { background: #d35400; transform: scale(0.98); }
-        .btn-copy { background: #27ae60; color: white; }
-        .btn-copy:active { background: #219150; transform: scale(0.98); }
         
+        /* 按鈕群組 */
+        .btn-group { display: flex; gap: 10px; margin-bottom: 10px; }
+        button { flex: 1; padding: 12px; border: none; border-radius: 8px; font-size: 16px; font-weight: bold; cursor: pointer; transition: 0.2s; }
+        
+        .btn-paste { background: #95a5a6; color: white; flex: 0 0 30%; } /* 貼上按鈕比較小 */
+        .btn-gen { background: #e67e22; color: white; flex: 1; }
+        .btn-copy { background: #27ae60; color: white; width: 100%; }
+        
+        button:active { transform: scale(0.98); opacity: 0.9; }
+
         /* 結果區 */
         #result { background: #fafafa; border: 2px dashed #ccc; }
-        
-        /* 頁尾 */
+
+        /* === 圖片下載區 (新增) === */
+        .img-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr); /* 一排三張 */
+            gap: 10px;
+        }
+        .img-item {
+            position: relative;
+            background: #eee;
+            border-radius: 8px;
+            overflow: hidden;
+            aspect-ratio: 1 / 1; /* 正方形 */
+            cursor: pointer;
+            border: 2px solid transparent;
+        }
+        .img-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        .img-item:active { border-color: #e67e22; }
+        .download-hint {
+            position: absolute;
+            bottom: 0; left: 0; right: 0;
+            background: rgba(0,0,0,0.6);
+            color: white;
+            font-size: 10px;
+            text-align: center;
+            padding: 2px;
+        }
+
         .footer { text-align: center; font-size: 12px; color: #aaa; margin-top: 30px; }
     </style>
 </head>
 <body>
 
     <div class="clock-box">
-        <span class="clock-label">台灣標準時間 (TST)</span>
         <div id="clock">Loading...</div>
     </div>
 
     <div class="card">
         <h2>🏮 文案產生器</h2>
-        <p style="font-size:14px; color:#666;">貼上原始班表 (如：巨蛋 2/24-3/3)：</p>
-        <textarea id="rawInput" placeholder="在此貼上..."></textarea>
-        <button class="btn-gen" onclick="generatePost()">✨ 一鍵產生公告文案</button>
+        
+        <p style="font-size:14px; color:#666; margin-bottom:5px;">1. 貼上原始班表：</p>
+        <div class="btn-group">
+            <button class="btn-paste" onclick="pasteText()">📋 貼上</button>
+            <button class="btn-gen" onclick="generatePost()">✨ 產生文案</button>
+        </div>
+        <textarea id="rawInput" placeholder="直接按「貼上」按鈕，或在此輸入..."></textarea>
         
         <hr style="border:0; border-top:1px solid #eee; margin:20px 0;">
         
-        <p style="font-size:14px; color:#666;">生成結果：</p>
+        <p style="font-size:14px; color:#666; margin-bottom:5px;">2. 生成結果：</p>
         <textarea id="result" readonly></textarea>
-        <button class="btn-copy" onclick="copyResult()">📋 複製到剪貼簿</button>
+        <button class="btn-copy" onclick="copyResult()">📋 複製文案</button>
+    </div>
+
+    <div class="card">
+        <h2>📸 發文配圖區</h2>
+        <p style="text-align:center; font-size:12px; color:#999; margin-bottom:15px;">點擊圖片即可下載原圖</p>
+        
+        <div class="img-grid">
+            <a href="img/1.jpg" download="元宵宣傳圖1.jpg" class="img-item">
+                <img src="img/1.jpg" alt="圖1">
+                <div class="download-hint">點擊下載</div>
+            </a>
+            <a href="img/2.jpg" download="元宵宣傳圖2.jpg" class="img-item">
+                <img src="img/2.jpg" alt="圖2">
+                <div class="download-hint">點擊下載</div>
+            </a>
+            <a href="img/3.jpg" download="元宵宣傳圖3.jpg" class="img-item">
+                <img src="img/3.jpg" alt="圖3">
+                <div class="download-hint">點擊下載</div>
+            </a>
+            </div>
     </div>
 
     <div class="footer">
-        陳記元宵系統 v1.0 | <span onclick="adminCheck()">⚙️</span>
+        陳記元宵系統 v2.0 | <span onclick="adminCheck()">⚙️</span>
     </div>
 
     <script>
-        // 1. PWA Service Worker 註冊
-        if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('./sw.js');
-        }
+        // Service Worker
+        if ('serviceWorker' in navigator) { navigator.serviceWorker.register('./sw.js'); }
 
-        // 2. 資料庫 (地址對照表)
+        // 資料庫
         const storeDB = {
             "Br4": { name: "City’Super 復興SOGO店", addr: "106台北市大安區忠孝東路三段300號遠東SOGO台北復興館B3", region: "📍台北 Taipei📍" },
             "美福": { name: "美福食集", addr: "114 台北市內湖區民善街 128 號 1F", region: "📍台北 Taipei📍" },
@@ -83,16 +137,24 @@
             "巨蛋": { name: "漢神巨蛋購物廣場", addr: "813 高雄市左營區博愛二路777號 B1", region: "📍高雄 Kaohsiung📍" }
         };
 
-        // 3. 時鐘功能
+        // 時鐘
         function updateClock() {
             const now = new Date();
-            const options = { timeZone: "Asia/Taipei", hour12: false, hour: '2-digit', minute: '2-digit', second: '2-digit' };
-            document.getElementById('clock').innerText = now.toLocaleTimeString('zh-TW', options);
+            document.getElementById('clock').innerText = now.toLocaleString('zh-TW', { hour12: false });
         }
-        setInterval(updateClock, 1000);
-        updateClock();
+        setInterval(updateClock, 1000); updateClock();
 
-        // 4. 文案生成邏輯
+        // 貼上功能
+        async function pasteText() {
+            try {
+                const text = await navigator.clipboard.readText();
+                document.getElementById('rawInput').value = text;
+            } catch (err) {
+                alert('您的瀏覽器不支援自動貼上，請手動長按輸入框貼上。');
+            }
+        }
+
+        // 產生文案 (已更新年份邏輯)
         function generatePost() {
             const raw = document.getElementById('rawInput').value;
             const lines = raw.split('\n');
@@ -104,14 +166,18 @@
                 let match = line.match(/^(.+?)[\s]*(\d{1,2}\/\d{1,2})-(\d{1,2}\/\d{1,2})/);
                 if (match) {
                     let key = match[1].trim();
-                    let start = match[2];
-                    let end = match[3];
+                    let start = match[2]; // 格式 2/24
+                    let end = match[3];   // 格式 3/3
                     let info = storeDB[key] || { name: key, addr: "地址待補", region: "📍其他📍" };
                     
                     if (!data[info.region]) data[info.region] = [];
+                    
+                    // 這裡修改了顯示格式：加入 ${year}/
+                    let displayTime = `${year}/${start}（${getW(year, start)}）- ${year}/${end}（${getW(year, end)}）`;
+
                     data[info.region].push({
                         name: info.name,
-                        time: `${start}（${getW(year, start)}）- ${end}（${getW(year, end)}）`,
+                        time: displayTime,
                         addr: info.addr,
                         sortKey: parseD(year, start)
                     });
