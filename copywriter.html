@@ -19,7 +19,6 @@
             border: 2px dashed #e67e22;
         }
 
-        /* 示意圖區塊 */
         .preview-imgs { display: flex; gap: 10px; overflow-x: auto; margin-bottom: 20px; }
         .preview-img {
             flex: 0 0 150px; height: 150px; background: #ddd; border-radius: 10px;
@@ -28,7 +27,6 @@
         }
         .preview-img img { width: 100%; height: 100%; object-fit: cover; border-radius: 10px; }
 
-        /* LINE 專用綠色系 */
         .line-section h3 { border-left-color: #06c755; color: #06c755; }
         
         textarea { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 8px; font-size: 16px; margin-bottom: 10px; box-sizing: border-box; font-family: inherit; }
@@ -45,25 +43,30 @@
         button:active { transform: scale(0.98); opacity: 0.9; }
 
         .btn-back { display: block; width: 100%; text-align: center; padding: 15px; background: #ddd; color: #333; border: none; border-radius: 50px; font-size: 16px; font-weight: bold; cursor: pointer; margin-bottom: 20px; text-decoration: none; }
+
+        /* 圖片下載區 (恢復原本的) */
+        .img-single-container { display: flex; justify-content: center; padding: 10px; }
+        .img-item {
+            position: relative; background: #eee; border-radius: 12px; overflow: hidden;
+            width: 100%; max-width: 300px; aspect-ratio: 1 / 1; cursor: pointer;
+            border: 3px solid transparent; text-decoration: none; box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+        .img-item img { width: 100%; height: 100%; object-fit: cover; }
+        .img-item:active { border-color: #e67e22; transform: scale(0.98); }
+        .download-hint { position: absolute; bottom: 0; left: 0; right: 0; background: rgba(0,0,0,0.6); color: white; font-size: 12px; text-align: center; padding: 8px; font-weight: bold; }
     </style>
 </head>
 <body>
 
-    <div class="page-title">/臉書、line官方販售地點公告文/</div>
+    <div class="page-title">臉書、line官方販售地點公告文</div>
 
     <div class="preview-imgs">
-        <div class="preview-img">
-            <span>LINE 官方截圖<br>(待上傳)</span> 
-            </div>
-        <div class="preview-img">
-            <span>FB 官方截圖<br>(待上傳)</span>
-            </div>
+        <div class="preview-img"><span>LINE 官方截圖<br>(待上傳)</span></div>
+        <div class="preview-img"><span>FB 官方截圖<br>(待上傳)</span></div>
     </div>
 
     <div class="card">
-        <div class="card-header">
-            <h2>⚙️ 原始資料輸入</h2>
-        </div>
+        <div class="card-header"><h2>⚙️ 原始資料輸入</h2></div>
         <div class="btn-group">
             <button class="btn-paste" onclick="pasteText()">📋 貼上</button>
             <button class="btn-gen" onclick="generatePost()">✨ 一鍵產生文案</button>
@@ -72,17 +75,13 @@
     </div>
 
     <div class="card">
-        <div class="card-header">
-            <h2>📘 Facebook 完整版</h2>
-        </div>
+        <div class="card-header"><h2>📘 Facebook 完整版</h2></div>
         <textarea id="fbResult" class="output-area" readonly></textarea>
         <button class="btn-copy" onclick="copyToClip('fbResult', this)">📋 複製 FB 文案</button>
     </div>
 
     <div class="card line-section">
-        <div class="card-header">
-            <h2 style="color:#06c755;">💚 LINE 官方帳號 (分三段)</h2>
-        </div>
+        <div class="card-header"><h2 style="color:#06c755;">💚 LINE 官方帳號 (分三段)</h2></div>
         <h3>第一段：台北 (1-5)</h3>
         <textarea id="lineResult1" class="line-area" readonly></textarea>
         <button class="btn-copy" style="background:#06c755; margin-bottom: 20px;" onclick="copyToClip('lineResult1', this)">📋 複製第一段</button>
@@ -96,28 +95,111 @@
         <button class="btn-copy" style="background:#06c755;" onclick="copyToClip('lineResult3', this)">📋 複製第三段</button>
     </div>
     
+    <div class="card">
+        <div class="card-header"><h2>📸 發文配圖區</h2></div>
+        <p style="text-align:center; font-size:12px; color:#999; margin-bottom:15px;">點擊圖片即可下載原圖</p>
+        <div class="img-single-container">
+            <a href="img/1.png" download="元宵宣傳圖.png" class="img-item">
+                <img src="img/1.png" alt="宣傳圖">
+                <div class="download-hint">⬇️ 點擊下載高畫質原圖</div>
+            </a>
+        </div>
+    </div>
+
     <a href="dashboard.html" class="btn-back">⬅️ 返回主選單</a>
 
     <script>
-        // (這裡的 Script 邏輯保持不變，沿用之前的即可)
-        // ... (略，因為沒有變動，直接複製之前的 copywriter.html 的 script 即可)
-        // 如果你需要我再貼一次 Script 請告訴我
-        
-        // 為了讓你方便複製，我還是貼上關鍵的 script 頭尾
+        // 完整的邏輯回歸！
         const storeDB = {
             "Br4": { name: "City’Super 復興SOGO店", addr: "106台北市大安區忠孝東路三段300號遠東SOGO台北復興館B3", region: "📍台北 Taipei📍", lineRegion: "🍡【台北 Taipei】🍡" },
-            // ... (其他店點資料保持不變) ...
+            "美福": { name: "美福食集", addr: "114 台北市內湖區民善街 128 號 1F", region: "📍台北 Taipei📍", lineRegion: "🍡【台北 Taipei】🍡" },
+            "美麗華": { name: "美麗華", addr: "114 台北市中山區敬業三路 22 號 B1", region: "📍台北 Taipei📍", lineRegion: "🍡【台北 Taipei】🍡" },
+            "天母": { name: "City’Super 天母SOGO店", addr: "111 台北市士林區中山北路六段 77 號 B1", region: "📍台北 Taipei📍", lineRegion: "🍡【台北 Taipei】🍡" },
+            "統一": { name: "統一時代百貨台北店", addr: "110 台北市信義區忠孝東路五段 8 號 B2", region: "📍台北 Taipei📍", lineRegion: "🍡【台北 Taipei】🍡" },
+            "松山": { name: "松山車站", addr: "105 台北市松山區松山路 11 號 1F", region: "📍台北 Taipei📍", lineRegion: "🍡【台北 Taipei】🍡" },
+            "微風": { name: "微風超市", addr: "105 台北市松山區復興南路一段 39 號 B4", region: "📍台北 Taipei📍", lineRegion: "🍡【台北 Taipei】🍡" },
+            "大葉": { name: "大葉高島屋", addr: "111 台北市士林區忠誠路二段 55 號 B1", region: "📍台北 Taipei📍", lineRegion: "🍡【台北 Taipei】🍡" },
+            "宏匯廣場": { name: "宏匯廣場", addr: "242 新北市新莊區新北大道四段3號 B2", region: "📍台北 Taipei📍", lineRegion: "🍡【台北 Taipei】🍡" },
+            "中和環球": { name: "中和環球", addr: "235 新北市中和區中山路三段122號 B2", region: "📍台北 Taipei📍", lineRegion: "🍡【台北 Taipei】🍡" },
+            "新竹": { name: "新竹巨城 Big City", addr: "300 新竹市東區中央路 229 號 B1", region: "📍新竹 Hsinchu📍", lineRegion: "🍡【新竹 Hsinchu】🍡" },
+            "竹北": { name: "遠百竹北", addr: "302 新竹縣竹北市莊敬北路18號", region: "📍新竹 Hsinchu📍", lineRegion: "🍡【新竹 Hsinchu】🍡" },
+            "台中": { name: "台中大遠百 Top City", addr: "407 台中市西屯區台灣大道三段 251 號 B2", region: "📍台中 Taichung📍", lineRegion: "🍡【台中 Taichung】🍡" },
+            "大樂": { name: "大樂購物中心", addr: "807 高雄市三民區民族一路 463 號", region: "📍高雄 Kaohsiung📍", lineRegion: "🍡【高雄 Kaohsiung】🍡" },
             "巨蛋": { name: "漢神巨蛋購物廣場", addr: "813 高雄市左營區博愛二路777號 B1", region: "📍高雄 Kaohsiung📍", lineRegion: "🍡【高雄 Kaohsiung】🍡" }
         };
 
         async function pasteText() { try { const t = await navigator.clipboard.readText(); document.getElementById('rawInput').value = t; } catch (e) { alert('請手動貼上'); } }
-        
+
         function generatePost() {
-            // ... (產生邏輯保持不變，若需要完整版請說) ...
-            alert("請把之前的 generatePost 邏輯貼回來喔！如果遺失了請跟我說");
+            const raw = document.getElementById('rawInput').value;
+            const lines = raw.split('\n');
+            const year = 2026;
+            let data = {};
+
+            lines.forEach(line => {
+                line = line.trim();
+                let match = line.match(/^(.+?)[\s]*(\d{1,2}\/\d{1,2})-(\d{1,2}\/\d{1,2})/);
+                if (match) {
+                    let key = match[1].trim();
+                    let start = match[2];
+                    let end = match[3];
+                    let info = storeDB[key] || { name: key, addr: "地址待補", region: "📍其他📍", lineRegion: "🍡【其他 Others】🍡" };
+                    
+                    if (!data[info.region]) { data[info.region] = { lineHeader: info.lineRegion, list: [] }; }
+                    let displayTime = `${year}/${start}（${getW(year, start)}）- ${year}/${end}（${getW(year, end)}）`;
+                    data[info.region].list.push({ name: info.name, time: displayTime, addr: info.addr, sortKey: parseD(year, start) });
+                }
+            });
+
+            let fbOut = `元宵開賣啦～我們要相見啦～\n以下為${year}元宵實演的檔期^_^\n歡迎來找我們歐\n\n`;
+            const order = ["📍台北 Taipei📍", "📍新竹 Hsinchu📍", "📍台中 Taichung📍", "📍高雄 Kaohsiung📍", "📍其他📍"];
+
+            order.forEach(r => {
+                if (data[r] && data[r].list.length > 0) {
+                    fbOut += `${r}\n`;
+                    let stores = data[r].list.sort((a,b) => a.sortKey - b.sortKey);
+                    let showNumbering = stores.length > 1;
+                    stores.forEach((item, i) => {
+                        let prefix = showNumbering ? `${i+1}.` : "";
+                        fbOut += `${prefix}${item.name}\n時間：${item.time}\n地址：${item.addr}\n\n`;
+                    });
+                }
+            });
+            document.getElementById('fbResult').value = fbOut;
+
+            let line1 = "", line2 = "", line3 = "";
+            let taipeiData = data["📍台北 Taipei📍"];
+            if (taipeiData && taipeiData.list.length > 0) {
+                let tStores = taipeiData.list.sort((a,b) => a.sortKey - b.sortKey);
+                line1 += `${taipeiData.lineHeader}\n\n`;
+                tStores.forEach((item, i) => {
+                    let prefix = `${i+1}.`;
+                    let content = `${prefix}${item.name} \n時間：${item.time}\n地址：${item.addr}\n\n`;
+                    if (i < 5) line1 += content; else line2 += content;
+                });
+            } else { line1 = "無台北資料"; line2 = "無台北後續資料"; }
+
+            const otherOrder = ["📍新竹 Hsinchu📍", "📍台中 Taichung📍", "📍高雄 Kaohsiung📍", "📍其他📍"];
+            otherOrder.forEach(r => {
+                if (data[r] && data[r].list.length > 0) {
+                    line3 += `${data[r].lineHeader}\n\n`;
+                    let stores = data[r].list.sort((a,b) => a.sortKey - b.sortKey);
+                    let showNumbering = stores.length > 1;
+                    stores.forEach((item, i) => {
+                        let prefix = showNumbering ? `${i+1}.` : "";
+                        line3 += `${prefix}${item.name}\n時間：${item.time}\n地址：${item.addr}\n\n`;
+                    });
+                }
+            });
+
+            document.getElementById('lineResult1').value = line1 || "無資料";
+            document.getElementById('lineResult2').value = line2;
+            document.getElementById('lineResult3').value = line3 || "無資料";
         }
-        
-        function copyToClip(id, btn) {
+
+        function getW(y, d) { return ['日','一','二','三','四','五','六'][new Date(y, d.split('/')[0]-1, d.split('/')[1]).getDay()]; }
+        function parseD(y, d) { return new Date(y, d.split('/')[0]-1, d.split('/')[1]); }
+        function copyToClip(id, btn) { 
             let t = document.getElementById(id); t.select(); document.execCommand("copy");
             let org = btn.innerText; btn.innerText = "✅ 已複製！"; btn.classList.add("copy-success");
             setTimeout(() => { btn.innerText = org; btn.classList.remove("copy-success"); }, 1500);
