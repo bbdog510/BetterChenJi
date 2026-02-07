@@ -9,21 +9,15 @@
     <link rel="icon" href="img/logo.png" type="image/png">
     
     <style>
-        /* === 預設暗黑模式 === */
         :root {
-            --bg-color: #121212;
-            --text-main: #E0E0E0;
-            --text-sub: #AAAAAA;
+            --bg-color: #121212; --text-main: #E0E0E0; --text-sub: #AAAAAA; --card-bg: #1E1E1E;
             --yellow-card: #3E3820; --yellow-text: #FFD54F;
             --pink-card: #3E2028; --pink-text: #F48FB1;
             --purple-card: #2D203E; --purple-text: #CE93D8;
             --avatar-border: #333;
         }
-        /* 白天模式 */
         body.light-mode {
-            --bg-color: #FDFCF4;
-            --text-main: #1C1B1F;
-            --text-sub: #666666;
+            --bg-color: #FDFCF4; --text-main: #1C1B1F; --text-sub: #666666; --card-bg: #FFF;
             --yellow-card: #FFE16D; --yellow-text: #221B00;
             --pink-card: #FFD8E4; --pink-text: #31111D;
             --purple-card: #E8DEF8; --purple-text: #1D192B;
@@ -31,12 +25,9 @@
         }
 
         body {
-            font-family: 'MiSans', sans-serif;
-            background-color: var(--bg-color);
-            margin: 0; padding: 20px; padding-bottom: 100px;
-            color: var(--text-main);
-            transition: background-color 0.3s;
-            animation: fadeIn 0.3s;
+            font-family: 'MiSans', sans-serif; background-color: var(--bg-color);
+            margin: 0; padding: 20px; padding-bottom: 100px; color: var(--text-main);
+            transition: 0.3s; animation: fadeIn 0.3s;
         }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
@@ -46,7 +37,7 @@
         
         .text-avatar { 
             width: 60px; height: 60px; border-radius: 50%; 
-            background: #FFD54F; color: #333; 
+            background: #FFD54F; color: #333; cursor: pointer;
             display: flex; justify-content: center; align-items: center; 
             font-size: 22px; font-weight: bold; 
             border: 3px solid var(--avatar-border); 
@@ -62,8 +53,6 @@
             text-decoration: none; font-weight: 500;
         }
         .menu-item:active { transform: scale(0.98); opacity: 0.8; }
-        
-        /* 權限控制 Class：vip-only 的東西預設通通藏起來 */
         .vip-only { display: none; } 
 
         .bg-yellow { background-color: var(--yellow-card); color: var(--yellow-text); }
@@ -71,13 +60,29 @@
         .bg-purple { background-color: var(--purple-card); color: var(--purple-text); }
 
         .btn-logout { display: block; width: 100%; text-align: center; padding: 15px; margin-bottom: 80px; color: var(--text-sub); text-decoration: none; font-size: 14px; }
-        
         .theme-toggle {
             position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
             background: rgba(125,125,125,0.2); color: var(--text-sub);
             padding: 8px 16px; border-radius: 20px; font-size: 12px; cursor: pointer;
             backdrop-filter: blur(5px); border: 1px solid rgba(255,255,255,0.1);
         }
+
+        /* Profile Modal */
+        .modal-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.7); display: none; justify-content: center; align-items: center; z-index: 1000;
+            backdrop-filter: blur(5px);
+        }
+        .modal {
+            background: var(--card-bg); width: 85%; max-width: 350px;
+            border-radius: 24px; padding: 30px; text-align: center;
+            position: relative; box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+        .modal-close { position: absolute; top: 15px; right: 15px; font-size: 24px; cursor: pointer; color: var(--text-sub); }
+        .profile-stat { margin-top: 20px; text-align: left; background: rgba(125,125,125,0.1); padding: 15px; border-radius: 12px; }
+        .profile-stat label { font-size: 12px; color: var(--text-sub); display: block; }
+        .profile-stat div { font-size: 18px; font-weight: bold; margin-top: 5px; }
+
     </style>
 </head>
 <body>
@@ -87,27 +92,29 @@
             <h2 id="greet-text">早安，</h2>
             <span id="user-name">...</span>
         </div>
-        <div id="avatar-box" class="text-avatar">員</div>
+        <div id="avatar-box" class="text-avatar" onclick="showProfile()">員</div>
     </div>
 
-    <div class="category-label">📂 重要表單快速檢索</div>
+    <div class="category-label">📂 重要表單</div>
     <div class="card-container">
-        <a href="schedule.html" class="menu-item bg-yellow"><span>🕒 員工班表 (外部含時數)</span></a>
+        <a href="schedule.html" class="menu-item bg-yellow"><span>🕒 我的班表</span></a>
         
         <a href="inventory.html" class="menu-item bg-yellow vip-only"><span>📦 每日盤點回報系統</span></a>
+        <a href="schedule.html" class="menu-item bg-yellow vip-only"><span>📅 開始排班</span></a>
         <a href="insurance.html" class="menu-item bg-yellow vip-only"><span>🛡️ 員工保險表單生產器</span></a>
-        <a href="schedule.html" class="menu-item bg-yellow vip-only"><span>📅 員工班表 (內部用)</span></a>
     </div>
 
     <div class="category-label vip-only">🎨 美編文案</div>
     <div class="card-container vip-only">
-        <a href="copywriter.html" class="menu-item bg-pink"><span>📢 公告文生產器</span></a>
+        <a href="copywriter.html" class="menu-item bg-pink"><span>📢 顧客公告文產生器</span></a>
+        
+        <a href="#" onclick="alert('這會連結到員工公告選單，含徵選與大群公告')" class="menu-item bg-pink"><span>📣 員工公告文產生器</span></a>
         <a href="schedule.html" class="menu-item bg-pink"><span>💬 LINE 內部階段公告</span></a>
     </div>
 
     <div class="category-label vip-only">👥 人事表單</div>
     <div class="card-container vip-only">
-        <a href="schedule.html" class="menu-item bg-purple"><span>📁 員工資料庫</span></a>
+        <a href="staff_search.html" class="menu-item bg-purple"><span>🔍 員工資料庫搜尋</span></a>
         <a href="schedule.html" class="menu-item bg-purple"><span>📝 員工徵選資料庫</span></a>
         <a href="schedule.html" class="menu-item bg-purple"><span>💰 員工薪資資料庫</span></a>
     </div>
@@ -115,15 +122,31 @@
     <a href="#" class="btn-logout" onclick="logout()">🔒 登出系統</a>
     <div class="theme-toggle" onclick="toggleTheme()">🌙 / ☀️ 切換</div>
 
+    <div id="profileModal" class="modal-overlay" onclick="closeProfile(event)">
+        <div class="modal">
+            <span class="modal-close" onclick="document.getElementById('profileModal').style.display='none'">&times;</span>
+            <div id="modal-avatar" class="text-avatar" style="width:80px; height:80px; margin:0 auto; font-size:30px;">員</div>
+            <h2 id="modal-name" style="margin-top:15px; margin-bottom:5px;">姓名</h2>
+            <p id="modal-role" style="color:var(--yellow-text); font-size:12px; margin:0;">職位</p>
+            
+            <div class="profile-stat">
+                <label>📅 入職時間</label>
+                <div id="modal-entry">...</div>
+            </div>
+            <div class="profile-stat">
+                <label>🚀 服務天數 (次數估算)</label>
+                <div id="modal-days">...</div>
+            </div>
+        </div>
+    </div>
+
     <script>
-        // 日夜切換
         function toggleTheme() {
             document.body.classList.toggle('light-mode');
             localStorage.setItem('theme', document.body.classList.contains('light-mode') ? 'light' : 'dark');
         }
         if (localStorage.getItem('theme') === 'light') document.body.classList.add('light-mode');
 
-        // 資料庫讀取檢查
         const cachedDB = localStorage.getItem('STAFF_DB_CACHE');
         if (!cachedDB) window.location.replace('index.html');
         
@@ -134,46 +157,61 @@
             window.location.replace('index.html');
         } else {
             const user = STAFF_DB[loggedInPhone];
-            
-            // 1. 設定名字
             document.getElementById('user-name').innerText = user.name;
             document.getElementById('avatar-box').innerText = getAvatarName(user.name);
 
-            // 2. 自動問候 (早/午/晚)
+            // 問候語
             const hour = new Date().getHours();
             let greeting = "早安，";
             if (hour >= 11 && hour < 17) greeting = "午安，";
             else if (hour >= 17 || hour < 5) greeting = "晚安，";
             document.getElementById('greet-text').innerText = greeting;
 
-            // 3. 權限判斷 (ADMIN 邏輯)
-            // 先確保 role 是字串，並轉成大寫，這樣你填 "admin" 或 "ADMIN" 都通
+            // 權限判斷
             const role = user.role ? String(user.role).toUpperCase() : "";
-            
-            // 判斷條件：
-            // A. W欄位裡面有寫 "ADMIN"
-            // B. 或是你是老闆本人 (0936588349)
             const isVip = role.includes("ADMIN") || loggedInPhone === "0936588349";
 
             if (isVip) {
-                // 如果是 VIP，把所有藏起來的東西 (vip-only) 打開
                 document.querySelectorAll('.vip-only').forEach(el => {
-                    // 如果是標題用 block，如果是按鈕用 flex
-                    if(el.classList.contains('category-label')) {
-                        el.style.display = 'block';
-                    } else {
-                        el.style.display = 'flex';
-                    }
+                    el.style.display = el.classList.contains('category-label') ? 'block' : 'flex';
                 });
             }
         }
 
-        function getAvatarName(name) {
-            return name.length > 2 ? name.slice(-2) : name;
+        function getAvatarName(name) { return name.length > 2 ? name.slice(-2) : name; }
+        function logout() { localStorage.removeItem('loginPhone'); window.location.replace('index.html'); }
+        
+        // 個人檔案邏輯
+        function showProfile() {
+            const user = STAFF_DB[loggedInPhone];
+            document.getElementById('modal-name').innerText = user.name;
+            document.getElementById('modal-avatar').innerText = getAvatarName(user.name);
+            document.getElementById('modal-role').innerText = user.role || "夥伴";
+            
+            // 計算服務天數
+            if (user.entryDate) {
+                const entry = new Date(user.entryDate);
+                const now = new Date();
+                const diffTime = Math.abs(now - entry);
+                const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)); 
+                
+                // 格式化入職日期
+                const y = entry.getFullYear();
+                const m = entry.getMonth() + 1;
+                const d = entry.getDate();
+                
+                document.getElementById('modal-entry').innerText = `${y}/${m}/${d}`;
+                document.getElementById('modal-days').innerText = `${diffDays} 天`;
+            } else {
+                document.getElementById('modal-entry').innerText = "未登記";
+                document.getElementById('modal-days').innerText = "0 天";
+            }
+
+            document.getElementById('profileModal').style.display = 'flex';
         }
-        function logout() {
-            localStorage.removeItem('loginPhone');
-            window.location.replace('index.html');
+
+        function closeProfile(e) {
+            if (e.target.id === 'profileModal') document.getElementById('profileModal').style.display = 'none';
         }
     </script>
 </body>
