@@ -48,4 +48,138 @@
         .btn-main {
             width: 100%; max-width: 280px; padding: 16px; margin-top: 10px;
             background-color: var(--primary); color: var(--btn-text);
-            border: none; border-radius
+            border: none; border-radius: 100px; font-weight: bold; cursor: pointer;
+        }
+        .btn-main:disabled { background-color: #555; color: #888; cursor: not-allowed; }
+
+        /* 時間顯示樣式 */
+        #status-msg { font-size: 12px; color: var(--text-sub); margin-top: 25px; opacity: 0.8; letter-spacing: 0.5px; }
+        
+        #install-btn {
+            display: none; margin-top: 15px;
+            background: rgba(255, 255, 255, 0.1); color: var(--primary);
+            padding: 8px 16px; border-radius: 20px; font-size: 12px; 
+            cursor: pointer; border: 1px solid var(--primary);
+        }
+
+        .theme-toggle {
+            position: fixed; bottom: 20px;
+            background: rgba(255,255,255,0.1); color: var(--text-sub);
+            padding: 8px 16px; border-radius: 20px; font-size: 12px; cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <div class="login-card">
+        <img src="img/logo.png" class="logo">
+        <h1>陳記元宵</h1>
+        <p>數位戰情中心</p>
+        
+        <div class="input-group">
+            <label>手機號碼</label>
+            <input type="tel" id="account" placeholder="09xxxxxxxx" maxlength="10">
+        </div>
+        <div class="input-group">
+            <label>密碼 (生日)</label>
+            <input type="password" id="pwd" placeholder="例如：831222" maxlength="6">
+        </div>
+
+        <button id="loginBtn" class="btn-main" onclick="login()" disabled>連線中...</button>
+        <button id="install-btn">📲 點我安裝於桌面</button>
+        
+        <div id="status-msg">正在同步最新名單...</div>
+    </div>
+
+    <div class="theme-toggle" onclick="toggleTheme()">🌙 / ☀️ 切換</div>
+
+    <script>
+        function toggleTheme() {
+            document.body.classList.toggle('light-mode');
+            localStorage.setItem('theme', document.body.classList.contains('light-mode') ? 'light' : 'dark');
+        }
+        if (localStorage.getItem('theme') === 'light') document.body.classList.add('light-mode');
+
+        // === 這裡換上了你指定的新網址 ===
+        const API_URL = "https://script.google.com/macros/s/AKfycbx--VbORHzmLBVwQMCEMYNCQojrmuOZPf4-Y0bnjsBNhL3_vYUKIN5gcq93qOjbVFMR4A/exec"; 
+        
+        let STAFF_DB = {};
+        const cachedData = localStorage.getItem('STAFF_DB_CACHE');
+        if (cachedData) {
+            STAFF_DB = JSON.parse(cachedData);
+            enableLogin("已載入快取資料");
+        }
+
+        fetch(API_URL)
+            .then(res => res.json())
+            .then(data => {
+                STAFF_DB = data;
+                localStorage.setItem('STAFF_DB_CACHE', JSON.stringify(data));
+                
+                // === 修改時間格式為：YYYY年MM月DD日 HH:mm ===
+                const now = new Date();
+                const year = now.getFullYear();
+                const month = String(now.getMonth() + 1).padStart(2, '0');
+                const day = String(now.getDate()).padStart(2, '0');
+                const hour = String(now.getHours()).padStart(2, '0');
+                const minute = String(now.getMinutes()).padStart(2, '0');
+                
+                // 組合字串
+                const timeStr = `${year}年${month}月${day}日 ${hour}:${minute}`;
+                              
+                enableLogin(`最後更新：${timeStr} ✅`);
+                
+                const savedPhone = localStorage.getItem('loginPhone');
+                if (savedPhone && STAFF_DB[savedPhone]) window.location.replace('dashboard.html');
+            })
+            .catch(err => {
+                if(!cachedData) {
+                    document.getElementById('status-msg').innerText = "連線失敗 ❌";
+                    document.getElementById('status-msg').style.color = "#FF5252";
+                }
+            });
+
+        function enableLogin(text) {
+            const btn = document.getElementById('loginBtn');
+            btn.disabled = false;
+            btn.innerText = "登入系統";
+            document.getElementById('status-msg').innerText = text;
+        }
+
+        function login() {
+            const acc = document.getElementById('account').value;
+            const pwd = document.getElementById('pwd').value;
+
+            if (acc === "0936588349" && pwd === "831222") {
+                 localStorage.setItem('loginPhone', acc);
+                 if(!STAFF_DB[acc]) STAFF_DB[acc] = { name: "NICK", role: "ADMIN", origin: "管理員" };
+                 else STAFF_DB[acc].role = "ADMIN"; 
+                 localStorage.setItem('STAFF_DB_CACHE', JSON.stringify(STAFF_DB));
+                 window.location.replace('dashboard.html');
+                 return;
+            }
+
+            if (STAFF_DB[acc] && String(STAFF_DB[acc].pwd) === String(pwd)) {
+                localStorage.setItem('loginPhone', acc);
+                window.location.replace('dashboard.html');
+            } else {
+                alert("帳號或密碼錯誤");
+            }
+        }
+
+        let deferredPrompt;
+        const installBtn = document.getElementById('install-btn');
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            installBtn.style.display = 'inline-block';
+        });
+        installBtn.addEventListener('click', async () => {
+            if (deferredPrompt) {
+                deferredPrompt.prompt();
+                deferredPrompt = null;
+                installBtn.style.display = 'none';
+            }
+        });
+    </script>
+</body>
+</html>
