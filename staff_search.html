@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>員工資料庫</title>
+    <link rel="icon" href="img/logo.png" type="image/png">
+    <style>
+        :root {
+            --bg-color: #121212; --text-main: #E0E0E0; --text-sub: #AAAAAA; --card-bg: #1E1E1E;
+            --primary: #CE93D8; --border: #333;
+        }
+        body.light-mode {
+            --bg-color: #FDFCF4; --text-main: #1C1B1F; --text-sub: #666666; --card-bg: #FFF;
+            --primary: #6200EE; --border: #E0E0E0;
+        }
+        
+        body { font-family: 'MiSans', sans-serif; background: var(--bg-color); color: var(--text-main); padding: 20px; margin: 0; }
+        
+        .search-box {
+            position: sticky; top: 0; background: var(--bg-color); padding: 10px 0; z-index: 10;
+            display: flex; gap: 10px; border-bottom: 1px solid var(--border);
+        }
+        input {
+            flex: 1; padding: 12px; border-radius: 12px; border: 1px solid var(--border);
+            background: var(--card-bg); color: var(--text-main); outline: none; font-size: 16px;
+        }
+        
+        .list-container { margin-top: 20px; }
+        .staff-card {
+            background: var(--card-bg); padding: 15px; border-radius: 16px; margin-bottom: 15px;
+            display: flex; align-items: center; gap: 15px; cursor: pointer; transition: 0.2s;
+            border: 1px solid transparent;
+        }
+        .staff-card:active { transform: scale(0.98); background: rgba(255,255,255,0.05); }
+        
+        .avatar-small {
+            width: 50px; height: 50px; border-radius: 50%; background: var(--primary); color: #fff;
+            display: flex; justify-content: center; align-items: center; font-weight: bold; font-size: 18px;
+            object-fit: cover;
+        }
+        .info { flex: 1; }
+        .name { font-size: 18px; font-weight: bold; }
+        .sub-info { font-size: 12px; color: var(--text-sub); margin-top: 4px; }
+        
+        /* Modal */
+        .modal-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.8); display: none; justify-content: center; align-items: center; z-index: 100;
+            backdrop-filter: blur(5px);
+        }
+        .modal {
+            background: var(--card-bg); width: 90%; max-width: 400px; max-height: 90vh;
+            border-radius: 24px; padding: 25px; overflow-y: auto; position: relative;
+        }
+        .modal-close { position: absolute; top: 15px; right: 15px; font-size: 24px; cursor: pointer; }
+        
+        .detail-row { margin-bottom: 15px; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 10px; }
+        .detail-label { font-size: 12px; color: var(--text-sub); }
+        .detail-val { font-size: 16px; margin-top: 5px; word-break: break-all; }
+        
+        .photo-area img { width: 100%; border-radius: 12px; margin-bottom: 15px; display: none; }
+        
+        .pagination { display: flex; justify-content: space-between; margin-top: 20px; padding-bottom: 50px; }
+        .page-btn { padding: 10px 20px; background: var(--card-bg); border-radius: 20px; cursor: pointer; border: 1px solid var(--border); color: var(--text-main); }
+        
+        .btn-back { position: fixed; bottom: 20px; right: 20px; background: var(--primary); color: #fff; padding: 12px 24px; border-radius: 50px; text-decoration: none; font-weight: bold; box-shadow: 0 4px 10px rgba(0,0,0,0.3); }
+
+    </style>
+</head>
+<body>
+
+    <div class="search-box">
+        <input type="text" id="searchInput" placeholder="搜尋姓名或電話..." oninput="searchStaff()">
+    </div>
+
+    <div id="list" class="list-container">
+        </div>
+
+    <div class="pagination">
+        <button class="page-btn" onclick="prevPage()">上一頁</button>
+        <span id="pageInfo" style="line-height: 40px; font-size: 12px; color: #888;"></span>
+        <button class="page-btn" onclick="nextPage()">下一頁</button>
+    </div>
+
+    <a href="dashboard.html" class="btn-back">⬅️ 返回</a>
+
+    <div id="detailModal" class="modal-overlay" onclick="closeModal(event)">
+        <div class="modal">
+            <span class="modal-close" onclick="document.getElementById('detailModal').style.display='none'">&times;</span>
+            
+            <div class="photo-area">
+                <img id="d-photo" src="" alt="員工照片">
+            </div>
+
+            <div class="detail-row"><div class="detail-label">姓名</div><div class="detail-val" id="d-name"></div></div>
+            <div class="detail-row"><div class="detail-label">入職時間</div><div class="detail-val" id="d-entry"></div></div>
+            <div class="detail-row"><div class="detail-label">服務次數 (天數)</div><div class="detail-val" id="d-service"></div></div>
+            <div class="detail-row"><div class="detail-label">生日 (歲數)</div><div class="detail-val" id="d-age"></div></div>
+            <div class="detail-row"><div class="detail-label">電話</div><div class="detail-val" id="d-phone"></div></div>
+            <div class="detail-row"><div class="detail-label">身高體重</div><div class="detail-val" id="d-body"></div></div>
+            <div class="detail-row"><div class="detail-label">學校/系級</div><div class="detail-val" id="d-school"></div></div>
+            <div class="detail-row"><div class="detail-label">地址</div><div class="detail-val" id="d-addr"></div></div>
+            <div class="detail-row"><div class="detail-label">身分證</div><div class="detail-val" id="d-id"></div></div>
+            <div class="detail-row"><div class="detail-label">自我介紹</div><div class="detail-val" id="d-intro"></div></div>
+        </div>
+    </div>
+
+    <script>
+        if (localStorage.getItem('theme') === 'light') document.body.classList.add('light-mode');
+
+        // 讀取快取資料庫
+        const cachedDB = localStorage.getItem('STAFF_DB_CACHE');
+        if (!cachedDB) { alert('請先登入以同步資料'); window.location.href = 'index.html'; }
+        
+        const STAFF_DB = JSON.parse(cachedDB);
+        let staffList = Object.values(STAFF_DB); // 轉成陣列
+        
+        // 排序：入職時間 (最新的在上面)
+        staffList.sort((a, b) => {
+            const dateA = new Date(a.entryDate || 0);
+            const dateB = new Date(b.entryDate || 0);
+            return dateB - dateA;
+        });
+
+        let currentPage = 1;
+        const itemsPerPage = 10;
+        let filteredList = staffList;
+
+        function renderList() {
+            const listEl = document.getElementById('list');
+            listEl.innerHTML = "";
+            
+            const start = (currentPage - 1) * itemsPerPage;
+            const end = start + itemsPerPage;
+            const pageData = filteredList.slice(start, end);
+
+            document.getElementById('pageInfo').innerText = `第 ${currentPage} 頁 / 共 ${Math.ceil(filteredList.length / itemsPerPage)} 頁`;
+
+            pageData.forEach(staff => {
+                // 計算顯示的入職日期
+                let entryStr = "未登記";
+                if(staff.entryDate) {
+                    const d = new Date(staff.entryDate);
+                    entryStr = `${d.getFullYear()}/${d.getMonth()+1}/${d.getDate()}`;
+                }
+
+                const card = document.createElement('div');
+                card.className = 'staff-card';
+                card.onclick = () => showDetail(staff);
+                
+                // 頭像處理 (如果有照片就顯示照片，沒有就顯示字)
+                let avatarHtml = `<div class="avatar-small">${staff.name.slice(-2)}</div>`;
+                if (staff.photo) {
+                    const photoUrl = convertDriveLink(staff.photo);
+                    if(photoUrl) avatarHtml = `<img src="${photoUrl}" class="avatar-small">`;
+                }
+
+                card.innerHTML = `
+                    ${avatarHtml}
+                    <div class="info">
+                        <div class="name">${staff.name} <span style="font-size:12px; font-weight:normal; opacity:0.7;">(${staff.alias || ''})</span></div>
+                        <div class="sub-info">入職：${entryStr} | ${staff.phone}</div>
+                    </div>
+                    <div style="font-size:20px; opacity:0.3;">➜</div>
+                `;
+                listEl.appendChild(card);
+            });
+        }
+
+        function searchStaff() {
+            const keyword = document.getElementById('searchInput').value.toLowerCase();
+            filteredList = staffList.filter(s => 
+                (s.name && s.name.includes(keyword)) || 
+                (s.phone && s.phone.includes(keyword))
+            );
+            currentPage = 1;
+            renderList();
+        }
+
+        function prevPage() { if(currentPage > 1) { currentPage--; renderList(); window.scrollTo(0,0); } }
+        function nextPage() { if(currentPage * itemsPerPage < filteredList.length) { currentPage++; renderList(); window.scrollTo(0,0); } }
+
+        function showDetail(staff) {
+            document.getElementById('d-name').innerText = staff.name;
+            document.getElementById('d-phone').innerText = staff.phone;
+            document.getElementById('d-body').innerText = staff.bodyInfo || "-";
+            document.getElementById('d-addr').innerText = staff.address || "-";
+            document.getElementById('d-id').innerText = staff.id || "-";
+            document.getElementById('d-intro').innerText = staff.intro || "無";
+            document.getElementById('d-school').innerText = staff.school || "-";
+
+            // 照片
+            const photoEl = document.getElementById('d-photo');
+            if (staff.photo) {
+                photoEl.src = convertDriveLink(staff.photo);
+                photoEl.style.display = 'block';
+            } else {
+                photoEl.style.display = 'none';
+            }
+
+            // 年齡計算
+            let ageStr = staff.birthday || "-";
+            if (staff.birthday) {
+                // 這裡的 birthday 格式是 YYYY/MM/DD
+                const bYear = parseInt(staff.birthday.split('/')[0]);
+                // 如果是民國年要 +1911 (因為我們在 API 那邊已經處理成西元了，所以這邊應該是西元)
+                const nowYear = new Date().getFullYear();
+                const age = nowYear - bYear;
+                ageStr += ` (${age} 歲)`;
+            }
+            document.getElementById('d-age').innerText = ageStr;
+
+            // 入職與服務天數
+            if (staff.entryDate) {
+                const entry = new Date(staff.entryDate);
+                const now = new Date();
+                const diffTime = Math.abs(now - entry);
+                const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                const y = entry.getFullYear();
+                const m = entry.getMonth() + 1;
+                const d = entry.getDate();
+                
+                document.getElementById('d-entry').innerText = `${y}/${m}/${d}`;
+                document.getElementById('d-service').innerText = `${diffDays} 天`;
+            } else {
+                document.getElementById('d-entry').innerText = "未登記";
+                document.getElementById('d-service').innerText = "-";
+            }
+
+            document.getElementById('detailModal').style.display = 'flex';
+        }
+
+        function closeModal(e) {
+            if(e.target.id === 'detailModal') document.getElementById('detailModal').style.display = 'none';
+        }
+
+        // Google Drive 圖片連結轉換器
+        function convertDriveLink(url) {
+            if (!url) return "";
+            // 嘗試抓取 ID
+            const match = url.match(/[-\w]{25,}/);
+            if (match) {
+                return `https://drive.google.com/uc?export=view&id=${match[0]}`;
+            }
+            return url;
+        }
+
+        // 初始化
+        renderList();
+    </script>
+</body>
+</html>
