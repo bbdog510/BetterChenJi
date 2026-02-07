@@ -99,7 +99,7 @@
     <div class="card-container">
         <a href="schedule.html" class="menu-item bg-yellow"><span>🕒 我的班表</span></a>
         
-        <a href="inventory.html" class="menu-item bg-yellow vip-only"><span>📦 每日盤點回報系統</span></a>
+        <a href="inventory.html" class="menu-item bg-yellow vip-only"><span>📦 每日盤點</span></a>
         <a href="schedule.html" class="menu-item bg-yellow vip-only"><span>📅 開始排班</span></a>
         <a href="insurance.html" class="menu-item bg-yellow vip-only"><span>🛡️ 員工保險表單生產器</span></a>
     </div>
@@ -108,7 +108,7 @@
     <div class="card-container vip-only">
         <a href="copywriter.html" class="menu-item bg-pink"><span>📢 顧客公告文產生器</span></a>
         
-        <a href="#" onclick="alert('這會連結到員工公告選單，含徵選與大群公告')" class="menu-item bg-pink"><span>📣 員工公告文產生器</span></a>
+        <a href="#" onclick="alert('連結到員工公告選單，含徵選與大群公告')" class="menu-item bg-pink"><span>📣 員工公告文產生器</span></a>
         <a href="schedule.html" class="menu-item bg-pink"><span>💬 LINE 內部階段公告</span></a>
     </div>
 
@@ -133,11 +133,7 @@
                 <label>📅 入職時間</label>
                 <div id="modal-entry">...</div>
             </div>
-            <div class="profile-stat">
-                <label>🚀 服務天數 (次數估算)</label>
-                <div id="modal-days">...</div>
             </div>
-        </div>
     </div>
 
     <script>
@@ -181,32 +177,21 @@
         function getAvatarName(name) { return name.length > 2 ? name.slice(-2) : name; }
         function logout() { localStorage.removeItem('loginPhone'); window.location.replace('index.html'); }
         
-        // 個人檔案邏輯
         function showProfile() {
             const user = STAFF_DB[loggedInPhone];
             document.getElementById('modal-name').innerText = user.name;
             document.getElementById('modal-avatar').innerText = getAvatarName(user.name);
             document.getElementById('modal-role').innerText = user.role || "夥伴";
             
-            // 計算服務天數
             if (user.entryDate) {
                 const entry = new Date(user.entryDate);
-                const now = new Date();
-                const diffTime = Math.abs(now - entry);
-                const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)); 
-                
-                // 格式化入職日期
                 const y = entry.getFullYear();
                 const m = entry.getMonth() + 1;
                 const d = entry.getDate();
-                
                 document.getElementById('modal-entry').innerText = `${y}/${m}/${d}`;
-                document.getElementById('modal-days').innerText = `${diffDays} 天`;
             } else {
                 document.getElementById('modal-entry').innerText = "未登記";
-                document.getElementById('modal-days').innerText = "0 天";
             }
-
             document.getElementById('profileModal').style.display = 'flex';
         }
 
