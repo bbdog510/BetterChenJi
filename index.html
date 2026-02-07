@@ -9,165 +9,43 @@
     <link rel="icon" href="img/logo.png" type="image/png">
     
     <style>
-        /* === 預設暗黑模式 (Dark Mode Default) === */
         :root {
-            --bg-color: #121212;
-            --card-bg: #1E1E1E;
-            --text-main: #E0E0E0;
-            --text-sub: #A0A0A0;
-            --input-bg: #2C2C2C;
-            --input-border: #444;
-            --primary: #FFD54F;
-            --btn-text: #000;
+            --bg-color: #121212; --card-bg: #1E1E1E; --text-main: #E0E0E0;
+            --text-sub: #A0A0A0; --input-bg: #2C2C2C; --input-border: #444;
+            --primary: #FFD54F; --btn-text: #000;
         }
-
-        /* 白天模式變數 */
         body.light-mode {
-            --bg-color: #FDFCF4;
-            --card-bg: #FFFFFF;
-            --text-main: #333333;
-            --text-sub: #666666;
-            --input-bg: #F4F6F4;
-            --input-border: #E0E2E0;
-            --primary: #6F5D00;
-            --btn-text: #FFFFFF;
+            --bg-color: #FDFCF4; --card-bg: #FFFFFF; --text-main: #333333;
+            --text-sub: #666666; --input-bg: #F4F6F4; --input-border: #E0E2E0;
+            --primary: #6F5D00; --btn-text: #FFFFFF;
         }
-
         body {
-            font-family: 'MiSans', sans-serif;
-            background-color: var(--bg-color);
-            color: var(--text-main);
-            display: flex; flex-direction: column; align-items: center; justify-content: center;
-            height: 100vh; margin: 0; 
-            transition: background-color 0.3s;
+            font-family: 'MiSans', sans-serif; background-color: var(--bg-color);
+            color: var(--text-main); display: flex; flex-direction: column;
+            align-items: center; justify-content: center; height: 100vh; margin: 0; 
+            transition: 0.3s;
         }
-
         .login-card {
             background: var(--card-bg); padding: 40px 30px; border-radius: 28px;
-            width: 80%; max-width: 320px; text-align: center;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.5);
-            border: 1px solid rgba(255,255,255,0.1);
+            width: 85%; max-width: 320px; text-align: center;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.1);
         }
-
         .logo { width: 80px; height: 80px; border-radius: 20px; margin-bottom: 20px; }
         h1 { font-size: 24px; margin-bottom: 5px; }
         p { color: var(--text-sub); font-size: 14px; margin-bottom: 30px; }
 
-        .input-group { text-align: left; margin-bottom: 15px; }
-        label { font-size: 12px; color: var(--text-sub); margin-left: 10px; display: block; margin-bottom: 5px; }
+        .input-group { text-align: left; margin-bottom: 15px; display: flex; flex-direction: column; align-items: center; }
+        label { font-size: 12px; color: var(--text-sub); width: 100%; max-width: 280px; margin-bottom: 5px; text-align: left; }
+        
         input {
-            width: 100%; padding: 16px; border: 2px solid var(--input-border);
+            width: 100%; max-width: 280px;
+            padding: 16px; border: 2px solid var(--input-border);
             border-radius: 16px; background: var(--input-bg); color: var(--text-main);
-            outline: none; transition: 0.3s;
+            outline: none; transition: 0.3s; box-sizing: border-box;
         }
         input:focus { border-color: var(--primary); }
 
         .btn-main {
-            width: 100%; padding: 16px; margin-top: 10px;
+            width: 100%; max-width: 280px; padding: 16px; margin-top: 10px;
             background-color: var(--primary); color: var(--btn-text);
-            border: none; border-radius: 100px; font-weight: bold; cursor: pointer;
-        }
-        .btn-main:disabled { background-color: #555; color: #888; cursor: not-allowed; }
-
-        #status-msg { font-size: 12px; color: var(--text-sub); margin-top: 15px; }
-        
-        .theme-toggle {
-            position: fixed; bottom: 20px;
-            background: rgba(255,255,255,0.1); color: var(--text-sub);
-            padding: 8px 16px; border-radius: 20px; font-size: 12px; cursor: pointer;
-        }
-    </style>
-</head>
-<body>
-    <div class="login-card">
-        <img src="img/logo.png" class="logo">
-        <h1>陳記元宵</h1>
-        <p>數位戰情中心</p>
-        
-        <div class="input-group">
-            <label>手機號碼</label>
-            <input type="tel" id="account" placeholder="09xxxxxxxx" maxlength="10">
-        </div>
-        <div class="input-group">
-            <label>密碼 (生日)</label>
-            <input type="password" id="pwd" placeholder="例如：831222" maxlength="6">
-        </div>
-
-        <button id="loginBtn" class="btn-main" onclick="login()" disabled>連線中...</button>
-        <div id="status-msg">正在同步最新名單...</div>
-    </div>
-
-    <div class="theme-toggle" onclick="toggleTheme()">🌙 / ☀️ 切換</div>
-
-    <script>
-        // 切換風格
-        function toggleTheme() {
-            document.body.classList.toggle('light-mode');
-            localStorage.setItem('theme', document.body.classList.contains('light-mode') ? 'light' : 'dark');
-        }
-        if (localStorage.getItem('theme') === 'light') document.body.classList.add('light-mode');
-
-        // === API 設定 ===
-        const API_URL = "https://script.google.com/macros/s/AKfycbxKId2YUNuZdQN4QaC78wlMXyvkFKh4eqsgLP7rli1j0JMStRy-Gdt49J9PaiChtj02rg/exec"; 
-        
-        let STAFF_DB = {};
-        const cachedData = localStorage.getItem('STAFF_DB_CACHE');
-        if (cachedData) {
-            STAFF_DB = JSON.parse(cachedData);
-            enableLogin("已載入快取資料");
-        }
-
-        fetch(API_URL)
-            .then(res => res.json())
-            .then(data => {
-                STAFF_DB = data;
-                localStorage.setItem('STAFF_DB_CACHE', JSON.stringify(data));
-                
-                // === 這裡加了時間戳記 ===
-                const time = new Date().toLocaleTimeString('zh-TW', {hour12: false});
-                enableLogin(`資料庫已同步最新版 (${time}) ✅`);
-                
-                const savedPhone = localStorage.getItem('loginPhone');
-                if (savedPhone && STAFF_DB[savedPhone]) window.location.replace('dashboard.html');
-            })
-            .catch(err => {
-                if(!cachedData) {
-                    document.getElementById('status-msg').innerText = "連線失敗 ❌";
-                    document.getElementById('status-msg').style.color = "#FF5252";
-                }
-            });
-
-        function enableLogin(text) {
-            const btn = document.getElementById('loginBtn');
-            btn.disabled = false;
-            btn.innerText = "登入系統";
-            document.getElementById('status-msg').innerText = text;
-            document.getElementById('status-msg').style.color = document.body.classList.contains('light-mode') ? "#27ae60" : "#81C784";
-        }
-
-        function login() {
-            const acc = document.getElementById('account').value;
-            const pwd = document.getElementById('pwd').value;
-
-            // 後門：NICK (你)
-            if (acc === "0936588349" && pwd === "831222") {
-                 localStorage.setItem('loginPhone', acc);
-                 // 強制寫入 Boss 權限
-                 if(!STAFF_DB[acc]) STAFF_DB[acc] = { name: "NICK", role: "Boss", origin: "管理員" };
-                 else STAFF_DB[acc].role = "Boss"; 
-                 
-                 localStorage.setItem('STAFF_DB_CACHE', JSON.stringify(STAFF_DB));
-                 window.location.replace('dashboard.html');
-                 return;
-            }
-
-            if (STAFF_DB[acc] && String(STAFF_DB[acc].pwd) === String(pwd)) {
-                localStorage.setItem('loginPhone', acc);
-                window.location.replace('dashboard.html');
-            } else {
-                alert("帳號或密碼錯誤");
-            }
-        }
-    </script>
-</body>
-</html>
+            border: none; border-radius
