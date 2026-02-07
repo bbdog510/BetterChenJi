@@ -246,11 +246,26 @@
         }
 
         function closeModal(e) { if(e.target.id === 'detailModal') document.getElementById('detailModal').style.display = 'none'; }
+        // 🚀 強力版：Google Drive 圖片連結轉換器 (修復破圖問題)
         function convertDriveLink(url) {
             if (!url) return "";
-            let match = url.match(/\/d\/(.+?)\//) || url.match(/id=([a-zA-Z0-9_-]+)/);
-            if (match && match[1]) return `https://lh3.googleusercontent.com/d/$${match[1]}`; // 修正字串拼接
-            return url;
+            
+            // 1. 抓取檔案 ID
+            let id = "";
+            let match = url.match(/\/d\/(.+?)\//); // 格式 1: /d/ID/
+            if (match) {
+                id = match[1];
+            } else {
+                match = url.match(/id=([a-zA-Z0-9_-]+)/); // 格式 2: id=ID
+                if (match) id = match[1];
+            }
+
+            // 2. 如果抓到 ID，回傳 lh3 連結 (目前最穩定的圖床)
+            if (id) {
+                return `https://lh3.googleusercontent.com/d/${id}`;
+            }
+            
+            return url; // 抓不到就回傳原網址試試
         }
 
         renderList();
