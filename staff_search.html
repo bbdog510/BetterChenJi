@@ -37,7 +37,7 @@
         .avatar-small {
             width: 50px; height: 50px; border-radius: 50%; background: var(--primary); color: #fff;
             display: flex; justify-content: center; align-items: center; font-weight: bold; font-size: 18px;
-            object-fit: cover;
+            object-fit: cover; flex-shrink: 0;
         }
         .info { flex: 1; }
         .name { font-size: 18px; font-weight: bold; }
@@ -53,19 +53,25 @@
             background: var(--card-bg); width: 90%; max-width: 400px; max-height: 90vh;
             border-radius: 24px; padding: 25px; overflow-y: auto; position: relative;
         }
-        .modal-close { position: absolute; top: 15px; right: 15px; font-size: 24px; cursor: pointer; }
+        .modal-close { position: absolute; top: 15px; right: 15px; font-size: 24px; cursor: pointer; z-index: 10; background: rgba(0,0,0,0.5); width: 30px; height: 30px; text-align: center; line-height: 30px; border-radius: 50%; color: white; }
         
         .detail-row { margin-bottom: 15px; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 10px; }
         .detail-label { font-size: 12px; color: var(--text-sub); }
         .detail-val { font-size: 16px; margin-top: 5px; word-break: break-all; }
         
-        .photo-area img { width: 100%; border-radius: 12px; margin-bottom: 15px; display: none; }
+        .photo-area { text-align: center; margin-bottom: 20px; }
+        .photo-area img { width: 100%; border-radius: 12px; max-height: 300px; object-fit: cover; display: none; }
         
         .pagination { display: flex; justify-content: space-between; margin-top: 20px; padding-bottom: 50px; }
         .page-btn { padding: 10px 20px; background: var(--card-bg); border-radius: 20px; cursor: pointer; border: 1px solid var(--border); color: var(--text-main); }
         
         .btn-back { position: fixed; bottom: 20px; right: 20px; background: var(--primary); color: #fff; padding: 12px 24px; border-radius: 50px; text-decoration: none; font-weight: bold; box-shadow: 0 4px 10px rgba(0,0,0,0.3); }
 
+        .map-btn {
+            display: inline-block; background: #4285F4; color: white; 
+            padding: 4px 10px; border-radius: 12px; font-size: 12px; 
+            text-decoration: none; margin-left: 10px;
+        }
     </style>
 </head>
 <body>
@@ -90,17 +96,24 @@
             <span class="modal-close" onclick="document.getElementById('detailModal').style.display='none'">&times;</span>
             
             <div class="photo-area">
-                <img id="d-photo" src="" alt="員工照片">
+                <img id="d-photo" src="" alt="員工照片" onerror="this.style.display='none'">
+                <div id="d-avatar-text" class="avatar-small" style="width:100px; height:100px; font-size:36px; margin:0 auto; display:none;"></div>
             </div>
 
             <div class="detail-row"><div class="detail-label">姓名</div><div class="detail-val" id="d-name"></div></div>
             <div class="detail-row"><div class="detail-label">入職時間</div><div class="detail-val" id="d-entry"></div></div>
-            <div class="detail-row"><div class="detail-label">服務次數 (天數)</div><div class="detail-val" id="d-service"></div></div>
+            
             <div class="detail-row"><div class="detail-label">生日 (歲數)</div><div class="detail-val" id="d-age"></div></div>
-            <div class="detail-row"><div class="detail-label">電話</div><div class="detail-val" id="d-phone"></div></div>
+            <div class="detail-row"><div class="detail-label">電話</div><div class="detail-val" id="d-phone"><a href="#" style="color:var(--primary)"></a></div></div>
             <div class="detail-row"><div class="detail-label">身高體重</div><div class="detail-val" id="d-body"></div></div>
             <div class="detail-row"><div class="detail-label">學校/系級</div><div class="detail-val" id="d-school"></div></div>
-            <div class="detail-row"><div class="detail-label">地址</div><div class="detail-val" id="d-addr"></div></div>
+            <div class="detail-row">
+                <div class="detail-label">地址</div>
+                <div class="detail-val">
+                    <span id="d-addr"></span>
+                    <a id="d-map-link" href="#" target="_blank" class="map-btn">🗺️ 開啟導航</a>
+                </div>
+            </div>
             <div class="detail-row"><div class="detail-label">身分證</div><div class="detail-val" id="d-id"></div></div>
             <div class="detail-row"><div class="detail-label">自我介紹</div><div class="detail-val" id="d-intro"></div></div>
         </div>
@@ -109,12 +122,11 @@
     <script>
         if (localStorage.getItem('theme') === 'light') document.body.classList.add('light-mode');
 
-        // 讀取快取資料庫
         const cachedDB = localStorage.getItem('STAFF_DB_CACHE');
         if (!cachedDB) { alert('請先登入以同步資料'); window.location.href = 'index.html'; }
         
         const STAFF_DB = JSON.parse(cachedDB);
-        let staffList = Object.values(STAFF_DB); // 轉成陣列
+        let staffList = Object.values(STAFF_DB);
         
         // 排序：入職時間 (最新的在上面)
         staffList.sort((a, b) => {
@@ -138,7 +150,6 @@
             document.getElementById('pageInfo').innerText = `第 ${currentPage} 頁 / 共 ${Math.ceil(filteredList.length / itemsPerPage)} 頁`;
 
             pageData.forEach(staff => {
-                // 計算顯示的入職日期
                 let entryStr = "未登記";
                 if(staff.entryDate) {
                     const d = new Date(staff.entryDate);
@@ -149,17 +160,24 @@
                 card.className = 'staff-card';
                 card.onclick = () => showDetail(staff);
                 
-                // 頭像處理 (如果有照片就顯示照片，沒有就顯示字)
+                // 別名判斷
+                let aliasHtml = staff.alias ? `<span style="font-size:12px; font-weight:normal; opacity:0.7;">(${staff.alias})</span>` : "";
+
+                // 列表頭像 (嘗試顯示圖片，失敗會變回文字)
                 let avatarHtml = `<div class="avatar-small">${staff.name.slice(-2)}</div>`;
                 if (staff.photo) {
                     const photoUrl = convertDriveLink(staff.photo);
-                    if(photoUrl) avatarHtml = `<img src="${photoUrl}" class="avatar-small">`;
+                    // 這裡用一個小技巧，如果圖片載入失敗(onerror)，就隱藏圖片並顯示後面的文字
+                    avatarHtml = `
+                        <img src="${photoUrl}" class="avatar-small" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex'">
+                        <div class="avatar-small" style="display:none">${staff.name.slice(-2)}</div>
+                    `;
                 }
 
                 card.innerHTML = `
                     ${avatarHtml}
                     <div class="info">
-                        <div class="name">${staff.name} <span style="font-size:12px; font-weight:normal; opacity:0.7;">(${staff.alias || ''})</span></div>
+                        <div class="name">${staff.name} ${aliasHtml}</div>
                         <div class="sub-info">入職：${entryStr} | ${staff.phone}</div>
                     </div>
                     <div style="font-size:20px; opacity:0.3;">➜</div>
@@ -183,49 +201,70 @@
 
         function showDetail(staff) {
             document.getElementById('d-name').innerText = staff.name;
-            document.getElementById('d-phone').innerText = staff.phone;
+            document.getElementById('d-phone').innerHTML = `<a href="tel:${staff.phone}" style="color:var(--text-main); text-decoration:none;">${staff.phone} 📞</a>`;
             document.getElementById('d-body').innerText = staff.bodyInfo || "-";
             document.getElementById('d-addr').innerText = staff.address || "-";
             document.getElementById('d-id').innerText = staff.id || "-";
             document.getElementById('d-intro').innerText = staff.intro || "無";
             document.getElementById('d-school').innerText = staff.school || "-";
+            
+            // 地圖連結
+            const mapLink = document.getElementById('d-map-link');
+            if (staff.address) {
+                mapLink.href = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(staff.address)}`;
+                mapLink.style.display = 'inline-block';
+            } else {
+                mapLink.style.display = 'none';
+            }
 
-            // 照片
+            // 照片處理
             const photoEl = document.getElementById('d-photo');
+            const avatarText = document.getElementById('d-avatar-text');
+            
             if (staff.photo) {
                 photoEl.src = convertDriveLink(staff.photo);
                 photoEl.style.display = 'block';
+                avatarText.style.display = 'none';
             } else {
+                // 沒照片就顯示大文字頭像
                 photoEl.style.display = 'none';
+                avatarText.innerText = staff.name.slice(-2);
+                avatarText.style.display = 'flex';
             }
 
-            // 年齡計算
-            let ageStr = staff.birthday || "-";
+            // 生日與年齡計算 (修復 1932 歲問題)
+            let ageStr = "-";
             if (staff.birthday) {
-                // 這裡的 birthday 格式是 YYYY/MM/DD
-                const bYear = parseInt(staff.birthday.split('/')[0]);
-                // 如果是民國年要 +1911 (因為我們在 API 那邊已經處理成西元了，所以這邊應該是西元)
-                const nowYear = new Date().getFullYear();
-                const age = nowYear - bYear;
-                ageStr += ` (${age} 歲)`;
+                let rawDate = String(staff.birthday);
+                // 嘗試解析日期，支援 94/03/16 或 1994/03/16
+                let parts = rawDate.split('/');
+                if (parts.length >= 1) {
+                    let year = parseInt(parts[0]);
+                    let month = parts[1] || "01";
+                    let day = parts[2] || "01";
+
+                    // 關鍵修正：如果年份小於 1911 (例如 94)，就當作民國年
+                    let fullYear = year < 1911 ? year + 1911 : year;
+                    
+                    const nowYear = new Date().getFullYear();
+                    const age = nowYear - fullYear;
+                    
+                    ageStr = `${fullYear}年${month}月${day}日 (${age} 歲)`;
+                } else {
+                    ageStr = rawDate; // 格式不對就直接顯示
+                }
             }
             document.getElementById('d-age').innerText = ageStr;
 
-            // 入職與服務天數
+            // 入職時間
             if (staff.entryDate) {
                 const entry = new Date(staff.entryDate);
-                const now = new Date();
-                const diffTime = Math.abs(now - entry);
-                const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
                 const y = entry.getFullYear();
                 const m = entry.getMonth() + 1;
                 const d = entry.getDate();
-                
                 document.getElementById('d-entry').innerText = `${y}/${m}/${d}`;
-                document.getElementById('d-service').innerText = `${diffDays} 天`;
             } else {
                 document.getElementById('d-entry').innerText = "未登記";
-                document.getElementById('d-service').innerText = "-";
             }
 
             document.getElementById('detailModal').style.display = 'flex';
@@ -235,18 +274,23 @@
             if(e.target.id === 'detailModal') document.getElementById('detailModal').style.display = 'none';
         }
 
-        // Google Drive 圖片連結轉換器
+        // 強化的 Google Drive 連結轉換
         function convertDriveLink(url) {
             if (!url) return "";
-            // 嘗試抓取 ID
-            const match = url.match(/[-\w]{25,}/);
-            if (match) {
-                return `https://drive.google.com/uc?export=view&id=${match[0]}`;
+            // 處理 drive.google.com/file/d/ID/view
+            let match = url.match(/\/d\/(.+?)\//);
+            if (!match) {
+                // 處理 id=ID 格式
+                match = url.match(/id=([a-zA-Z0-9_-]+)/);
+            }
+            
+            if (match && match[1]) {
+                // 使用 Google 的usercontent 伺服器，讀取速度較快且不易破圖
+                return `https://lh3.googleusercontent.com/d/${match[1]}`;
             }
             return url;
         }
 
-        // 初始化
         renderList();
     </script>
 </body>
