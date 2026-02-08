@@ -21,7 +21,7 @@
         .btn-gen:disabled { background: #555; color: #888; cursor: not-allowed; }
 
         .note { font-size: 12px; color: #888; background: rgba(255,255,255,0.05); padding: 10px; border-radius: 8px; margin-bottom: 20px; }
-        .status { text-align: center; margin-top: 20px; font-weight: bold; min-height: 24px; }
+        .status { text-align: center; margin-top: 20px; font-weight: bold; min-height: 24px; white-space: pre-line; }
         
         .btn-back { display: block; margin-top: 20px; color: #888; text-decoration: none; text-align: center; }
     </style>
@@ -34,9 +34,9 @@
         <label>1. 設定年份</label>
         <input type="number" id="yearInput" value="2026">
         
-        <label>2. 貼上檔期資料 (格式：店名 開始日期-結束日期)</label>
+        <label>2. 貼上檔期資料 (格式：店名 月/日-月/日)</label>
         <div class="note">
-            範例：<br>
+            直接從 LINE 或記事本複製貼上即可，例如：<br>
             巨蛋 2/24-3/3<br>
             大樂 2/26-3/3<br>
             Br4 2/19-3/3
@@ -50,8 +50,8 @@
     </div>
 
     <script>
-        // 請換成你剛剛 SCHEDULE_GEN.gs 部署的網址
-        const API_URL = "https://script.google.com/macros/s/AKfycbzn2OrJi4VCdGoRjn8n-1J0qNBpBNy7WNxZHghRb4shDMsVy4q8Dfyol4gix01WpXFXpA/exec"; 
+        // 🔴 已更新為您的最新網址
+        const API_URL = "https://script.google.com/macros/s/AKfycbyJiO5Vd88xOT3g5tR6DZDIWgUhLNBMxPSv5-ZiSuVM6T64bK_2DA7F8ELGOiS4FKxQyg/exec"; 
 
         function generate() {
             const year = document.getElementById('yearInput').value;
@@ -66,32 +66,23 @@
             status.innerText = "指令已發送，請稍候 (約 5-10 秒)...";
             status.style.color = "#FFD54F";
 
-            // 這裡使用 POST 傳送大量文字
             fetch(API_URL, {
                 method: "POST",
-                headers: { "Content-Type": "text/plain;charset=utf-8" }, // 簡單請求
+                mode: "no-cors", 
+                headers: { "Content-Type": "text/plain;charset=utf-8" },
                 body: JSON.stringify({ year: year, text: text })
             })
-            .then(res => res.json())
-            .then(data => {
-                if(data.success) {
-                    status.innerText = "✅ 生成成功！請去 Google Sheet 查看。";
-                    status.style.color = "#4CAF50";
-                    btn.innerText = "🚀 再次生成";
-                } else {
-                    status.innerText = "❌ 失敗：" + data.msg;
-                    status.style.color = "#FF5252";
-                }
+            .then(() => {
+                status.innerText = "✅ 指令已送出！\n請去 Google Sheet 確認分頁是否出現。\n(若 1 分鐘後沒出現，請檢查 API 部署設定)";
+                status.style.color = "#4CAF50";
+                btn.innerText = "🚀 再次生成";
                 btn.disabled = false;
             })
             .catch(err => {
-                // Apps Script POST 跨域有時候會回傳不透明回應，但其實成功了
-                // 這裡做個簡單判斷，如果沒報錯就是成功
-                console.log(err);
-                status.innerText = "✅ 指令已送出 (若 Google Sheet 有出現即成功)";
-                status.style.color = "#4CAF50";
+                console.error(err);
+                status.innerText = "❌ 發送失敗，請檢查網路";
+                status.style.color = "#FF5252";
                 btn.disabled = false;
-                btn.innerText = "🚀 再次生成";
             });
         }
     </script>
