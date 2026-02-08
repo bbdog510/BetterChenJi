@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>排班表生成器</title>
+    <link rel="icon" href="img/logo.png" type="image/png">
+    <style>
+        :root { --bg: #121212; --card: #1E1E1E; --text: #E0E0E0; --primary: #FFD54F; }
+        body { font-family: 'MiSans', sans-serif; background: var(--bg); color: var(--text); padding: 20px; display: flex; flex-direction: column; align-items: center; }
+        
+        .container { width: 100%; max-width: 600px; background: var(--card); padding: 30px; border-radius: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.5); }
+        h1 { color: var(--primary); text-align: center; margin-bottom: 20px; }
+        
+        label { display: block; margin-bottom: 8px; font-weight: bold; color: #aaa; }
+        input, textarea { width: 100%; box-sizing: border-box; background: #333; border: 1px solid #555; color: #fff; padding: 12px; border-radius: 10px; font-size: 16px; margin-bottom: 20px; outline: none; }
+        textarea { height: 300px; font-family: monospace; line-height: 1.5; }
+        
+        .btn-gen { width: 100%; padding: 15px; background: var(--primary); color: #000; font-weight: bold; font-size: 18px; border: none; border-radius: 50px; cursor: pointer; transition: 0.3s; }
+        .btn-gen:hover { transform: scale(1.02); opacity: 0.9; }
+        .btn-gen:disabled { background: #555; color: #888; cursor: not-allowed; }
+
+        .note { font-size: 12px; color: #888; background: rgba(255,255,255,0.05); padding: 10px; border-radius: 8px; margin-bottom: 20px; }
+        .status { text-align: center; margin-top: 20px; font-weight: bold; min-height: 24px; }
+        
+        .btn-back { display: block; margin-top: 20px; color: #888; text-decoration: none; text-align: center; }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>📅 智慧排班表生成器</h1>
+        
+        <label>1. 設定年份</label>
+        <input type="number" id="yearInput" value="2026">
+        
+        <label>2. 貼上檔期資料 (格式：店名 開始日期-結束日期)</label>
+        <div class="note">
+            範例：<br>
+            巨蛋 2/24-3/3<br>
+            大樂 2/26-3/3<br>
+            Br4 2/19-3/3
+        </div>
+        <textarea id="dataInput" placeholder="請在此貼上那一大串文字..."></textarea>
+
+        <button id="genBtn" class="btn-gen" onclick="generate()">🚀 開始生成 Google Sheet</button>
+        <div id="status" class="status"></div>
+        
+        <a href="dashboard.html" class="btn-back">⬅️ 返回戰情室</a>
+    </div>
+
+    <script>
+        // 請換成你剛剛 SCHEDULE_GEN.gs 部署的網址
+        const API_URL = "https://script.google.com/macros/s/AKfycbz..........你的新網址........../exec"; 
+
+        function generate() {
+            const year = document.getElementById('yearInput').value;
+            const text = document.getElementById('dataInput').value;
+            const btn = document.getElementById('genBtn');
+            const status = document.getElementById('status');
+
+            if(!text.trim()) { alert("請貼上資料！"); return; }
+
+            btn.disabled = true;
+            btn.innerText = "⏳ 正在分析資料並繪製表格...";
+            status.innerText = "指令已發送，請稍候 (約 5-10 秒)...";
+            status.style.color = "#FFD54F";
+
+            // 這裡使用 POST 傳送大量文字
+            fetch(API_URL, {
+                method: "POST",
+                headers: { "Content-Type": "text/plain;charset=utf-8" }, // 簡單請求
+                body: JSON.stringify({ year: year, text: text })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if(data.success) {
+                    status.innerText = "✅ 生成成功！請去 Google Sheet 查看。";
+                    status.style.color = "#4CAF50";
+                    btn.innerText = "🚀 再次生成";
+                } else {
+                    status.innerText = "❌ 失敗：" + data.msg;
+                    status.style.color = "#FF5252";
+                }
+                btn.disabled = false;
+            })
+            .catch(err => {
+                // Apps Script POST 跨域有時候會回傳不透明回應，但其實成功了
+                // 這裡做個簡單判斷，如果沒報錯就是成功
+                console.log(err);
+                status.innerText = "✅ 指令已送出 (若 Google Sheet 有出現即成功)";
+                status.style.color = "#4CAF50";
+                btn.disabled = false;
+                btn.innerText = "🚀 再次生成";
+            });
+        }
+    </script>
+</body>
+</html>
