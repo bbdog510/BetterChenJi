@@ -71,7 +71,7 @@
             background-color: var(--primary); color: #000;
             border: none; border-radius: 100px; font-weight: bold; cursor: pointer;
         }
-        .btn-admin { background-color: #ff4444; color: white; } /* 管理員按鈕紅色的 */
+        .btn-admin { background-color: #ff4444; color: white; } 
 
         #status-msg { font-size: 12px; color: var(--text-sub); margin-top: 25px; opacity: 0.8; }
         
@@ -141,7 +141,8 @@
             document.getElementById('cardStack').classList.toggle('flipped');
         }
 
-        const API_URL = "https://script.google.com/macros/s/AKfycbzn2OrJi4VCdGoRjn8n-1J0qNBpBNy7WNxZHghRb4shDMsVy4q8Dfyol4gix01WpXFXpA/exec"; 
+        // 🔴 已更新為您的最新網址
+        const API_URL = "https://script.google.com/macros/s/AKfycbyJiO5Vd88xOT3g5tR6DZDIWgUhLNBMxPSv5-ZiSuVM6T64bK_2DA7F8ELGOiS4FKxQyg/exec"; 
         
         let STAFF_DB = {};
         const cachedData = localStorage.getItem('STAFF_DB_CACHE');
@@ -193,20 +194,15 @@
                 
                 // === 關鍵邏輯：透過哪扇門進來的？ ===
                 if (isBackdoor) {
-                    // 走後門：檢查 W 欄位是否真的是 ADMIN
                     const userRole = (STAFF_DB[acc].role || "").toUpperCase();
                     if (userRole.includes("ADMIN")) {
-                        // 是管理員，放行並給予 Admin 權限
-                        // (Dashboard 會讀取這個 role)
                         alert("管理員身分確認，歡迎進入戰情室。");
                         window.location.replace('dashboard.html');
                     } else {
-                        // 走後門但不是管理員
                         alert("權限不足！您雖是員工但非管理職，請走正面通道。");
                     }
                 } else {
-                    // 走正門：一律閹割權限，強制設為 STAFF (暫時修改快取中的資料)
-                    // 這樣就算他是 ADMIN，從正門進來也看不到 VIP 按鈕
+                    // 走正門：一律強制設為 STAFF
                     STAFF_DB[acc].role = "STAFF";
                     localStorage.setItem('STAFF_DB_CACHE', JSON.stringify(STAFF_DB));
                     window.location.replace('dashboard.html');
