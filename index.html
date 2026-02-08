@@ -10,50 +10,70 @@
     
     <style>
         :root {
-            --bg-color: #121212; --card-bg: #1E1E1E; --text-main: #E0E0E0;
-            --text-sub: #A0A0A0; --input-bg: #2C2C2C; --input-border: #444;
-            --primary: #FFD54F; --btn-text: #000;
+            --bg-color: #121212; --text-main: #E0E0E0; --text-sub: #A0A0A0;
+            --primary: #FFD54F; --card-bg: #1E1E1E; --input-bg: #2C2C2C; --input-border: #444;
         }
         body.light-mode {
-            --bg-color: #FDFCF4; --card-bg: #FFFFFF; --text-main: #333333;
-            --text-sub: #666666; --input-bg: #F4F6F4; --input-border: #E0E2E0;
-            --primary: #6F5D00; --btn-text: #FFFFFF;
+            --bg-color: #FDFCF4; --text-main: #333333; --text-sub: #666666;
+            --primary: #6F5D00; --card-bg: #FFFFFF; --input-bg: #F4F6F4; --input-border: #E0E2E0;
         }
         body {
             font-family: 'MiSans', sans-serif; background-color: var(--bg-color);
             color: var(--text-main); display: flex; flex-direction: column;
-            align-items: center; justify-content: center; height: 100vh; margin: 0; 
-            transition: 0.3s;
+            align-items: center; justify-content: center; height: 100vh; margin: 0; perspective: 1000px;
         }
-        .login-card {
-            background: var(--card-bg); padding: 40px 30px; border-radius: 28px;
-            width: 85%; max-width: 320px; text-align: center;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.1);
+
+        /* 翻轉容器 */
+        .flip-container {
+            width: 85%; max-width: 320px; height: 450px; position: relative;
+            transform-style: preserve-3d; transition: transform 0.6s;
         }
+        .flip-container.flipped { transform: rotateY(180deg); }
+
+        /* 正反面通用 */
+        .login-card, .login-card-back {
+            position: absolute; width: 100%; height: 100%;
+            backface-visibility: hidden; border-radius: 28px;
+            padding: 40px 30px; box-sizing: border-box; text-align: center;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+        }
+
+        /* 正面 (一般員工) */
+        .login-card { background: var(--card-bg); border: 1px solid rgba(255,255,255,0.1); }
+        
+        /* 背面 (管理員 - 紅色警戒) */
+        .login-card-back { 
+            background: #2c0000; border: 2px solid #ff4444; 
+            transform: rotateY(180deg); color: #ffcccc;
+        }
+
+        /* 隱形密道按鈕 */
+        .secret-trigger {
+            position: fixed; top: 0; left: 0; width: 100%; height: 50px; z-index: 999;
+        }
+
         .logo { width: 80px; height: 80px; border-radius: 20px; margin-bottom: 20px; }
         h1 { font-size: 24px; margin-bottom: 5px; }
         p { color: var(--text-sub); font-size: 14px; margin-bottom: 30px; }
 
-        .input-group { text-align: left; margin-bottom: 15px; display: flex; flex-direction: column; align-items: center; }
-        label { font-size: 12px; color: var(--text-sub); width: 100%; max-width: 280px; margin-bottom: 5px; text-align: left; }
-        
+        .input-group { width: 100%; margin-bottom: 15px; text-align: left; }
+        label { font-size: 12px; color: var(--text-sub); display: block; margin-bottom: 5px; }
         input {
-            width: 100%; max-width: 280px;
-            padding: 16px; border: 2px solid var(--input-border);
+            width: 100%; padding: 16px; border: 2px solid var(--input-border);
             border-radius: 16px; background: var(--input-bg); color: var(--text-main);
-            outline: none; transition: 0.3s; box-sizing: border-box;
+            outline: none; box-sizing: border-box; transition: 0.3s;
         }
         input:focus { border-color: var(--primary); }
 
         .btn-main {
-            width: 100%; max-width: 280px; padding: 16px; margin-top: 10px;
-            background-color: var(--primary); color: var(--btn-text);
+            width: 100%; padding: 16px; margin-top: 10px;
+            background-color: var(--primary); color: #000;
             border: none; border-radius: 100px; font-weight: bold; cursor: pointer;
         }
-        .btn-main:disabled { background-color: #555; color: #888; cursor: not-allowed; }
+        .btn-admin { background-color: #ff4444; color: white; } /* 管理員按鈕紅色的 */
 
-        /* 時間顯示樣式 */
-        #status-msg { font-size: 12px; color: var(--text-sub); margin-top: 25px; opacity: 0.8; letter-spacing: 0.5px; }
+        #status-msg { font-size: 12px; color: var(--text-sub); margin-top: 25px; opacity: 0.8; }
         
         #install-btn {
             display: none; margin-top: 15px;
@@ -61,33 +81,51 @@
             padding: 8px 16px; border-radius: 20px; font-size: 12px; 
             cursor: pointer; border: 1px solid var(--primary);
         }
-
-        .theme-toggle {
-            position: fixed; bottom: 20px;
-            background: rgba(255,255,255,0.1); color: var(--text-sub);
-            padding: 8px 16px; border-radius: 20px; font-size: 12px; cursor: pointer;
-        }
+        
+        .theme-toggle { position: fixed; bottom: 20px; font-size: 12px; cursor: pointer; color: var(--text-sub); padding: 8px 16px; background: rgba(255,255,255,0.1); border-radius: 20px; }
     </style>
 </head>
 <body>
-    <div class="login-card">
-        <img src="img/logo.png" class="logo">
-        <h1>陳記元宵</h1>
-        <p>數位戰情中心</p>
-        
-        <div class="input-group">
-            <label>手機號碼</label>
-            <input type="tel" id="account" placeholder="09xxxxxxxx" maxlength="10">
-        </div>
-        <div class="input-group">
-            <label>密碼 (生日)</label>
-            <input type="password" id="pwd" placeholder="例如：870101" maxlength="6">
+
+    <div class="secret-trigger" ondblclick="toggleAdminMode()"></div>
+
+    <div class="flip-container" id="cardStack">
+        <div class="login-card">
+            <img src="img/logo.png" class="logo">
+            <h1>陳記元宵</h1>
+            <p>數位戰情中心 (一般通道)</p>
+            
+            <div class="input-group">
+                <label>手機號碼</label>
+                <input type="tel" id="account" placeholder="09xxxxxxxx" maxlength="10">
+            </div>
+            <div class="input-group">
+                <label>密碼 (生日)</label>
+                <input type="password" id="pwd" placeholder="例如：870101" maxlength="6">
+            </div>
+
+            <button id="loginBtn" class="btn-main" onclick="login('STAFF')" disabled>連線中...</button>
+            <button id="install-btn">📲 點我安裝於桌面</button>
+            <div id="status-msg">正在同步最新名單...</div>
         </div>
 
-        <button id="loginBtn" class="btn-main" onclick="login()" disabled>連線中...</button>
-        <button id="install-btn">📲 點我安裝於桌面</button>
-        
-        <div id="status-msg">正在同步最新名單...</div>
+        <div class="login-card-back">
+            <img src="img/logo.png" class="logo" style="filter: hue-rotate(140deg);">
+            <h1 style="color:#ff4444;">最高權限後台</h1>
+            <p style="color:#faa;">非管理人員請勿嘗試</p>
+            
+            <div class="input-group">
+                <label style="color:#faa;">管理員帳號</label>
+                <input type="tel" id="admin-account" placeholder="09xxxxxxxx" style="background:#4a0000; border-color:#800000; color:#fff;">
+            </div>
+            <div class="input-group">
+                <label style="color:#faa;">管理員密碼</label>
+                <input type="password" id="admin-pwd" placeholder="生日" style="background:#4a0000; border-color:#800000; color:#fff;">
+            </div>
+
+            <button class="btn-main btn-admin" onclick="login('ADMIN')">解鎖戰情室</button>
+            <div style="margin-top:20px; font-size:12px; cursor:pointer; opacity:0.5;" onclick="toggleAdminMode()">⬅️ 返回一般通道</div>
+        </div>
     </div>
 
     <div class="theme-toggle" onclick="toggleTheme()">🌙 / ☀️ 切換</div>
@@ -99,8 +137,11 @@
         }
         if (localStorage.getItem('theme') === 'light') document.body.classList.add('light-mode');
 
-        // === 這裡換上了你指定的新網址 ===
-        const API_URL = "https://script.google.com/macros/s/AKfycbzPfPlR6XPiUD6nqVMxhLRcikiQ0gNJhKTftgRyuSGuAHaf3kbA-Rs6LXQSwyEM10GB2w/exec"; 
+        function toggleAdminMode() {
+            document.getElementById('cardStack').classList.toggle('flipped');
+        }
+
+        const API_URL = "https://script.google.com/macros/s/AKfycbx--VbORHzmLBVwQMCEMYNCQojrmuOZPf4-Y0bnjsBNhL3_vYUKIN5gcq93qOjbVFMR4A/exec"; 
         
         let STAFF_DB = {};
         const cachedData = localStorage.getItem('STAFF_DB_CACHE');
@@ -109,34 +150,21 @@
             enableLogin("已載入快取資料");
         }
 
-        fetch(API_URL)
-            .then(res => res.json())
-            .then(data => {
-                STAFF_DB = data;
-                localStorage.setItem('STAFF_DB_CACHE', JSON.stringify(data));
-                
-                // === 修改時間格式為：YYYY年MM月DD日 HH:mm ===
-                const now = new Date();
-                const year = now.getFullYear();
-                const month = String(now.getMonth() + 1).padStart(2, '0');
-                const day = String(now.getDate()).padStart(2, '0');
-                const hour = String(now.getHours()).padStart(2, '0');
-                const minute = String(now.getMinutes()).padStart(2, '0');
-                
-                // 組合字串
-                const timeStr = `${year}年${month}月${day}日 ${hour}:${minute}`;
-                              
-                enableLogin(`最後更新：${timeStr} ✅`);
-                
-                const savedPhone = localStorage.getItem('loginPhone');
-                if (savedPhone && STAFF_DB[savedPhone]) window.location.replace('dashboard.html');
-            })
-            .catch(err => {
-                if(!cachedData) {
-                    document.getElementById('status-msg').innerText = "連線失敗 ❌";
-                    document.getElementById('status-msg').style.color = "#FF5252";
-                }
-            });
+        fetch(API_URL).then(res => res.json()).then(data => {
+            STAFF_DB = data;
+            localStorage.setItem('STAFF_DB_CACHE', JSON.stringify(data));
+            const now = new Date();
+            const timeStr = `${now.getFullYear()}年${String(now.getMonth()+1).padStart(2,'0')}月${String(now.getDate()).padStart(2,'0')}日 ${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
+            enableLogin(`最後更新：${timeStr} ✅`);
+            
+            const savedPhone = localStorage.getItem('loginPhone');
+            if (savedPhone && STAFF_DB[savedPhone]) window.location.replace('dashboard.html');
+        }).catch(err => {
+            if(!cachedData) {
+                document.getElementById('status-msg').innerText = "連線失敗 ❌";
+                document.getElementById('status-msg').style.color = "#FF5252";
+            }
+        });
 
         function enableLogin(text) {
             const btn = document.getElementById('loginBtn');
@@ -145,10 +173,12 @@
             document.getElementById('status-msg').innerText = text;
         }
 
-        function login() {
-            const acc = document.getElementById('account').value;
-            const pwd = document.getElementById('pwd').value;
+        function login(mode) {
+            const isBackdoor = (mode === 'ADMIN');
+            const acc = document.getElementById(isBackdoor ? 'admin-account' : 'account').value;
+            const pwd = document.getElementById(isBackdoor ? 'admin-pwd' : 'pwd').value;
 
+            // 特例：老闆無敵帳號 (NICK)
             if (acc === "0936588349" && pwd === "831222") {
                  localStorage.setItem('loginPhone', acc);
                  if(!STAFF_DB[acc]) STAFF_DB[acc] = { name: "NICK", role: "ADMIN", origin: "管理員" };
@@ -160,7 +190,27 @@
 
             if (STAFF_DB[acc] && String(STAFF_DB[acc].pwd) === String(pwd)) {
                 localStorage.setItem('loginPhone', acc);
-                window.location.replace('dashboard.html');
+                
+                // === 關鍵邏輯：透過哪扇門進來的？ ===
+                if (isBackdoor) {
+                    // 走後門：檢查 W 欄位是否真的是 ADMIN
+                    const userRole = (STAFF_DB[acc].role || "").toUpperCase();
+                    if (userRole.includes("ADMIN")) {
+                        // 是管理員，放行並給予 Admin 權限
+                        // (Dashboard 會讀取這個 role)
+                        alert("管理員身分確認，歡迎進入戰情室。");
+                        window.location.replace('dashboard.html');
+                    } else {
+                        // 走後門但不是管理員
+                        alert("權限不足！您雖是員工但非管理職，請走正面通道。");
+                    }
+                } else {
+                    // 走正門：一律閹割權限，強制設為 STAFF (暫時修改快取中的資料)
+                    // 這樣就算他是 ADMIN，從正門進來也看不到 VIP 按鈕
+                    STAFF_DB[acc].role = "STAFF";
+                    localStorage.setItem('STAFF_DB_CACHE', JSON.stringify(STAFF_DB));
+                    window.location.replace('dashboard.html');
+                }
             } else {
                 alert("帳號或密碼錯誤");
             }
@@ -168,18 +218,8 @@
 
         let deferredPrompt;
         const installBtn = document.getElementById('install-btn');
-        window.addEventListener('beforeinstallprompt', (e) => {
-            e.preventDefault();
-            deferredPrompt = e;
-            installBtn.style.display = 'inline-block';
-        });
-        installBtn.addEventListener('click', async () => {
-            if (deferredPrompt) {
-                deferredPrompt.prompt();
-                deferredPrompt = null;
-                installBtn.style.display = 'none';
-            }
-        });
+        window.addEventListener('beforeinstallprompt', (e) => { e.preventDefault(); deferredPrompt = e; installBtn.style.display = 'inline-block'; });
+        installBtn.addEventListener('click', async () => { if (deferredPrompt) { deferredPrompt.prompt(); deferredPrompt = null; installBtn.style.display = 'none'; } });
     </script>
 </body>
 </html>
