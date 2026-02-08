@@ -6,66 +6,52 @@
     <title>公告文生產器</title>
     <link rel="icon" href="img/logo.png" type="image/png">
     <style>
+        /* ... (保留原本 CSS) ... */
         body { font-family: sans-serif; background-color: #f0f2f5; margin: 0; padding: 20px; color: #333; padding-bottom: 80px;}
         .card { background: white; border-radius: 12px; padding: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); margin-bottom: 20px; }
         .card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
         h2 { margin: 0; color: #d35400; font-size: 1.4rem; }
         h3 { margin: 0 0 10px 0; font-size: 1rem; color: #555; border-left: 4px solid #e67e22; padding-left: 8px; }
+        .page-title { text-align: center; font-size: 1.2rem; font-weight: bold; color: #555; margin-bottom: 20px; padding: 10px; background: #fff; border-radius: 10px; border: 2px dashed #e67e22; }
         
-        /* 頁面大標題 */
-        .page-title {
-            text-align: center; font-size: 1.2rem; font-weight: bold; color: #555;
-            margin-bottom: 20px; padding: 10px; background: #fff; border-radius: 10px;
-            border: 2px dashed #e67e22;
-        }
-
         .preview-imgs { display: flex; gap: 10px; overflow-x: auto; margin-bottom: 20px; }
-        .preview-img {
-            flex: 0 0 150px; height: 150px; background: #ddd; border-radius: 10px;
-            display: flex; align-items: center; justify-content: center; color: #777;
-            font-size: 12px; text-align: center; border: 1px solid #ccc;
-        }
-        .preview-img img { width: 100%; height: 100%; object-fit: cover; border-radius: 10px; }
+        .preview-img { flex: 0 0 150px; height: 150px; background: #ddd; border-radius: 10px; display: flex; align-items: center; justify-content: center; overflow: hidden; border: 1px solid #ccc; cursor: zoom-in; }
+        .preview-img img { width: 100%; height: 100%; object-fit: cover; transition: 0.3s; }
+        .preview-img:hover img { transform: scale(1.1); }
 
         .line-section h3 { border-left-color: #06c755; color: #06c755; }
-        
         textarea { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 8px; font-size: 16px; margin-bottom: 10px; box-sizing: border-box; font-family: inherit; }
         .input-area { height: 120px; }
         .output-area { height: 150px; background: #fafafa; border: 2px dashed #ccc; }
         .line-area { height: 120px; background: #f0fff4; border: 2px dashed #06c755; }
-        
         .btn-group { display: flex; gap: 10px; margin-bottom: 10px; }
         button { flex: 1; padding: 12px; border: none; border-radius: 8px; font-size: 16px; font-weight: bold; cursor: pointer; transition: 0.2s; }
-        .btn-paste { background: #95a5a6; color: white; flex: 0 0 30%; } 
-        .btn-gen { background: #e67e22; color: white; flex: 1; }
-        .btn-copy { background: #27ae60; color: white; width: 100%; position: relative; }
+        .btn-paste { background: #95a5a6; color: white; flex: 0 0 30%; } .btn-gen { background: #e67e22; color: white; flex: 1; } .btn-copy { background: #27ae60; color: white; width: 100%; position: relative; }
         .copy-success { background: #219150 !important; }
         button:active { transform: scale(0.98); opacity: 0.9; }
-
         .btn-back { display: block; width: 100%; text-align: center; padding: 15px; background: #ddd; color: #333; border: none; border-radius: 50px; font-size: 16px; font-weight: bold; cursor: pointer; margin-bottom: 20px; text-decoration: none; }
-
-        /* 圖片下載區 (恢復原本的) */
+        
+        /* 圖片下載區 */
         .img-single-container { display: flex; justify-content: center; padding: 10px; }
-        .img-item {
-            position: relative; background: #eee; border-radius: 12px; overflow: hidden;
-            width: 100%; max-width: 300px; aspect-ratio: 1 / 1; cursor: pointer;
-            border: 3px solid transparent; text-decoration: none; box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-        }
+        .img-item { position: relative; background: #eee; border-radius: 12px; overflow: hidden; width: 100%; max-width: 300px; aspect-ratio: 1 / 1; cursor: pointer; border: 3px solid transparent; text-decoration: none; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
         .img-item img { width: 100%; height: 100%; object-fit: cover; }
-        .img-item:active { border-color: #e67e22; transform: scale(0.98); }
         .download-hint { position: absolute; bottom: 0; left: 0; right: 0; background: rgba(0,0,0,0.6); color: white; font-size: 12px; text-align: center; padding: 8px; font-weight: bold; }
+
+        /* 圖片放大 Modal */
+        .lightbox { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); display: none; justify-content: center; align-items: center; z-index: 1000; cursor: zoom-out; }
+        .lightbox img { max-width: 90%; max-height: 90%; border-radius: 10px; box-shadow: 0 0 20px rgba(255,255,255,0.1); }
     </style>
 </head>
 <body>
 
     <div class="page-title">臉書、line官方販售地點公告文</div>
 
-<div class="preview-imgs">
-        <div class="preview-img">
-            <img src="img/3.jpg" alt="LINE 官方截圖">
+    <div class="preview-imgs">
+        <div class="preview-img" onclick="openLightbox('img/3.jpg')">
+            <img src="img/3.jpg" alt="LINE 官方截圖" onerror="this.src='img/3.JPG'">
         </div>
-        <div class="preview-img">
-            <img src="img/2.jpg" alt="FB 官方截圖">
+        <div class="preview-img" onclick="openLightbox('img/2.jpg')">
+            <img src="img/2.jpg" alt="FB 官方截圖" onerror="this.src='img/2.JPG'">
         </div>
     </div>
 
@@ -89,22 +75,20 @@
         <h3>第一段：台北 (1-5)</h3>
         <textarea id="lineResult1" class="line-area" readonly></textarea>
         <button class="btn-copy" style="background:#06c755; margin-bottom: 20px;" onclick="copyToClip('lineResult1', this)">📋 複製第一段</button>
-
         <h3>第二段：台北 (6-後續)</h3>
         <textarea id="lineResult2" class="line-area" readonly></textarea>
         <button class="btn-copy" style="background:#06c755; margin-bottom: 20px;" onclick="copyToClip('lineResult2', this)">📋 複製第二段</button>
-
         <h3>第三段：其他縣市</h3>
         <textarea id="lineResult3" class="line-area" readonly></textarea>
         <button class="btn-copy" style="background:#06c755;" onclick="copyToClip('lineResult3', this)">📋 複製第三段</button>
     </div>
-    
-<div class="card">
+
+    <div class="card">
         <div class="card-header"><h2>📸 發文配圖區</h2></div>
         <p style="text-align:center; font-size:12px; color:#999; margin-bottom:15px;">點擊圖片即可下載原圖</p>
         <div class="img-single-container">
-            <a href="img/1.jpg" download="元宵宣傳圖.png" class="img-item">
-                <img src="img/1.jpg" alt="宣傳圖" onerror="this.src='img/1.PNG'; this.onerror=null;">
+            <a href="img/1.png" download="元宵宣傳圖.png" class="img-item">
+                <img src="img/1.png" alt="宣傳圖" onerror="this.src='img/1.PNG'; this.onerror=null;">
                 <div class="download-hint">⬇️ 點擊下載高畫質原圖</div>
             </a>
         </div>
@@ -112,8 +96,20 @@
 
     <a href="dashboard.html" class="btn-back">⬅️ 返回主選單</a>
 
+    <div id="lightbox" class="lightbox" onclick="this.style.display='none'">
+        <img id="lightbox-img" src="">
+    </div>
+
     <script>
-        // 完整的邏輯回歸！
+        // ... (保留原本的 generatePost 等邏輯) ...
+        // 請務必保留之前的 JS，這裡只增加燈箱功能
+        
+        function openLightbox(src) {
+            document.getElementById('lightbox-img').src = src;
+            document.getElementById('lightbox').style.display = 'flex';
+        }
+        
+        // --- 補上之前的關鍵變數，防呆 ---
         const storeDB = {
             "Br4": { name: "City’Super 復興SOGO店", addr: "106台北市大安區忠孝東路三段300號遠東SOGO台北復興館B3", region: "📍台北 Taipei📍", lineRegion: "🍡【台北 Taipei】🍡" },
             "美福": { name: "美福食集", addr: "114 台北市內湖區民善街 128 號 1F", region: "📍台北 Taipei📍", lineRegion: "🍡【台北 Taipei】🍡" },
@@ -131,33 +127,25 @@
             "大樂": { name: "大樂購物中心", addr: "807 高雄市三民區民族一路 463 號", region: "📍高雄 Kaohsiung📍", lineRegion: "🍡【高雄 Kaohsiung】🍡" },
             "巨蛋": { name: "漢神巨蛋購物廣場", addr: "813 高雄市左營區博愛二路777號 B1", region: "📍高雄 Kaohsiung📍", lineRegion: "🍡【高雄 Kaohsiung】🍡" }
         };
-
         async function pasteText() { try { const t = await navigator.clipboard.readText(); document.getElementById('rawInput').value = t; } catch (e) { alert('請手動貼上'); } }
-
         function generatePost() {
             const raw = document.getElementById('rawInput').value;
             const lines = raw.split('\n');
             const year = 2026;
             let data = {};
-
             lines.forEach(line => {
                 line = line.trim();
                 let match = line.match(/^(.+?)[\s]*(\d{1,2}\/\d{1,2})-(\d{1,2}\/\d{1,2})/);
                 if (match) {
-                    let key = match[1].trim();
-                    let start = match[2];
-                    let end = match[3];
+                    let key = match[1].trim(); let start = match[2]; let end = match[3];
                     let info = storeDB[key] || { name: key, addr: "地址待補", region: "📍其他📍", lineRegion: "🍡【其他 Others】🍡" };
-                    
                     if (!data[info.region]) { data[info.region] = { lineHeader: info.lineRegion, list: [] }; }
                     let displayTime = `${year}/${start}（${getW(year, start)}）- ${year}/${end}（${getW(year, end)}）`;
                     data[info.region].list.push({ name: info.name, time: displayTime, addr: info.addr, sortKey: parseD(year, start) });
                 }
             });
-
             let fbOut = `元宵開賣啦～我們要相見啦～\n以下為${year}元宵實演的檔期^_^\n歡迎來找我們歐\n\n`;
             const order = ["📍台北 Taipei📍", "📍新竹 Hsinchu📍", "📍台中 Taichung📍", "📍高雄 Kaohsiung📍", "📍其他📍"];
-
             order.forEach(r => {
                 if (data[r] && data[r].list.length > 0) {
                     fbOut += `${r}\n`;
@@ -170,7 +158,6 @@
                 }
             });
             document.getElementById('fbResult').value = fbOut;
-
             let line1 = "", line2 = "", line3 = "";
             let taipeiData = data["📍台北 Taipei📍"];
             if (taipeiData && taipeiData.list.length > 0) {
@@ -182,7 +169,6 @@
                     if (i < 5) line1 += content; else line2 += content;
                 });
             } else { line1 = "無台北資料"; line2 = "無台北後續資料"; }
-
             const otherOrder = ["📍新竹 Hsinchu📍", "📍台中 Taichung📍", "📍高雄 Kaohsiung📍", "📍其他📍"];
             otherOrder.forEach(r => {
                 if (data[r] && data[r].list.length > 0) {
@@ -195,12 +181,10 @@
                     });
                 }
             });
-
             document.getElementById('lineResult1').value = line1 || "無資料";
             document.getElementById('lineResult2').value = line2;
             document.getElementById('lineResult3').value = line3 || "無資料";
         }
-
         function getW(y, d) { return ['日','一','二','三','四','五','六'][new Date(y, d.split('/')[0]-1, d.split('/')[1]).getDay()]; }
         function parseD(y, d) { return new Date(y, d.split('/')[0]-1, d.split('/')[1]); }
         function copyToClip(id, btn) { 
@@ -211,5 +195,3 @@
     </script>
 </body>
 </html>
-
-
