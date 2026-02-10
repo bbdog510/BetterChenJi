@@ -141,8 +141,8 @@
             document.getElementById('cardStack').classList.toggle('flipped');
         }
 
-        // 🔴 已更新為您的最新網址
-        const API_URL = "https://script.google.com/macros/s/AKfycbzAFJgr1eeW6WfcEn14ub2RMF3Gsrw75JC63mQLXZzOYrJAxXfwo_hCT2d8bgAqwd02hQ/exec"; 
+        // 🔴 已更新您的新佈署連結 (V5.0 薪資履歷版)
+        const API_URL = "https://script.google.com/macros/s/AKfycbz3AuLNKyBqZGvOM7iP-qb7-BuGTxX3XCwb4GSPEcwbqRLkqk2sEIyW8tTgidkQCUy11g/exec"; 
         
         let STAFF_DB = {};
         const cachedData = localStorage.getItem('STAFF_DB_CACHE');
@@ -156,7 +156,7 @@
             localStorage.setItem('STAFF_DB_CACHE', JSON.stringify(data));
             const now = new Date();
             const timeStr = `${now.getFullYear()}年${String(now.getMonth()+1).padStart(2,'0')}月${String(now.getDate()).padStart(2,'0')}日 ${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
-            enableLogin(`最後更新：${timeStr} ✅`);
+            enableLogin(`資料庫已同步最新版 (${timeStr}) ✅`);
             
             const savedPhone = localStorage.getItem('loginPhone');
             if (savedPhone && STAFF_DB[savedPhone]) window.location.replace('dashboard.html');
