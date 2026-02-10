@@ -8,6 +8,7 @@
     <style>
         :root { --bg-color: #121212; --text-main: #E0E0E0; --text-sub: #AAAAAA; --card-bg: #1E1E1E; --primary: #CE93D8; --border: #333; --highlight: #FFD54F; --tag-active: #FFD54F; }
         body.light-mode { --bg-color: #FDFCF4; --text-main: #1C1B1F; --text-sub: #666666; --card-bg: #FFF; --primary: #6200EE; --border: #E0E0E0; --highlight: #FFD600; --tag-active: #FFD600; }
+        
         body { font-family: 'MiSans', sans-serif; background: var(--bg-color); color: var(--text-main); padding: 20px; margin: 0; padding-bottom: 80px; }
         
         .search-box { position: sticky; top: 0; background: var(--bg-color); padding: 10px 0; z-index: 10; display: flex; gap: 10px; border-bottom: 1px solid var(--border); }
@@ -41,7 +42,17 @@
         .bar-fill { height: 100%; background: var(--primary); border-radius: 5px; }
         .bar-val { width: 40px; margin-left: 10px; color: var(--text-main); font-size: 11px;}
 
-        /* Modal */
+        .calendar-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; background: var(--card-bg); padding: 10px; border-radius: 12px; }
+        .cal-btn { background: none; border: none; font-size: 20px; color: var(--primary); cursor: pointer; padding: 0 15px; }
+        .cal-month { font-size: 18px; font-weight: bold; }
+        .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 5px; text-align: center; font-size: 12px; }
+        .cal-day-header { color: var(--text-sub); padding-bottom: 5px; }
+        .cal-cell { min-height: 50px; background: var(--card-bg); border-radius: 8px; border: 1px solid var(--border); padding: 4px; display: flex; flex-direction: column; align-items: center; }
+        .cal-cell.today { border: 2px solid var(--primary); background: rgba(206, 147, 216, 0.1); }
+        .cal-date-num { font-weight: bold; margin-bottom: 2px; }
+        .cal-person { background: var(--primary); color: #fff; font-size: 10px; border-radius: 4px; padding: 2px 4px; margin-top: 2px; cursor: pointer; width: 90%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .cal-person.is-me { background: var(--highlight); color: #000; border: 1px solid #fff; }
+
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); display: none; justify-content: center; align-items: center; z-index: 100; backdrop-filter: blur(5px); }
         .modal { background: var(--card-bg); width: 90%; max-width: 400px; max-height: 90vh; border-radius: 24px; padding: 25px; overflow-y: auto; position: relative; display: flex; flex-direction: column; }
         .modal-close { position: absolute; top: 15px; right: 15px; font-size: 24px; cursor: pointer; z-index: 10; background: rgba(0,0,0,0.5); width: 30px; height: 30px; text-align: center; line-height: 30px; border-radius: 50%; color: white; }
@@ -56,8 +67,8 @@
         .btn-back { position: fixed; bottom: 20px; right: 20px; background: var(--primary); color: #fff; padding: 12px 24px; border-radius: 50px; text-decoration: none; font-weight: bold; box-shadow: 0 4px 10px rgba(0,0,0,0.3); z-index: 50; }
         .inline-content { display: flex; align-items: center; gap: 8px; flex-wrap: nowrap; }
         .icon-btn { text-decoration: none; font-size: 20px; transition: transform 0.2s; }
-        
-        /* 履歷與名單 */
+        .icon-btn:active { transform: scale(1.2); }
+
         .history-list { display: flex; flex-direction: column; gap: 8px; margin-top: 10px; }
         .history-item { padding: 12px; border-radius: 12px; display: flex; justify-content: space-between; align-items: center; font-size: 14px; border: 1px solid transparent; }
         .history-item.active { background: rgba(255, 213, 79, 0.15); border-color: var(--tag-active); color: var(--text-main); font-weight: bold; }
@@ -70,20 +81,12 @@
         .roster-loc { font-weight: bold; color: var(--primary); font-size: 15px; }
         .roster-names { display: flex; flex-wrap: wrap; gap: 8px; }
         .roster-person { background: var(--card-bg); border: 1px solid #555; padding: 4px 10px; border-radius: 12px; font-size: 13px; cursor: pointer; }
-        .btn-copy-ins { background: #4285F4; color: white; border: none; border-radius: 20px; padding: 4px 10px; font-size: 11px; cursor: pointer; }
+        .roster-person:active { background: var(--primary); color: #fff; }
+        
+        .btn-copy-ins { background: #4285F4; color: white; border: none; border-radius: 20px; padding: 4px 10px; font-size: 11px; cursor: pointer; display: flex; align-items: center; gap: 4px; }
+        .btn-copy-ins:active { transform: scale(0.95); opacity: 0.8; }
 
-        /* 行事曆與算命CSS略(保持原樣) */
-        .calendar-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; background: var(--card-bg); padding: 10px; border-radius: 12px; }
-        .cal-btn { background: none; border: none; font-size: 20px; color: var(--primary); cursor: pointer; padding: 0 15px; }
-        .cal-month { font-size: 18px; font-weight: bold; }
-        .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 5px; text-align: center; font-size: 12px; }
-        .cal-day-header { color: var(--text-sub); padding-bottom: 5px; }
-        .cal-cell { min-height: 50px; background: var(--card-bg); border-radius: 8px; border: 1px solid var(--border); padding: 4px; display: flex; flex-direction: column; align-items: center; }
-        .cal-cell.today { border: 2px solid var(--primary); background: rgba(206, 147, 216, 0.1); }
-        .cal-date-num { font-weight: bold; margin-bottom: 2px; }
-        .cal-person { background: var(--primary); color: #fff; font-size: 10px; border-radius: 4px; padding: 2px 4px; margin-top: 2px; cursor: pointer; width: 90%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        .cal-person.is-me { background: var(--highlight); color: #000; border: 1px solid #fff; }
-        .fate-group { margin-bottom: 20px; } .fate-header { display: flex; align-items: center; margin-bottom: 8px; } .fate-num { width: 30px; height: 30px; background: var(--primary); color: white; border-radius: 50%; text-align: center; line-height: 30px; font-weight: bold; margin-right: 10px; } .fate-desc { font-size: 14px; font-weight: bold; } .fate-list { display: flex; flex-wrap: wrap; gap: 8px; padding-left: 40px; } .fate-person { background: var(--card-bg); border: 1px solid var(--border); padding: 6px 12px; border-radius: 20px; font-size: 13px; cursor: pointer; } .fate-person.is-me { border: 2px solid var(--highlight); background: rgba(255, 213, 79, 0.2); font-weight: bold; }
+        .fate-group { margin-bottom: 20px; } .fate-header { display: flex; align-items: center; margin-bottom: 8px; } .fate-num { width: 30px; height: 30px; background: var(--primary); color: white; border-radius: 50%; text-align: center; line-height: 30px; font-weight: bold; margin-right: 10px; } .fate-desc { font-size: 14px; font-weight: bold; } .fate-detail { font-size: 12px; color: var(--text-sub); margin-bottom: 10px; line-height: 1.4; padding-left: 40px; } .fate-list { display: flex; flex-wrap: wrap; gap: 8px; padding-left: 40px; } .fate-person { background: var(--card-bg); border: 1px solid var(--border); padding: 6px 12px; border-radius: 20px; font-size: 13px; cursor: pointer; } .fate-person.is-me { border: 2px solid var(--highlight); background: rgba(255, 213, 79, 0.2); font-weight: bold; }
     </style>
 </head>
 <body>
@@ -108,7 +111,6 @@
     <div id="analysis-section" class="section">
         <div class="chart-card"><div class="chart-title">🏆 服務總時數 TOP 10</div><div id="chart-top-hours"></div></div>
         <div class="chart-card"><div class="chart-title">⭐ 服務總次數 TOP 10</div><div id="chart-top-count"></div></div>
-        
         <div class="chart-card"><div class="chart-title">🎂 年齡層分布</div><div id="chart-age"></div></div>
         <div class="chart-card"><div class="chart-title">👫 性別分布</div><div id="chart-gender"></div></div>
         <div class="chart-card"><div class="chart-title">📍 居住地 (縣市)</div><div id="chart-loc"></div></div>
@@ -177,7 +179,7 @@
         const itemsPerPage = 20;
         let filteredList = staffList;
 
-        // 🔥 北到南排序邏輯
+        // 🔥 北到南排序
         const CITY_ORDER = ["基隆", "台北", "新北", "桃園", "新竹", "苗栗", "台中", "彰化", "南投", "雲林", "嘉義", "台南", "高雄", "屏東", "宜蘭", "花蓮", "台東"];
 
         function renderList() { /* (保持原樣，略) */
@@ -214,7 +216,6 @@
             document.getElementById('d-entry').innerText = getEntryDate(staff.entryDate);
             document.getElementById('d-school').innerText = staff.school || "-";
             document.getElementById('d-id').innerText = staff.id || "-";
-            
             document.getElementById('d-call-btn').href = `tel:${staff.phone}`;
             const lineBtn = document.getElementById('d-line-btn');
             if(staff.lineId) { lineBtn.href = `https://line.me/ti/p/~${staff.lineId}`; lineBtn.style.display = 'inline-flex'; } else { lineBtn.style.display = 'none'; }
@@ -243,8 +244,11 @@
                 
                 if (isAttended) {
                     div.className = 'history-item active';
-                    // 🔥 字串優化: 7h│台北板橋大遠百 (拿掉中間的 | )
-                    let niceLoc = (record.loc || "").replace(/\|/g, ""); 
+                    
+                    // 🔥🔥 重點修正：強力移除所有直槓和空白
+                    let rawLoc = record.loc || "";
+                    let niceLoc = rawLoc.replace(/\s*[|｜│]\s*/g, ""); // 移除 | ｜ │ 和周圍空白
+                    
                     div.innerHTML = `${eventName} <span class="h-tag">${record.hours}h│${niceLoc}</span>`;
                     div.style.cursor = "pointer";
                     div.onclick = (e) => { e.stopPropagation(); openRosterModal(eventName); };
@@ -259,7 +263,7 @@
             document.getElementById('detailModal').style.display = 'flex';
         }
 
-        // 🔥 北到南排序的名單 Modal
+        // 🔥 北到南排序 + 強力符號清除
         function openRosterModal(eventName) {
             document.getElementById('r-title').innerText = `${eventName} 人員名單`;
             const contentEl = document.getElementById('r-content');
@@ -269,8 +273,8 @@
             staffList.forEach(s => {
                 if (s.history && s.history[eventName]) {
                     let loc = s.history[eventName].loc || "未知地點";
-                    // 為了排序，我們要保留城市名，例如 "台北|板橋大遠百" -> "台北板橋大遠百"
-                    let cleanLoc = loc.replace(/\|/g, "");
+                    // 🔥 這裡也強力清除
+                    let cleanLoc = loc.replace(/\s*[|｜│]\s*/g, "");
                     if (!groups[cleanLoc]) groups[cleanLoc] = [];
                     groups[cleanLoc].push(s);
                 }
@@ -279,11 +283,9 @@
             contentEl.innerHTML = "";
             if (Object.keys(groups).length === 0) { contentEl.innerHTML = "<div style='text-align:center; color:#888;'>此檔期尚無人員紀錄</div>"; return; }
 
-            // 排序 keys
             let sortedKeys = Object.keys(groups).sort((a, b) => {
                 let indexA = CITY_ORDER.findIndex(city => a.includes(city));
                 let indexB = CITY_ORDER.findIndex(city => b.includes(city));
-                // 如果找不到城市名，放到最後，否則依序排列
                 return (indexA === -1 ? 999 : indexA) - (indexB === -1 ? 999 : indexB);
             });
 
@@ -309,7 +311,7 @@
             document.getElementById('rosterModal').style.display = 'flex';
         }
 
-        function copyInsuranceList(locName, staffArray) { /* (保持 V5.1 日期解析版) */
+        function copyInsuranceList(locName, staffArray) { /* (保持原樣) */
             let text = `${locName}\n\n`;
             staffArray.forEach((s, index) => {
                 let bDayStr = s.birthday || ""; let rocBday = "??.??.??";
@@ -321,46 +323,27 @@
             navigator.clipboard.writeText(text).then(() => { alert(`✅ 已複製！`); }).catch(err => { alert("❌ 複製失敗"); });
         }
 
-        // 🔥 大數據分析 (新增排名)
+        // 大數據 (保持原樣)
         function renderAnalysis() {
             let gender={ "男":0, "女":0, "未知":0 }, age={ "18以下":0, "19-22":0, "23-25":0, "26以上":0 }, loc={}, school={};
-            // 排行榜陣列
             let topHours = [], topCounts = [];
-
             staffList.forEach(s => {
                 if(s.id && s.id.length === 10) { let g = s.id[1]; if(g === '1') gender["男"]++; else if(g === '2') gender["女"]++; else gender["未知"]++; } else gender["未知"]++;
                 let a = getAge(s.birthday); if(a!=="?") { if(a<=18) age["18以下"]++; else if(a<=22) age["19-22"]++; else if(a<=25) age["23-25"]++; else age["26以上"]++; }
                 if(s.address) { let l = s.address.substring(0, 3); loc[l] = (loc[l] || 0) + 1; }
                 if(s.school) { let sc = s.school.split('/')[0] || s.school; school[sc] = (school[sc] || 0) + 1; }
-                
-                // 收集排名資料
                 if(s.totalHours > 0) topHours.push({name: s.name, val: s.totalHours});
                 let count = s.history ? Object.keys(s.history).length : 0;
                 if(count > 0) topCounts.push({name: s.name, val: count});
             });
-
             drawChart('chart-age', age); drawChart('chart-gender', gender); drawChart('chart-loc', loc); drawChart('chart-school', school);
-            
-            // 繪製排名
-            topHours.sort((a,b) => b.val - a.val);
-            topCounts.sort((a,b) => b.val - a.val);
-            drawRanking('chart-top-hours', topHours.slice(0, 10), 'hr');
-            drawRanking('chart-top-count', topCounts.slice(0, 10), '次');
+            topHours.sort((a,b) => b.val - a.val); topCounts.sort((a,b) => b.val - a.val);
+            drawRanking('chart-top-hours', topHours.slice(0, 10), 'hr'); drawRanking('chart-top-count', topCounts.slice(0, 10), '次');
         }
-
         function drawChart(id, data) { const el = document.getElementById(id); el.innerHTML = ""; let total = Object.values(data).reduce((a,b)=>a+b, 0); let sorted = Object.entries(data).sort((a,b)=>b[1]-a[1]).slice(0, 8); sorted.forEach(([label, val]) => { let pct = Math.round((val / total) * 100); el.innerHTML += `<div class="bar-row"><div class="bar-label">${label}</div><div class="bar-bg"><div class="bar-fill" style="width:${pct}%"></div></div><div class="bar-val">${val}</div></div>`; }); }
-        
-        function drawRanking(id, data, unit) {
-            const el = document.getElementById(id); el.innerHTML = "";
-            if(data.length === 0) { el.innerHTML = "無資料"; return; }
-            let max = data[0].val;
-            data.forEach((item, i) => {
-                let pct = (item.val / max) * 100;
-                el.innerHTML += `<div class="bar-row"><div class="bar-label" style="width:30px;">#${i+1}</div><div class="bar-label">${item.name}</div><div class="bar-bg"><div class="bar-fill" style="width:${pct}%; background:#FFD54F;"></div></div><div class="bar-val" style="width:50px;">${item.val}${unit}</div></div>`;
-            });
-        }
+        function drawRanking(id, data, unit) { const el = document.getElementById(id); el.innerHTML = ""; if(data.length === 0) { el.innerHTML = "無資料"; return; } let max = data[0].val; data.forEach((item, i) => { let pct = (item.val / max) * 100; el.innerHTML += `<div class="bar-row"><div class="bar-label" style="width:30px;">#${i+1}</div><div class="bar-label">${item.name}</div><div class="bar-bg"><div class="bar-fill" style="width:${pct}%; background:#FFD54F;"></div></div><div class="bar-val" style="width:50px;">${item.val}${unit}</div></div>`; }); }
 
-        // 輔助函式 (保持原樣)
+        // 輔助函式
         function closeRosterModal(e) { if(e.target.id === 'rosterModal') document.getElementById('rosterModal').style.display = 'none'; }
         function getAge(birthdayStr) { if(!birthdayStr) return "?"; let parts = String(birthdayStr).split(/[-/.]/); if(parts.length < 3) return "?"; let y = parseInt(parts[0]); if(y < 1911) y += 1911; return new Date().getFullYear() - y; }
         function getEntryDate(ts) { if(!ts) return "未登記"; const d = new Date(ts); return `${d.getFullYear()}/${d.getMonth()+1}/${d.getDate()}`; }
