@@ -9,96 +9,49 @@
     <link rel="icon" href="img/logo.png" type="image/png">
     
     <style>
-        :root {
-            --bg-color: #121212; --text-main: #E0E0E0; --text-sub: #AAAAAA; --card-bg: #1E1E1E;
-            --yellow-card: #3E3820; --yellow-text: #FFD54F;
-            --pink-card: #3E2028; --pink-text: #F48FB1;
-            --purple-card: #2D203E; --purple-text: #CE93D8;
-            --avatar-border: #333;
-        }
-        body.light-mode {
-            --bg-color: #FDFCF4; --text-main: #1C1B1F; --text-sub: #666666; --card-bg: #FFF;
-            --yellow-card: #FFE16D; --yellow-text: #221B00;
-            --pink-card: #FFD8E4; --pink-text: #31111D;
-            --purple-card: #E8DEF8; --purple-text: #1D192B;
-            --avatar-border: #fff;
-        }
-
-        body {
-            font-family: 'MiSans', sans-serif; background-color: var(--bg-color);
-            margin: 0; padding: 20px; padding-bottom: 100px; color: var(--text-main);
-            transition: 0.3s; animation: fadeIn 0.3s;
-        }
+        /* ... (保持原樣 CSS) ... */
+        :root { --bg-color: #121212; --text-main: #E0E0E0; --text-sub: #AAAAAA; --card-bg: #1E1E1E; --yellow-card: #3E3820; --yellow-text: #FFD54F; --pink-card: #3E2028; --pink-text: #F48FB1; --purple-card: #2D203E; --purple-text: #CE93D8; --avatar-border: #333; }
+        body.light-mode { --bg-color: #FDFCF4; --text-main: #1C1B1F; --text-sub: #666666; --card-bg: #FFF; --yellow-card: #FFE16D; --yellow-text: #221B00; --pink-card: #FFD8E4; --pink-text: #31111D; --purple-card: #E8DEF8; --purple-text: #1D192B; --avatar-border: #fff; }
+        body { font-family: 'MiSans', sans-serif; background-color: var(--bg-color); margin: 0; padding: 20px; padding-bottom: 100px; color: var(--text-main); transition: 0.3s; animation: fadeIn 0.3s; }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-
         .top-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; margin-top: 10px; }
         .greeting h2 { margin: 0; font-size: 20px; font-weight: normal; color: var(--text-sub); }
         .greeting span { font-weight: bold; font-size: 28px; color: var(--text-main); }
-        
-        .text-avatar { 
-            width: 60px; height: 60px; border-radius: 50%; 
-            background: #FFD54F; color: #333; cursor: pointer;
-            display: flex; justify-content: center; align-items: center; 
-            font-size: 22px; font-weight: bold; 
-            border: 3px solid var(--avatar-border); 
-            box-shadow: 0 4px 10px rgba(0,0,0,0.2); 
-        }
-
+        .text-avatar { width: 60px; height: 60px; border-radius: 50%; background: #FFD54F; color: #333; cursor: pointer; display: flex; justify-content: center; align-items: center; font-size: 22px; font-weight: bold; border: 3px solid var(--avatar-border); box-shadow: 0 4px 10px rgba(0,0,0,0.2); }
         .category-label { font-size: 14px; font-weight: bold; color: var(--text-sub); margin-bottom: 10px; margin-left: 5px; margin-top: 25px; }
         .card-container { display: flex; flex-direction: column; gap: 12px; }
-
-        .menu-item { 
-            display: flex; align-items: center; justify-content: space-between; 
-            padding: 20px 24px; border-radius: 24px; 
-            text-decoration: none; font-weight: 500;
-        }
+        .menu-item { display: flex; align-items: center; justify-content: space-between; padding: 20px 24px; border-radius: 24px; text-decoration: none; font-weight: 500; }
         .menu-item:active { transform: scale(0.98); opacity: 0.8; }
         .vip-only { display: none; } 
-
         .bg-yellow { background-color: var(--yellow-card); color: var(--yellow-text); }
         .bg-pink { background-color: var(--pink-card); color: var(--pink-text); }
         .bg-purple { background-color: var(--purple-card); color: var(--purple-text); }
-
         .btn-logout { display: block; width: 100%; text-align: center; padding: 15px; margin-bottom: 80px; color: var(--text-sub); text-decoration: none; font-size: 14px; }
-        .theme-toggle {
-            position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
-            background: rgba(125,125,125,0.2); color: var(--text-sub);
-            padding: 8px 16px; border-radius: 20px; font-size: 12px; cursor: pointer;
-            backdrop-filter: blur(5px); border: 1px solid rgba(255,255,255,0.1);
-        }
-
-        /* Profile Modal */
-        .modal-overlay {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.7); display: none; justify-content: center; align-items: center; z-index: 1000;
-            backdrop-filter: blur(5px);
-        }
-        .modal {
-            background: var(--card-bg); width: 85%; max-width: 350px;
-            border-radius: 24px; padding: 30px; text-align: center;
-            position: relative; box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-        }
+        .theme-toggle { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background: rgba(125,125,125,0.2); color: var(--text-sub); padding: 8px 16px; border-radius: 20px; font-size: 12px; cursor: pointer; backdrop-filter: blur(5px); border: 1px solid rgba(255,255,255,0.1); }
+        
+        /* Modal 樣式 */
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); display: none; justify-content: center; align-items: center; z-index: 1000; backdrop-filter: blur(5px); }
+        .modal { background: var(--card-bg); width: 85%; max-width: 350px; max-height: 80vh; overflow-y: auto; border-radius: 24px; padding: 30px; text-align: center; position: relative; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
         .modal-close { position: absolute; top: 15px; right: 15px; font-size: 24px; cursor: pointer; color: var(--text-sub); }
         .profile-stat { margin-top: 20px; text-align: left; background: rgba(125,125,125,0.1); padding: 15px; border-radius: 12px; }
         .profile-stat label { font-size: 12px; color: var(--text-sub); display: block; }
         .profile-stat div { font-size: 18px; font-weight: bold; margin-top: 5px; }
-
+        
+        .history-list { margin-top: 20px; text-align: left; max-height: 200px; overflow-y: auto; }
+        .history-item { padding: 8px; border-bottom: 1px solid rgba(125,125,125,0.2); font-size: 13px; display: flex; justify-content: space-between; }
+        .h-tag { background: var(--yellow-text); color: #000; padding: 1px 6px; border-radius: 4px; font-size: 11px; }
     </style>
 </head>
 <body>
 
     <div class="top-bar">
-        <div class="greeting">
-            <h2 id="greet-text">早安，</h2>
-            <span id="user-name">...</span>
-        </div>
+        <div class="greeting"><h2 id="greet-text">早安，</h2><span id="user-name">...</span></div>
         <div id="avatar-box" class="text-avatar" onclick="showProfile()">員</div>
     </div>
 
     <div class="category-label">📂 重要表單</div>
     <div class="card-container">
         <a href="schedule.html" class="menu-item bg-yellow"><span>🕒 我的班表</span></a>
-        
         <a href="inventory.html" class="menu-item bg-yellow vip-only"><span>📦 每日盤點</span></a>
         <a href="schedule_create.html" class="menu-item bg-yellow vip-only"><span>📅 開始排班 (自動生成)</span></a>
         <a href="insurance.html" class="menu-item bg-yellow vip-only"><span>🛡️ 員工保險表單生產器</span></a>
@@ -134,17 +87,16 @@
             </div>
             
             <div class="profile-stat">
-                <label>🚀 服務資歷 (薪資表紀錄)</label>
+                <label>🚀 服務資歷 (排名 <span id="modal-rank" style="color:var(--pink-text)"></span>)</label>
                 <div id="modal-days">...</div>
             </div>
+
+            <div id="modal-history" class="history-list"></div>
         </div>
     </div>
 
     <script>
-        function toggleTheme() {
-            document.body.classList.toggle('light-mode');
-            localStorage.setItem('theme', document.body.classList.contains('light-mode') ? 'light' : 'dark');
-        }
+        function toggleTheme() { document.body.classList.toggle('light-mode'); localStorage.setItem('theme', document.body.classList.contains('light-mode') ? 'light' : 'dark'); }
         if (localStorage.getItem('theme') === 'light') document.body.classList.add('light-mode');
 
         const cachedDB = localStorage.getItem('STAFF_DB_CACHE');
@@ -153,66 +105,61 @@
         const STAFF_DB = JSON.parse(cachedDB);
         const loggedInPhone = localStorage.getItem('loginPhone');
         
-        if (!loggedInPhone || !STAFF_DB[loggedInPhone]) {
-            window.location.replace('index.html');
-        } else {
+        if (!loggedInPhone || !STAFF_DB[loggedInPhone]) { window.location.replace('index.html'); } 
+        else {
             const user = STAFF_DB[loggedInPhone];
             document.getElementById('user-name').innerText = user.name;
             document.getElementById('avatar-box').innerText = getAvatarName(user.name);
-
-            // 問候語
             const hour = new Date().getHours();
-            let greeting = "早安，";
-            if (hour >= 11 && hour < 17) greeting = "午安，";
-            else if (hour >= 17 || hour < 5) greeting = "晚安，";
-            document.getElementById('greet-text').innerText = greeting;
-
-            // 權限判斷
+            document.getElementById('greet-text').innerText = (hour>=11&&hour<17)?"午安，":(hour>=17||hour<5)?"晚安，":"早安，";
+            
             const role = user.role ? String(user.role).toUpperCase() : "";
-            // 如果是 ADMIN 或者是老闆的電話，就顯示 VIP 功能
             const isVip = role.includes("ADMIN") || loggedInPhone === "0936588349";
-
-            if (isVip) {
-                document.querySelectorAll('.vip-only').forEach(el => {
-                    el.style.display = el.classList.contains('category-label') ? 'block' : 'flex';
-                });
-            }
+            if (isVip) { document.querySelectorAll('.vip-only').forEach(el => el.style.display = el.classList.contains('category-label') ? 'block' : 'flex'); }
         }
 
         function getAvatarName(name) { return name.length > 2 ? name.slice(-2) : name; }
         function logout() { localStorage.removeItem('loginPhone'); window.location.replace('index.html'); }
         
-        // 個人檔案邏輯 (更新版)
         function showProfile() {
             const user = STAFF_DB[loggedInPhone];
             document.getElementById('modal-name').innerText = user.name;
             document.getElementById('modal-avatar').innerText = getAvatarName(user.name);
             document.getElementById('modal-role').innerText = user.role || "夥伴";
             
-            // 入職時間
             if (user.entryDate) {
                 const entry = new Date(user.entryDate);
-                const y = entry.getFullYear();
-                const m = entry.getMonth() + 1;
-                const d = entry.getDate();
-                document.getElementById('modal-entry').innerText = `${y}/${m}/${d}`;
-            } else {
-                document.getElementById('modal-entry').innerText = "未登記";
-            }
+                document.getElementById('modal-entry').innerText = `${entry.getFullYear()}/${entry.getMonth()+1}/${entry.getDate()}`;
+            } else { document.getElementById('modal-entry').innerText = "未登記"; }
 
-            // ★ 更新這裡：計算服務檔期數 (從 salary sheet 抓來的 history)
-            let serviceCount = 0;
-            if (user.history) {
-                serviceCount = Object.keys(user.history).length;
+            // 計算排名 (總時數)
+            let allHours = Object.values(STAFF_DB).map(s => s.totalHours || 0);
+            allHours.sort((a, b) => b - a); // 大到小
+            let myRank = allHours.indexOf(user.totalHours || 0) + 1;
+            let totalPeople = allHours.length;
+            document.getElementById('modal-rank').innerText = `Top ${myRank} / ${totalPeople}`;
+
+            // 服務統計
+            let serviceCount = user.history ? Object.keys(user.history).length : 0;
+            document.getElementById('modal-days').innerText = `${serviceCount} 檔期 | 累積 ${user.totalHours||0} 小時`;
+
+            // 履歷列表 (不能點)
+            const listEl = document.getElementById('modal-history');
+            listEl.innerHTML = "";
+            if(user.history) {
+                // 排序 (新到舊)
+                let events = Object.keys(user.history).sort().reverse();
+                events.forEach(evt => {
+                    let record = user.history[evt];
+                    let niceLoc = (record.loc || "").replace(/\|/g, "");
+                    listEl.innerHTML += `<div class="history-item"><span>${evt}</span><span class="h-tag">${record.hours}h | ${niceLoc}</span></div>`;
+                });
             }
-            document.getElementById('modal-days').innerText = `${serviceCount} 檔期`;
 
             document.getElementById('profileModal').style.display = 'flex';
         }
 
-        function closeProfile(e) {
-            if (e.target.id === 'profileModal') document.getElementById('profileModal').style.display = 'none';
-        }
+        function closeProfile(e) { if (e.target.id === 'profileModal') document.getElementById('profileModal').style.display = 'none'; }
     </script>
 </body>
 </html>
