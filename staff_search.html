@@ -76,7 +76,6 @@
         .history-item.inactive { background: rgba(125,125,125,0.05); color: #666; }
         .history-item.inactive .h-tag { display: none; }
         
-        /* 檔期名單 Modal */
         .roster-group { margin-bottom: 20px; background: rgba(255,255,255,0.03); padding: 10px; border-radius: 12px; }
         .roster-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; border-bottom: 1px dashed #555; padding-bottom: 5px; }
         .roster-loc { font-weight: bold; color: var(--primary); font-size: 15px; }
@@ -84,14 +83,9 @@
         .roster-person { background: var(--card-bg); border: 1px solid #555; padding: 4px 10px; border-radius: 12px; font-size: 13px; cursor: pointer; }
         .roster-person:active { background: var(--primary); color: #fff; }
         
-        /* 🔥 複製保險名單按鈕 */
-        .btn-copy-ins { 
-            background: #4285F4; color: white; border: none; border-radius: 20px; 
-            padding: 4px 10px; font-size: 11px; cursor: pointer; display: flex; align-items: center; gap: 4px; 
-        }
+        .btn-copy-ins { background: #4285F4; color: white; border: none; border-radius: 20px; padding: 4px 10px; font-size: 11px; cursor: pointer; display: flex; align-items: center; gap: 4px; }
         .btn-copy-ins:active { transform: scale(0.95); opacity: 0.8; }
 
-        /* 算命區 */
         .fate-group { margin-bottom: 20px; }
         .fate-header { display: flex; align-items: center; margin-bottom: 8px; }
         .fate-num { width: 30px; height: 30px; background: var(--primary); color: white; border-radius: 50%; text-align: center; line-height: 30px; font-weight: bold; margin-right: 10px; }
@@ -158,23 +152,13 @@
             </div>
             <div class="detail-row"><div class="detail-label">姓名</div><div class="detail-val" id="d-name"></div></div>
             <div class="detail-row"><div class="detail-label">入職時間</div><div class="detail-val" id="d-entry"></div></div>
-            
-            <div class="detail-row">
-                <div class="detail-label">服務紀錄</div>
-                <div class="detail-val" style="color:var(--highlight); font-weight:bold;">
-                    共服務 <span id="d-count">0</span> 次檔期 (累積 <span id="d-hours">0</span> 小時)
-                </div>
-            </div>
-
+            <div class="detail-row"><div class="detail-label">生日 (歲數)</div><div class="detail-val" id="d-age"></div></div>
+            <div class="detail-row"><div class="detail-label">服務紀錄</div><div class="detail-val" style="color:var(--highlight); font-weight:bold;">共服務 <span id="d-count">0</span> 次檔期 (累積 <span id="d-hours">0</span> 小時)</div></div>
             <div class="detail-row"><div class="detail-label">電話 / LINE</div><div class="detail-val inline-content"><span id="d-phone"></span><a id="d-call-btn" href="#" class="icon-btn">📞</a><a id="d-line-btn" href="#" target="_blank" class="icon-btn">💬</a></div></div>
             <div class="detail-row"><div class="detail-label">地址</div><div class="detail-val inline-content"><span id="d-addr" style="flex:1;"></span><a id="d-map-btn" href="#" target="_blank" class="icon-btn">🗺️</a></div></div>
             <div class="detail-row"><div class="detail-label">學校/系級</div><div class="detail-val" id="d-school"></div></div>
             <div class="detail-row"><div class="detail-label">身分證</div><div class="detail-val" id="d-id"></div></div>
-
-            <div class="detail-row">
-                <div class="detail-label">服務履歷 (點擊檔期可查看名單)</div>
-                <div id="d-history-list" class="history-list"></div>
-            </div>
+            <div class="detail-row"><div class="detail-label">服務履歷 (點擊檔期可查看名單)</div><div id="d-history-list" class="history-list"></div></div>
         </div>
     </div>
 
@@ -264,12 +248,26 @@
             document.getElementById('d-entry').innerText = getEntryDate(staff.entryDate);
             document.getElementById('d-school').innerText = staff.school || "-";
             document.getElementById('d-id').innerText = staff.id || "-";
+            
+            // 年齡與生日顯示
+            let age = getAge(staff.birthday);
+            let bdayText = staff.birthday || "?";
+            let parts = bdayText.split(/[-/]/);
+            if(parts.length >= 3) {
+                let y = parseInt(parts[0]);
+                if(y < 1911) y += 1911;
+                bdayText = `${y}.${parts[1]}.${parts[2]}`;
+            }
+            document.getElementById('d-age').innerText = `${bdayText} (${age}歲)`;
+
             document.getElementById('d-call-btn').href = `tel:${staff.phone}`;
             const lineBtn = document.getElementById('d-line-btn');
             if(staff.lineId) { lineBtn.href = `https://line.me/ti/p/~${staff.lineId}`; lineBtn.style.display = 'inline-flex'; } else { lineBtn.style.display = 'none'; }
+            
             const mapBtn = document.getElementById('d-map-btn');
             document.getElementById('d-addr').innerText = staff.address || "-";
             if(staff.address) { mapBtn.href = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(staff.address)}`; mapBtn.style.display = 'inline-flex'; } else { mapBtn.style.display = 'none'; }
+
             const photoEl = document.getElementById('d-photo');
             const avatarText = document.getElementById('d-avatar-text');
             photoEl.classList.remove('zoomed'); 
@@ -305,7 +303,7 @@
             document.getElementById('detailModal').style.display = 'flex';
         }
 
-        // 4. 檔期名單 Modal (含保險生成功能)
+        // Modal: 檔期名單
         function openRosterModal(eventName) {
             document.getElementById('r-title').innerText = `${eventName} 人員名單`;
             const contentEl = document.getElementById('r-content');
@@ -328,10 +326,8 @@
                 let section = document.createElement('div');
                 section.className = 'roster-group';
                 
-                // 🔥 Header: 地點 + 複製按鈕
                 let header = document.createElement('div');
                 header.className = 'roster-header';
-                
                 let title = document.createElement('span');
                 title.className = 'roster-loc';
                 title.innerText = `📍 ${loc}`;
@@ -339,7 +335,6 @@
                 let copyBtn = document.createElement('button');
                 copyBtn.className = 'btn-copy-ins';
                 copyBtn.innerHTML = '📋 複製保險名單';
-                // 綁定複製事件，傳入地點與人員陣列
                 copyBtn.onclick = () => copyInsuranceList(loc, groups[loc]);
                 
                 header.appendChild(title);
@@ -361,105 +356,60 @@
             document.getElementById('rosterModal').style.display = 'flex';
         }
 
-        // 🔥 核心功能：生成並複製保險名單
+        // 🔥 核心：保險名單生成 (增強日期解析)
         function copyInsuranceList(locName, staffArray) {
             let text = `${locName}\n\n`;
-            
             staffArray.forEach((s, index) => {
-                // 1. 處理民國年生日
                 let bDayStr = s.birthday || "";
                 let rocBday = "??.??.??";
                 
-                // 嘗試解析 YYYY/MM/DD 或 YYYY-MM-DD
-                let parts = bDayStr.split(/[-/]/); 
+                // 支援各種日期格式分隔符 / - .
+                let parts = bDayStr.split(/[-/.]/); 
                 if (parts.length >= 3) {
                     let y = parseInt(parts[0]);
                     let m = parts[1];
                     let d = parts[2];
-                    
-                    // 如果是西元，轉民國
-                    if (y > 1911) y -= 1911;
-                    
+                    if (y > 1911) y -= 1911; // 轉民國年
                     rocBday = `${y}.${m}.${d}`;
                 } else if (bDayStr.length >= 6) {
-                    // 如果原本就是類似 831222 的格式
                     rocBday = bDayStr; 
                 }
 
-                // 2. 組合字串
-                // 格式：1.陳皓揚 / 83.12.22 / F129356872 / 0936588349
                 text += `${index + 1}.${s.name} / ${rocBday} / ${s.id || "無身分證"} / ${s.phone}\n`;
             });
 
-            // 3. 複製到剪貼簿
             navigator.clipboard.writeText(text).then(() => {
-                alert(`✅ 已複製 [${locName}] 的保險名單！\n\n內容如下：\n${text}`);
+                alert(`✅ 已複製 [${locName}] 的保險名單！`);
             }).catch(err => {
                 alert("❌ 複製失敗，請手動複製。\n\n" + text);
             });
         }
 
         function closeRosterModal(e) { if(e.target.id === 'rosterModal') document.getElementById('rosterModal').style.display = 'none'; }
-        function getAge(birthdayStr) { if(!birthdayStr) return "?"; let parts = String(birthdayStr).split('/'); if(parts.length < 1) return "?"; let y = parseInt(parts[0]); if(y < 1911) y += 1911; return new Date().getFullYear() - y; }
+        
+        function getAge(birthdayStr) {
+            if(!birthdayStr) return "?";
+            let parts = String(birthdayStr).split(/[-/.]/); // 增強：支援 . 分隔
+            if(parts.length < 3) return "?";
+            let y = parseInt(parts[0]);
+            if(y < 1911) y += 1911; 
+            return new Date().getFullYear() - y;
+        }
+        
         function getEntryDate(ts) { if(!ts) return "未登記"; const d = new Date(ts); return `${d.getFullYear()}/${d.getMonth()+1}/${d.getDate()}`; }
         function convertDriveLink(url) { if (!url) return ""; let match = url.match(/\/d\/(.+?)\//) || url.match(/id=([a-zA-Z0-9_-]+)/); if (match && match[1]) return `https://lh3.googleusercontent.com/d/${match[1]}`; return url; }
         function toggleZoom(container) { const img = container.querySelector('img'); if(img && img.style.display !== 'none') img.classList.toggle('zoomed'); }
         function closeModal(e) { if(e.target.id === 'detailModal') document.getElementById('detailModal').style.display = 'none'; }
-        
         function prevPage() { if(currentPage > 1) { currentPage--; renderList(); window.scrollTo(0,0); } }
         function nextPage() { if(currentPage * itemsPerPage < filteredList.length) { currentPage++; renderList(); window.scrollTo(0,0); } }
-        function switchTab(tabName) {
-             document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-             document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
-             const btns = document.querySelectorAll('.tab-btn');
-             const sections = ['list', 'analysis', 'birthday', 'fate'];
-             btns[sections.indexOf(tabName)].classList.add('active');
-             document.getElementById(`${tabName}-section`).classList.add('active');
-             if(tabName === 'analysis') renderAnalysis(); if(tabName === 'birthday') renderBirthday(); if(tabName === 'fate') renderFate();
-        }
+        function switchTab(tabName) { document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active')); document.querySelectorAll('.section').forEach(s => s.classList.remove('active')); const btns = document.querySelectorAll('.tab-btn'); const sections = ['list', 'analysis', 'birthday', 'fate']; btns[sections.indexOf(tabName)].classList.add('active'); document.getElementById(`${tabName}-section`).classList.add('active'); if(tabName === 'analysis') renderAnalysis(); if(tabName === 'birthday') renderBirthday(); if(tabName === 'fate') renderFate(); }
         
-        function renderFate() {
-            const el = document.getElementById('fate-container'); el.innerHTML = ""; let groups = {};
-            staffList.forEach(s => { if(!s.birthday) return; let num = calcLifePath(s.birthday); if(!groups[num]) groups[num] = []; groups[num].push(s); });
-            const meanings = { 1:{title:"開創數",desc:"獨立"}, 2:{title:"協調數",desc:"合作"}, 3:{title:"創意數",desc:"表達"}, 4:{title:"穩定數",desc:"秩序"}, 5:{title:"自由數",desc:"冒險"}, 6:{title:"關懷數",desc:"奉獻"}, 7:{title:"真理數",desc:"分析"}, 8:{title:"權力數",desc:"掌控"}, 9:{title:"智慧數",desc:"大愛"}, 11:{title:"大師數",desc:"靈感"}, 22:{title:"大師數",desc:"執行"}, 33:{title:"大師數",desc:"療癒"} };
-            const order = [1,2,3,4,5,6,7,8,9,11,22,33];
-            order.forEach(num => { if(groups[num] && groups[num].length > 0) {
-                let names = groups[num].map(s => { const isMe = (s.phone === loggedInPhone) ? "is-me" : ""; return `<span class="fate-person ${isMe}" onclick='findAndShow("${s.phone}")'>${s.name}</span>`; }).join("");
-                el.innerHTML += `<div class="fate-group"><div class="fate-header"><div class="fate-num">${num}</div><div class="fate-desc">${meanings[num]?.title}</div></div><div class="fate-list">${names}</div></div>`;
-            }});
-        }
-        function calcLifePath(dateStr) { let parts = dateStr.split('/'); if(parts.length < 3) return 0; let y = parseInt(parts[0]); if(y < 1911) y += 1911; let fullStr = "" + y + parts[1] + parts[2]; let digits = fullStr.split('').map(Number); let sum = digits.reduce((a,b)=>a+b, 0); while(sum > 9 && sum !== 11 && sum !== 22 && sum !== 33) { sum = String(sum).split('').map(Number).reduce((a,b)=>a+b, 0); } return sum; }
-        function renderAnalysis() {
-            let gender={ "男":0, "女":0, "未知":0 }, age={ "18以下":0, "19-22":0, "23-25":0, "26以上":0 }, loc={}, school={};
-            staffList.forEach(s => {
-                if(s.id && s.id.length === 10) { let g = s.id[1]; if(g === '1') gender["男"]++; else if(g === '2') gender["女"]++; else gender["未知"]++; } else gender["未知"]++;
-                let a = getAge(s.birthday); if(a!=="?") { if(a<=18) age["18以下"]++; else if(a<=22) age["19-22"]++; else if(a<=25) age["23-25"]++; else age["26以上"]++; }
-                if(s.address) { let l = s.address.substring(0, 3); loc[l] = (loc[l] || 0) + 1; }
-                if(s.school) { let sc = s.school.split('/')[0] || s.school; school[sc] = (school[sc] || 0) + 1; }
-            });
-            drawChart('chart-age', age); drawChart('chart-gender', gender); drawChart('chart-loc', loc); drawChart('chart-school', school);
-        }
+        // 算命與分析圖表 (保持不變)
+        function renderFate() { const el = document.getElementById('fate-container'); el.innerHTML = ""; let groups = {}; staffList.forEach(s => { if(!s.birthday) return; let num = calcLifePath(s.birthday); if(!groups[num]) groups[num] = []; groups[num].push(s); }); const meanings = { 1:{title:"開創數",desc:"獨立"}, 2:{title:"協調數",desc:"合作"}, 3:{title:"創意數",desc:"表達"}, 4:{title:"穩定數",desc:"秩序"}, 5:{title:"自由數",desc:"冒險"}, 6:{title:"關懷數",desc:"奉獻"}, 7:{title:"真理數",desc:"分析"}, 8:{title:"權力數",desc:"掌控"}, 9:{title:"智慧數",desc:"大愛"}, 11:{title:"大師數",desc:"靈感"}, 22:{title:"大師數",desc:"執行"}, 33:{title:"大師數",desc:"療癒"} }; const order = [1,2,3,4,5,6,7,8,9,11,22,33]; order.forEach(num => { if(groups[num] && groups[num].length > 0) { let names = groups[num].map(s => { const isMe = (s.phone === loggedInPhone) ? "is-me" : ""; return `<span class="fate-person ${isMe}" onclick='findAndShow("${s.phone}")'>${s.name}</span>`; }).join(""); el.innerHTML += `<div class="fate-group"><div class="fate-header"><div class="fate-num">${num}</div><div class="fate-desc">${meanings[num]?.title}</div></div><div class="fate-list">${names}</div></div>`; }}); }
+        function calcLifePath(dateStr) { let parts = dateStr.split(/[-/.]/); if(parts.length < 3) return 0; let y = parseInt(parts[0]); if(y < 1911) y += 1911; let fullStr = "" + y + parts[1] + parts[2]; let digits = fullStr.split('').map(Number); let sum = digits.reduce((a,b)=>a+b, 0); while(sum > 9 && sum !== 11 && sum !== 22 && sum !== 33) { sum = String(sum).split('').map(Number).reduce((a,b)=>a+b, 0); } return sum; }
+        function renderAnalysis() { let gender={ "男":0, "女":0, "未知":0 }, age={ "18以下":0, "19-22":0, "23-25":0, "26以上":0 }, loc={}, school={}; staffList.forEach(s => { if(s.id && s.id.length === 10) { let g = s.id[1]; if(g === '1') gender["男"]++; else if(g === '2') gender["女"]++; else gender["未知"]++; } else gender["未知"]++; let a = getAge(s.birthday); if(a!=="?") { if(a<=18) age["18以下"]++; else if(a<=22) age["19-22"]++; else if(a<=25) age["23-25"]++; else age["26以上"]++; } if(s.address) { let l = s.address.substring(0, 3); loc[l] = (loc[l] || 0) + 1; } if(s.school) { let sc = s.school.split('/')[0] || s.school; school[sc] = (school[sc] || 0) + 1; } }); drawChart('chart-age', age); drawChart('chart-gender', gender); drawChart('chart-loc', loc); drawChart('chart-school', school); }
         function drawChart(id, data) { const el = document.getElementById(id); el.innerHTML = ""; let total = Object.values(data).reduce((a,b)=>a+b, 0); let sorted = Object.entries(data).sort((a,b)=>b[1]-a[1]).slice(0, 8); sorted.forEach(([label, val]) => { let pct = Math.round((val / total) * 100); el.innerHTML += `<div class="bar-row"><div class="bar-label">${label}</div><div class="bar-bg"><div class="bar-fill" style="width:${pct}%"></div></div><div class="bar-val">${val}</div></div>`; }); }
-        
-        function renderBirthday() {
-            let calDate = new Date(); const m = calDate.getMonth(); document.getElementById('calMonth').innerText = `${calDate.getFullYear()}年 ${m+1}月`;
-            const first = new Date(calDate.getFullYear(), m, 1).getDay(); const days = new Date(calDate.getFullYear(), m+1, 0).getDate();
-            const el = document.getElementById('cal-body'); el.innerHTML = "";
-            for(let i=0; i<first; i++) el.innerHTML += `<div class="cal-cell"></div>`;
-            const today = new Date();
-            for(let d=1; d<=days; d++) {
-                let isToday = (d === today.getDate() && m === today.getMonth());
-                let html = `<div class="cal-cell ${isToday?'today':''}"><div class="cal-date-num">${d}</div>`;
-                staffList.forEach(s => {
-                    if(!s.birthday) return; let parts = String(s.birthday).split('/'); if(parts.length < 2) return;
-                    if(parseInt(parts[1]) === (m+1) && parseInt(parts[2]) === d) {
-                        const isMe = (s.phone === loggedInPhone) ? "is-me" : "";
-                        html += `<div class="cal-person ${isMe}" onclick='findAndShow("${s.phone}")'>${s.name}</div>`;
-                    }
-                });
-                el.innerHTML += html + `</div>`;
-            }
-        }
+        function renderBirthday() { let calDate = new Date(); const m = calDate.getMonth(); document.getElementById('calMonth').innerText = `${calDate.getFullYear()}年 ${m+1}月`; const first = new Date(calDate.getFullYear(), m, 1).getDay(); const days = new Date(calDate.getFullYear(), m+1, 0).getDate(); const el = document.getElementById('cal-body'); el.innerHTML = ""; for(let i=0; i<first; i++) el.innerHTML += `<div class="cal-cell"></div>`; const today = new Date(); for(let d=1; d<=days; d++) { let isToday = (d === today.getDate() && m === today.getMonth()); let html = `<div class="cal-cell ${isToday?'today':''}"><div class="cal-date-num">${d}</div>`; staffList.forEach(s => { if(!s.birthday) return; let parts = String(s.birthday).split(/[-/.]/); if(parts.length < 2) return; if(parseInt(parts[1]) === (m+1) && parseInt(parts[2]) === d) { const isMe = (s.phone === loggedInPhone) ? "is-me" : ""; html += `<div class="cal-person ${isMe}" onclick='findAndShow("${s.phone}")'>${s.name}</div>`; } }); el.innerHTML += html + `</div>`; } }
         function changeMonth(delta) { /* 略 */ }
         function findAndShow(phone) { const s = staffList.find(x => x.phone === phone); if(s) showDetail(s); }
 
