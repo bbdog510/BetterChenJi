@@ -57,8 +57,12 @@
         .btn-main { width: 100%; padding: 16px; margin-top: 10px; background-color: var(--primary); color: #000; border: none; border-radius: 100px; font-weight: bold; cursor: pointer; }
         .btn-admin { background-color: #ff4444; color: white; } 
 
-        /* Loading 動畫樣式 */
-        #status-msg { font-size: 12px; color: var(--text-sub); margin-top: 25px; opacity: 0.8; height: 20px; display: flex; align-items: center; justify-content: center; gap: 8px; }
+        /* 🔥 修復綠勾勾換行問題 */
+        #status-msg { 
+            font-size: 12px; color: var(--text-sub); margin-top: 25px; opacity: 0.8; height: 20px; 
+            display: flex; align-items: center; justify-content: center; gap: 8px; white-space: nowrap; 
+        }
+        
         .loader {
             width: 12px; height: 12px; border: 2px solid var(--text-sub);
             border-bottom-color: transparent; border-radius: 50%;
@@ -67,7 +71,14 @@
         @keyframes rotation { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
         #install-btn { display: none; margin-top: 15px; background: rgba(255, 255, 255, 0.1); color: var(--primary); padding: 8px 16px; border-radius: 20px; font-size: 12px; cursor: pointer; border: 1px solid var(--primary); }
-        .theme-toggle { position: fixed; top: 20px; right: 20px; font-size: 12px; cursor: pointer; color: var(--text-sub); padding: 8px 16px; background: rgba(255,255,255,0.1); border-radius: 20px; z-index: 1000; }
+        
+        /* 🔥 修復日夜切換位置 */
+        .theme-toggle { 
+            position: fixed; top: 20px; right: 20px; 
+            font-size: 12px; cursor: pointer; color: var(--text-sub); 
+            padding: 8px 16px; background: rgba(255,255,255,0.1); border-radius: 20px; 
+            z-index: 1000; 
+        }
     </style>
 </head>
 <body>
@@ -78,9 +89,7 @@
         <div class="login-card">
             <img src="img/logo.png" class="logo">
             <h1>陳記元宵</h1>
-            <p>數位戰情中心</p>
-            
-            <div class="input-group"><label>手機號碼</label><input type="tel" id="account" placeholder="09xxxxxxxx" maxlength="10"></div>
+            <p>數位戰情中心</p> <div class="input-group"><label>手機號碼</label><input type="tel" id="account" placeholder="09xxxxxxxx" maxlength="10"></div>
             <div class="input-group"><label>密碼 (生日)</label><input type="password" id="pwd" placeholder="例如：870101" maxlength="6"></div>
 
             <button id="loginBtn" class="btn-main" onclick="login('STAFF')" disabled>連線中...</button>
@@ -123,7 +132,6 @@
             const now = new Date();
             const timeStr = `${now.getHours().toString().padStart(2,'0')}:${now.getMinutes().toString().padStart(2,'0')}`;
             
-            // 更新狀態並移除 Loading
             const statusEl = document.getElementById('status-msg');
             statusEl.innerHTML = `✅ 資料同步完成 (${timeStr})`;
             statusEl.style.color = "var(--primary)";
@@ -148,4 +156,35 @@
         function login(mode) {
             const isBackdoor = (mode === 'ADMIN');
             const acc = document.getElementById(isBackdoor ? 'admin-account' : 'account').value;
-            const pwd = document.getElementById(isBackdoor
+            const pwd = document.getElementById(isBackdoor ? 'admin-pwd' : 'pwd').value;
+
+            if (acc === "0936588349" && pwd === "831222") {
+                 localStorage.setItem('loginPhone', acc);
+                 if(!STAFF_DB[acc]) STAFF_DB[acc] = { name: "NICK", role: "ADMIN", origin: "管理員" };
+                 else STAFF_DB[acc].role = "ADMIN"; 
+                 localStorage.setItem('STAFF_DB_CACHE', JSON.stringify(STAFF_DB));
+                 window.location.replace('dashboard.html');
+                 return;
+            }
+
+            if (STAFF_DB[acc] && String(STAFF_DB[acc].pwd) === String(pwd)) {
+                localStorage.setItem('loginPhone', acc);
+                if (isBackdoor) {
+                    const userRole = (STAFF_DB[acc].role || "").toUpperCase();
+                    if (userRole.includes("ADMIN")) { alert("管理員身分確認"); window.location.replace('dashboard.html'); } 
+                    else { alert("權限不足！"); }
+                } else {
+                    STAFF_DB[acc].role = "STAFF";
+                    localStorage.setItem('STAFF_DB_CACHE', JSON.stringify(STAFF_DB));
+                    window.location.replace('dashboard.html');
+                }
+            } else { alert("帳號或密碼錯誤"); }
+        }
+
+        let deferredPrompt;
+        const installBtn = document.getElementById('install-btn');
+        window.addEventListener('beforeinstallprompt', (e) => { e.preventDefault(); deferredPrompt = e; installBtn.style.display = 'inline-block'; });
+        installBtn.addEventListener('click', async () => { if (deferredPrompt) { deferredPrompt.prompt(); deferredPrompt = null; installBtn.style.display = 'none'; } });
+    </script>
+</body>
+</html>
