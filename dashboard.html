@@ -100,23 +100,22 @@
         <a href="schedule.html" class="menu-item bg-yellow"><span>🕒 我的班表</span></a>
         
         <a href="inventory.html" class="menu-item bg-yellow vip-only"><span>📦 每日盤點</span></a>
-<a href="schedule_create.html" class="menu-item bg-yellow vip-only"><span>📅 開始排班 (自動生成)</span></a>
+        <a href="schedule_create.html" class="menu-item bg-yellow vip-only"><span>📅 開始排班 (自動生成)</span></a>
         <a href="insurance.html" class="menu-item bg-yellow vip-only"><span>🛡️ 員工保險表單生產器</span></a>
     </div>
 
     <div class="category-label vip-only">🎨 美編文案</div>
     <div class="card-container vip-only">
         <a href="copywriter.html" class="menu-item bg-pink"><span>📢 顧客公告文產生器</span></a>
-        
-        <a href="#" onclick="alert('連結到員工公告選單，含徵選與大群公告')" class="menu-item bg-pink"><span>📣 員工公告文產生器</span></a>
-        <a href="schedule.html" class="menu-item bg-pink"><span>💬 LINE 內部階段公告</span></a>
+        <a href="#" onclick="alert('功能開發中')" class="menu-item bg-pink"><span>📣 員工公告文產生器</span></a>
+        <a href="#" class="menu-item bg-pink"><span>💬 LINE 內部階段公告</span></a>
     </div>
 
     <div class="category-label vip-only">👥 人事表單</div>
     <div class="card-container vip-only">
         <a href="staff_search.html" class="menu-item bg-purple"><span>🔍 員工資料庫搜尋</span></a>
-        <a href="schedule.html" class="menu-item bg-purple"><span>📝 員工徵選資料庫</span></a>
-        <a href="schedule.html" class="menu-item bg-purple"><span>💰 員工薪資資料庫</span></a>
+        <a href="#" class="menu-item bg-purple"><span>📝 員工徵選資料庫</span></a>
+        <a href="#" class="menu-item bg-purple"><span>💰 員工薪資資料庫</span></a>
     </div>
 
     <a href="#" class="btn-logout" onclick="logout()">🔒 登出系統</a>
@@ -124,7 +123,7 @@
 
     <div id="profileModal" class="modal-overlay" onclick="closeProfile(event)">
         <div class="modal">
-            <span class="modal-close" onclick="document.getElementById('profileModal').style.display='none'">&times;</span>
+            <span class="modal-close" onclick="document.getElementById('profileModal').style.display='none'">×</span>
             <div id="modal-avatar" class="text-avatar" style="width:80px; height:80px; margin:0 auto; font-size:30px;">員</div>
             <h2 id="modal-name" style="margin-top:15px; margin-bottom:5px;">姓名</h2>
             <p id="modal-role" style="color:var(--yellow-text); font-size:12px; margin:0;">職位</p>
@@ -133,7 +132,12 @@
                 <label>📅 入職時間</label>
                 <div id="modal-entry">...</div>
             </div>
+            
+            <div class="profile-stat">
+                <label>🚀 服務資歷 (薪資表紀錄)</label>
+                <div id="modal-days">...</div>
             </div>
+        </div>
     </div>
 
     <script>
@@ -165,6 +169,7 @@
 
             // 權限判斷
             const role = user.role ? String(user.role).toUpperCase() : "";
+            // 如果是 ADMIN 或者是老闆的電話，就顯示 VIP 功能
             const isVip = role.includes("ADMIN") || loggedInPhone === "0936588349";
 
             if (isVip) {
@@ -177,12 +182,14 @@
         function getAvatarName(name) { return name.length > 2 ? name.slice(-2) : name; }
         function logout() { localStorage.removeItem('loginPhone'); window.location.replace('index.html'); }
         
+        // 個人檔案邏輯 (更新版)
         function showProfile() {
             const user = STAFF_DB[loggedInPhone];
             document.getElementById('modal-name').innerText = user.name;
             document.getElementById('modal-avatar').innerText = getAvatarName(user.name);
             document.getElementById('modal-role').innerText = user.role || "夥伴";
             
+            // 入職時間
             if (user.entryDate) {
                 const entry = new Date(user.entryDate);
                 const y = entry.getFullYear();
@@ -192,6 +199,14 @@
             } else {
                 document.getElementById('modal-entry').innerText = "未登記";
             }
+
+            // ★ 更新這裡：計算服務檔期數 (從 salary sheet 抓來的 history)
+            let serviceCount = 0;
+            if (user.history) {
+                serviceCount = Object.keys(user.history).length;
+            }
+            document.getElementById('modal-days').innerText = `${serviceCount} 檔期`;
+
             document.getElementById('profileModal').style.display = 'flex';
         }
 
