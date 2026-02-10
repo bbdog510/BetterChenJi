@@ -6,8 +6,16 @@
     <title>員工資料庫</title>
     <link rel="icon" href="img/logo.png" type="image/png">
     <style>
-        :root { --bg-color: #121212; --text-main: #E0E0E0; --text-sub: #AAAAAA; --card-bg: #1E1E1E; --primary: #CE93D8; --border: #333; --highlight: #FFD54F; --tag-active: #FFD54F; }
-        body.light-mode { --bg-color: #FDFCF4; --text-main: #1C1B1F; --text-sub: #666666; --card-bg: #FFF; --primary: #6200EE; --border: #E0E0E0; --highlight: #FFD600; --tag-active: #FFD600; }
+        :root { 
+            --bg-color: #121212; --text-main: #E0E0E0; --text-sub: #AAAAAA; --card-bg: #1E1E1E; 
+            --primary: #CE93D8; --border: #333; --highlight: #FFD54F; --tag-active: #FFD54F;
+            --border-line: rgba(255,255,255,0.1);
+        }
+        body.light-mode { 
+            --bg-color: #FDFCF4; --text-main: #1C1B1F; --text-sub: #666666; --card-bg: #FFF; 
+            --primary: #7B1FA2; --border: #E0E0E0; --highlight: #B08D00; --tag-active: #B08D00; 
+            --border-line: #E0E0E0;
+        }
         
         body { font-family: 'MiSans', sans-serif; background: var(--bg-color); color: var(--text-main); padding: 20px; margin: 0; padding-bottom: 80px; }
         
@@ -24,6 +32,7 @@
         .staff-card { background: var(--card-bg); padding: 15px; border-radius: 16px; margin-bottom: 10px; display: flex; align-items: center; gap: 15px; cursor: pointer; border: 1px solid transparent; transition: 0.2s; }
         .staff-card:active { transform: scale(0.98); }
         .staff-card.is-me { border: 2px solid var(--highlight); background: rgba(255, 213, 79, 0.1); }
+        body.light-mode .staff-card { box-shadow: 0 2px 5px rgba(0,0,0,0.02); }
         
         .avatar-small { width: 50px; height: 50px; border-radius: 50%; background: var(--primary); color: #fff; display: flex; justify-content: center; align-items: center; font-weight: bold; font-size: 18px; object-fit: cover; flex-shrink: 0; }
         .info { flex: 1; }
@@ -42,7 +51,6 @@
         .bar-fill { height: 100%; background: var(--primary); border-radius: 5px; }
         .bar-val { width: 40px; margin-left: 10px; color: var(--text-main); font-size: 11px;}
 
-        /* 行事曆 */
         .calendar-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; background: var(--card-bg); padding: 10px; border-radius: 12px; }
         .cal-btn { background: none; border: none; font-size: 20px; color: var(--primary); cursor: pointer; padding: 0 15px; }
         .cal-month { font-size: 18px; font-weight: bold; }
@@ -54,16 +62,6 @@
         .cal-person { background: var(--primary); color: #fff; font-size: 10px; border-radius: 4px; padding: 2px 4px; margin-top: 2px; cursor: pointer; width: 90%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         .cal-person.is-me { background: var(--highlight); color: #000; border: 1px solid #fff; }
 
-        /* 算命 */
-        .fate-group { margin-bottom: 20px; }
-        .fate-header { display: flex; align-items: center; margin-bottom: 8px; }
-        .fate-num { width: 30px; height: 30px; background: var(--primary); color: white; border-radius: 50%; text-align: center; line-height: 30px; font-weight: bold; margin-right: 10px; }
-        .fate-desc { font-size: 14px; font-weight: bold; }
-        .fate-list { display: flex; flex-wrap: wrap; gap: 8px; padding-left: 40px; }
-        .fate-person { background: var(--card-bg); border: 1px solid var(--border); padding: 6px 12px; border-radius: 20px; font-size: 13px; cursor: pointer; }
-        .fate-person.is-me { border: 2px solid var(--highlight); background: rgba(255, 213, 79, 0.2); font-weight: bold; }
-
-        /* Modal */
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); display: none; justify-content: center; align-items: center; z-index: 100; backdrop-filter: blur(5px); }
         .modal { background: var(--card-bg); width: 90%; max-width: 400px; max-height: 90vh; border-radius: 24px; padding: 25px; overflow-y: auto; position: relative; display: flex; flex-direction: column; }
         .modal-close { position: absolute; top: 15px; right: 15px; font-size: 24px; cursor: pointer; z-index: 10; background: rgba(0,0,0,0.5); width: 30px; height: 30px; text-align: center; line-height: 30px; border-radius: 50%; color: white; }
@@ -80,11 +78,20 @@
         .icon-btn { text-decoration: none; font-size: 20px; transition: transform 0.2s; }
         .icon-btn:active { transform: scale(1.2); }
 
-        .history-list { display: flex; flex-direction: column; gap: 8px; margin-top: 10px; }
-        .history-item { padding: 12px; border-radius: 12px; display: flex; justify-content: space-between; align-items: center; font-size: 14px; border: 1px solid transparent; }
-        .history-item.active { background: rgba(255, 213, 79, 0.15); border-color: var(--tag-active); color: var(--text-main); font-weight: bold; }
-        .history-item.active .h-tag { background: var(--tag-active); color: #000; padding: 2px 8px; border-radius: 4px; font-size: 12px; }
-        .history-item.inactive { background: rgba(125,125,125,0.05); color: #666; }
+        /* 🔥 歷史列表：清爽去背版 */
+        .history-list { display: flex; flex-direction: column; gap: 5px; margin-top: 10px; }
+        .history-item { 
+            padding: 12px 5px; 
+            border-bottom: 1px solid var(--border-line); 
+            display: flex; justify-content: space-between; align-items: center; 
+            font-size: 14px; 
+            color: var(--text-main);
+        }
+        /* 亮燈文字 */
+        .history-item.active { font-weight: bold; }
+        .history-item.active .h-tag { color: var(--tag-active); font-weight: bold; font-size: 12px; }
+        /* 滅燈文字 */
+        .history-item.inactive { color: var(--text-sub); opacity: 0.7; }
         .history-item.inactive .h-tag { display: none; }
         
         .roster-group { margin-bottom: 20px; background: rgba(255,255,255,0.03); padding: 10px; border-radius: 12px; }
@@ -96,6 +103,8 @@
         
         .btn-copy-ins { background: #4285F4; color: white; border: none; border-radius: 20px; padding: 4px 10px; font-size: 11px; cursor: pointer; display: flex; align-items: center; gap: 4px; }
         .btn-copy-ins:active { transform: scale(0.95); opacity: 0.8; }
+
+        .fate-group { margin-bottom: 20px; } .fate-header { display: flex; align-items: center; margin-bottom: 8px; } .fate-num { width: 30px; height: 30px; background: var(--primary); color: white; border-radius: 50%; text-align: center; line-height: 30px; font-weight: bold; margin-right: 10px; } .fate-desc { font-size: 14px; font-weight: bold; } .fate-detail { font-size: 12px; color: var(--text-sub); margin-bottom: 10px; line-height: 1.4; padding-left: 40px; } .fate-list { display: flex; flex-wrap: wrap; gap: 8px; padding-left: 40px; } .fate-person { background: var(--card-bg); border: 1px solid var(--border); padding: 6px 12px; border-radius: 20px; font-size: 13px; cursor: pointer; } .fate-person.is-me { border: 2px solid var(--highlight); background: rgba(255, 213, 79, 0.2); font-weight: bold; }
     </style>
 </head>
 <body>
@@ -347,7 +356,6 @@
         function drawChart(id, data) { const el = document.getElementById(id); el.innerHTML = ""; let total = Object.values(data).reduce((a,b)=>a+b, 0); let sorted = Object.entries(data).sort((a,b)=>b[1]-a[1]).slice(0, 8); sorted.forEach(([label, val]) => { let pct = Math.round((val / total) * 100); el.innerHTML += `<div class="bar-row"><div class="bar-label">${label}</div><div class="bar-bg"><div class="bar-fill" style="width:${pct}%"></div></div><div class="bar-val">${val}</div></div>`; }); }
         function drawRanking(id, data, unit) { const el = document.getElementById(id); el.innerHTML = ""; if(data.length === 0) { el.innerHTML = "無資料"; return; } let max = data[0].val; data.forEach((item, i) => { let pct = (item.val / max) * 100; el.innerHTML += `<div class="bar-row"><div class="bar-label" style="width:30px;">#${i+1}</div><div class="bar-label">${item.name}</div><div class="bar-bg"><div class="bar-fill" style="width:${pct}%; background:#FFD54F;"></div></div><div class="bar-val" style="width:50px;">${item.val}${unit}</div></div>`; }); }
 
-        // 🔥🔥 補回壽星行事曆邏輯 🔥🔥
         function renderBirthday() {
             const m = calDate.getMonth();
             document.getElementById('calMonth').innerText = `${calDate.getFullYear()}年 ${m+1}月`;
@@ -355,24 +363,16 @@
             const days = new Date(calDate.getFullYear(), m+1, 0).getDate();
             const el = document.getElementById('cal-body');
             el.innerHTML = "";
-            
-            // 填補空白
             for(let i=0; i<first; i++) el.innerHTML += `<div class="cal-cell"></div>`;
-            
             const today = new Date();
             for(let d=1; d<=days; d++) {
                 let isToday = (d === today.getDate() && m === today.getMonth());
                 let html = `<div class="cal-cell ${isToday?'today':''}"><div class="cal-date-num">${d}</div>`;
-                
-                // 找壽星
                 staffList.forEach(s => {
                     if(!s.birthday) return;
                     let parts = String(s.birthday).split(/[-/.]/);
                     if(parts.length < 2) return;
-                    // 生日格式可能是 1999/12/22 或 88/12/22，取後兩位為月日
-                    let bM = parseInt(parts[1]);
-                    let bD = parseInt(parts[2]);
-                    
+                    let bM = parseInt(parts[1]); let bD = parseInt(parts[2]);
                     if(bM === (m+1) && bD === d) {
                         const isMe = (s.phone === loggedInPhone) ? "is-me" : "";
                         html += `<div class="cal-person ${isMe}" onclick='findAndShow("${s.phone}")'>${s.name}</div>`;
@@ -381,72 +381,17 @@
                 el.innerHTML += html + `</div>`;
             }
         }
-        function changeMonth(delta) {
-            calDate.setMonth(calDate.getMonth() + delta);
-            renderBirthday();
-        }
+        function changeMonth(delta) { calDate.setMonth(calDate.getMonth() + delta); renderBirthday(); }
 
-        // 🔥🔥 補回靈數算命邏輯 🔥🔥
         function renderFate() {
-            const el = document.getElementById('fate-container');
-            el.innerHTML = "";
-            let groups = {};
-            
-            staffList.forEach(s => {
-                if(!s.birthday) return;
-                let num = calcLifePath(s.birthday);
-                if(num === 0) return;
-                if(!groups[num]) groups[num] = [];
-                groups[num].push(s);
-            });
-            
-            const meanings = {
-                1:{title:"開創數", desc:"獨立、領導、創造"}, 2:{title:"協調數", desc:"合作、耐心、細節"},
-                3:{title:"創意數", desc:"表達、樂觀、藝術"}, 4:{title:"穩定數", desc:"秩序、安全、建設"},
-                5:{title:"自由數", desc:"冒險、變化、適應"}, 6:{title:"關懷數", desc:"奉獻、責任、愛"},
-                7:{title:"真理數", desc:"分析、鑽研、幸運"}, 8:{title:"權力數", desc:"掌控、富足、野心"},
-                9:{title:"智慧數", desc:"大愛、夢想、服務"},
-                11:{title:"大師數", desc:"靈感、直覺"}, 22:{title:"大師數", desc:"執行、夢想成真"}, 33:{title:"大師數", desc:"療癒、無私"}
-            };
+            const el = document.getElementById('fate-container'); el.innerHTML = ""; let groups = {};
+            staffList.forEach(s => { if(!s.birthday) return; let num = calcLifePath(s.birthday); if(num===0)return; if(!groups[num]) groups[num] = []; groups[num].push(s); });
+            const meanings = { 1:{title:"開創數",desc:"獨立"}, 2:{title:"協調數",desc:"合作"}, 3:{title:"創意數",desc:"表達"}, 4:{title:"穩定數",desc:"秩序"}, 5:{title:"自由數",desc:"冒險"}, 6:{title:"關懷數",desc:"奉獻"}, 7:{title:"真理數",desc:"分析"}, 8:{title:"權力數",desc:"掌控"}, 9:{title:"智慧數",desc:"大愛"}, 11:{title:"大師數",desc:"靈感"}, 22:{title:"大師數",desc:"執行"}, 33:{title:"大師數",desc:"療癒"} };
             const order = [1,2,3,4,5,6,7,8,9,11,22,33];
-            
-            order.forEach(num => {
-                if(groups[num] && groups[num].length > 0) {
-                    let names = groups[num].map(s => {
-                        const isMe = (s.phone === loggedInPhone) ? "is-me" : "";
-                        return `<span class="fate-person ${isMe}" onclick='findAndShow("${s.phone}")'>${s.name}</span>`;
-                    }).join("");
-                    
-                    let info = meanings[num] || {title:"未知", desc:""};
-                    el.innerHTML += `
-                        <div class="fate-group">
-                            <div class="fate-header">
-                                <div class="fate-num">${num}</div>
-                                <div class="fate-desc">${info.title} <span style="font-weight:normal; font-size:12px; color:#888;">(${info.desc})</span></div>
-                            </div>
-                            <div class="fate-list">${names}</div>
-                        </div>`;
-                }
-            });
+            order.forEach(num => { if(groups[num] && groups[num].length > 0) { let names = groups[num].map(s => { const isMe = (s.phone === loggedInPhone) ? "is-me" : ""; return `<span class="fate-person ${isMe}" onclick='findAndShow("${s.phone}")'>${s.name}</span>`; }).join(""); let info = meanings[num]||{title:"未知"}; el.innerHTML += `<div class="fate-group"><div class="fate-header"><div class="fate-num">${num}</div><div class="fate-desc">${info.title}</div></div><div class="fate-list">${names}</div></div>`; }});
         }
-        
-        function calcLifePath(dateStr) {
-            let parts = dateStr.split(/[-/.]/);
-            if(parts.length < 3) return 0;
-            let y = parseInt(parts[0]); if(y < 1911) y += 1911;
-            let fullStr = "" + y + parts[1] + parts[2];
-            
-            // 第一次加總
-            let sum = fullStr.split('').map(Number).reduce((a,b)=>a+b, 0);
-            
-            // 縮減到個位數，但保留大師數
-            while(sum > 9 && sum !== 11 && sum !== 22 && sum !== 33) {
-                sum = String(sum).split('').map(Number).reduce((a,b)=>a+b, 0);
-            }
-            return sum;
-        }
+        function calcLifePath(dateStr) { let parts = dateStr.split(/[-/.]/); if(parts.length < 3) return 0; let y = parseInt(parts[0]); if(y < 1911) y += 1911; let fullStr = "" + y + parts[1] + parts[2]; let sum = fullStr.split('').map(Number).reduce((a,b)=>a+b, 0); while(sum > 9 && sum !== 11 && sum !== 22 && sum !== 33) { sum = String(sum).split('').map(Number).reduce((a,b)=>a+b, 0); } return sum; }
 
-        // 輔助函式
         function closeRosterModal(e) { if(e.target.id === 'rosterModal') document.getElementById('rosterModal').style.display = 'none'; }
         function getAge(birthdayStr) { if(!birthdayStr) return "?"; let parts = String(birthdayStr).split(/[-/.]/); if(parts.length < 3) return "?"; let y = parseInt(parts[0]); if(y < 1911) y += 1911; return new Date().getFullYear() - y; }
         function getEntryDate(ts) { if(!ts) return "未登記"; const d = new Date(ts); return `${d.getFullYear()}/${d.getMonth()+1}/${d.getDate()}`; }
