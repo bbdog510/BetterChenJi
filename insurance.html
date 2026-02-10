@@ -2,128 +2,309 @@
 <html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>保險資料填寫</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>保險名單生成器</title>
     <link rel="icon" href="img/logo.png" type="image/png">
     <style>
+        :root {
+            --bg-color: #121212; --text-main: #E0E0E0; --text-sub: #AAAAAA; --card-bg: #1E1E1E;
+            --primary: #FFD54F; --border: #333; --highlight: #4285F4;
+            --danger: #FF5252;
+        }
+        body.light-mode {
+            --bg-color: #FDFCF4; --text-main: #1C1B1F; --text-sub: #666666; --card-bg: #FFF;
+            --primary: #6F5D00; --border: #E0E0E0; --highlight: #1976D2;
+        }
         body {
-            font-family: 'MiSans', sans-serif;
-            background-color: #FDFCF4;
-            padding: 20px; color: #333;
+            font-family: 'MiSans', sans-serif; background: var(--bg-color); color: var(--text-main);
+            margin: 0; padding: 15px; display: flex; flex-direction: column; height: 100vh; box-sizing: border-box;
         }
+
+        h2 { margin: 0 0 15px 0; color: var(--primary); text-align: center; }
+
+        /* 主容器：左右兩欄 */
         .container {
-            max-width: 600px; margin: 0 auto;
-            background: white; padding: 25px; border-radius: 20px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            display: flex; gap: 15px; flex: 1; overflow: hidden;
         }
-        h2 { text-align: center; color: #6F5D00; margin-top: 0; }
+        /* 手機版改成上下排列 */
+        @media (max-width: 768px) {
+            .container { flex-direction: column; }
+        }
+
+        /* 區塊樣式 */
+        .panel {
+            flex: 1; background: var(--card-bg); border-radius: 16px; border: 1px solid var(--border);
+            display: flex; flex-direction: column; overflow: hidden; padding: 10px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+        }
+
+        .panel-header {
+            display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;
+        }
+        .panel-title { font-weight: bold; color: var(--text-main); }
+        .count-badge { background: var(--highlight); color: white; padding: 2px 8px; border-radius: 10px; font-size: 12px; }
+
+        /* 搜尋框 */
+        .search-box {
+            width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--border);
+            background: rgba(125,125,125,0.1); color: var(--text-main); margin-bottom: 10px;
+            box-sizing: border-box; outline: none;
+        }
+
+        /* 列表區 (可滾動) */
+        .list-area {
+            flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 8px;
+            padding: 5px; border: 2px dashed transparent; transition: 0.2s;
+        }
+        .list-area.drag-over { border-color: var(--highlight); background: rgba(66, 133, 244, 0.1); border-radius: 8px; }
+
+        /* 員工卡片 */
+        .staff-item {
+            background: rgba(125,125,125,0.1); padding: 10px; border-radius: 8px;
+            cursor: grab; display: flex; justify-content: space-between; align-items: center;
+            border: 1px solid transparent; transition: 0.2s;
+        }
+        .staff-item:active { cursor: grabbing; transform: scale(0.98); }
+        .staff-item:hover { border-color: var(--primary); background: rgba(255, 213, 79, 0.1); }
         
-        .info-box {
-            background: #FFF4CB; padding: 15px; border-radius: 12px;
-            margin-bottom: 20px; font-size: 14px; color: #555;
-            border-left: 4px solid #FFE16D;
-        }
+        .s-info { display: flex; flex-direction: column; }
+        .s-name { font-weight: bold; font-size: 15px; }
+        .s-phone { font-size: 12px; color: var(--text-sub); }
+        .s-action { font-size: 18px; color: var(--text-sub); }
 
-        .form-group { margin-bottom: 15px; }
-        label { display: block; font-weight: bold; margin-bottom: 5px; font-size: 14px; }
-        input {
-            width: 100%; padding: 12px; border: 1px solid #ddd;
-            border-radius: 10px; box-sizing: border-box; font-size: 16px;
-            background: #f9f9f9;
-        }
-        input[readonly] { background: #eee; color: #777; }
+        /* 右邊選中區的樣式差異 */
+        .selected-item { border-left: 4px solid var(--highlight); background: rgba(66, 133, 244, 0.1); }
+        .selected-item .s-action { color: var(--danger); } /* 移除按鈕變紅色 */
 
-        .btn-copy {
-            width: 100%; padding: 15px; background: #6F5D00; color: white;
-            border: none; border-radius: 50px; font-size: 16px; font-weight: bold;
-            cursor: pointer; margin-top: 20px;
+        /* 底部按鈕區 */
+        .bottom-bar {
+            margin-top: 15px; display: flex; gap: 10px;
         }
-        .btn-back {
-            display: block; text-align: center; margin-top: 15px;
-            color: #999; text-decoration: none; font-size: 14px;
+        .btn {
+            flex: 1; padding: 15px; border: none; border-radius: 50px;
+            font-weight: bold; cursor: pointer; font-size: 16px;
+            display: flex; justify-content: center; align-items: center; gap: 5px;
         }
+        .btn-gen { background: var(--primary); color: #000; }
+        .btn-clear { background: #444; color: #fff; flex: 0.3; }
+        .btn-back { background: transparent; border: 1px solid var(--text-sub); color: var(--text-sub); flex: 0.3; }
+
     </style>
 </head>
 <body>
 
+    <h2>🛡️ 員工保險單生成器</h2>
+
     <div class="container">
-        <h2>🛡️ 員工保險資料確認</h2>
-        
-        <div class="info-box">
-            請確認以下資料是否正確，若有誤請直接聯繫管理員 (NICK)。
-            <br>確認無誤後，請點擊下方按鈕複製，並傳送至群組。
+        <div class="panel">
+            <div class="panel-header">
+                <span class="panel-title">👥 人員庫 (點擊或拖拉)</span>
+            </div>
+            <input type="text" id="searchInput" class="search-box" placeholder="搜尋姓名、電話..." oninput="filterSource()">
+            <div id="sourceList" class="list-area" ondrop="drop(event, 'source')" ondragover="allowDrop(event)">
+                </div>
         </div>
 
-        <div class="form-group">
-            <label>來源 (店點)</label>
-            <input type="text" id="origin" readonly>
+        <div class="panel" style="border-color: var(--highlight);">
+            <div class="panel-header">
+                <span class="panel-title" style="color:var(--highlight);">📋 投保名單</span>
+                <span id="countBadge" class="count-badge">0 人</span>
+            </div>
+            <div id="targetList" class="list-area" ondrop="drop(event, 'target')" ondragover="allowDrop(event)">
+                <div style="text-align:center; color:#666; font-size:12px; margin-top:20px;" id="emptyMsg">
+                    請從左側拖入或點擊人員
+                </div>
+            </div>
         </div>
-
-        <div class="form-group">
-            <label>姓名</label>
-            <input type="text" id="name" readonly>
-        </div>
-
-        <div class="form-group">
-            <label>身分證字號</label>
-            <input type="text" id="uid" readonly>
-        </div>
-
-        <div class="form-group">
-            <label>生日 (民國年)</label>
-            <input type="text" id="birthday" readonly>
-        </div>
-
-        <div class="form-group">
-            <label>手機號碼</label>
-            <input type="text" id="phone" readonly>
-        </div>
-
-        <button class="btn-copy" onclick="copyData()">📋 確認無誤，一鍵複製</button>
-        <a href="dashboard.html" class="btn-back">⬅️ 返回主選單</a>
     </div>
 
-    <script src="staffData.js"></script>
+    <div class="bottom-bar">
+        <a href="dashboard.html" class="btn btn-back">⬅️</a>
+        <button class="btn btn-clear" onclick="clearTarget()">🗑️ 清空</button>
+        <button class="btn btn-gen" onclick="generateAndCopy()">📋 一鍵生成並複製</button>
+    </div>
+
     <script>
-<script>
-    // 1. 讀取資料庫
-    const cachedDB = localStorage.getItem('STAFF_DB_CACHE');
-    const loginPhone = localStorage.getItem('loginPhone');
-    
-    if (!cachedDB || !loginPhone) {
-        alert("資料庫未載入，請重新登入");
-        window.location.href = 'index.html';
-    }
+        if (localStorage.getItem('theme') === 'light') document.body.classList.add('light-mode');
 
-    const STAFF_DB = JSON.parse(cachedDB);
-    const user = STAFF_DB[loginPhone];
+        const cachedDB = localStorage.getItem('STAFF_DB_CACHE');
+        if (!cachedDB) { alert('請先登入以同步資料'); window.location.href = 'index.html'; }
+        
+        const STAFF_DB = JSON.parse(cachedDB);
+        let staffList = Object.values(STAFF_DB);
+        // 排序：入職日
+        staffList.sort((a, b) => new Date(b.entryDate || 0) - new Date(a.entryDate || 0));
 
-    if (!user) {
-        alert("找不到您的資料");
-        window.location.href = 'index.html';
-    }
+        let selectedStaffIds = new Set(); // 用 Set 紀錄已選的人 (避免重複)
 
-    // 2. 自動填入表單
-    document.getElementById('origin').value = user.origin || "未設定";
-    document.getElementById('name').value = user.name;
-    document.getElementById('uid').value = user.id;
-    // ... (後面保持一樣)
-</script>
-        document.getElementById('birthday').value = user.birthday;
-        document.getElementById('phone').value = loginPhone;
+        // 初始化
+        renderSource();
 
-        // 3. 複製功能
-        function copyData() {
-            // 組合出你要的格式
-            const textToCopy = `【保險資料回報】\n姓名：${user.name}\n身分證：${user.id}\n生日：${user.birthday}\n手機：${loginPhone}\n來源：${user.origin}`;
-            
-            navigator.clipboard.writeText(textToCopy).then(() => {
-                alert("✅ 資料已複製！請切換到 LINE 貼上。");
-            }).catch(err => {
-                alert("複製失敗，請手動截圖。");
+        // 渲染左側列表
+        function renderSource() {
+            const container = document.getElementById('sourceList');
+            const keyword = document.getElementById('searchInput').value.toLowerCase();
+            container.innerHTML = "";
+
+            staffList.forEach(staff => {
+                // 如果已經在右邊，左邊就不顯示
+                if (selectedStaffIds.has(staff.phone)) return;
+
+                if ((staff.name && staff.name.includes(keyword)) || (staff.phone && staff.phone.includes(keyword))) {
+                    const div = createCard(staff, 'source');
+                    container.appendChild(div);
+                }
             });
         }
-    </script>
 
+        // 渲染右側列表
+        function renderTarget() {
+            const container = document.getElementById('targetList');
+            const emptyMsg = document.getElementById('emptyMsg');
+            container.innerHTML = "";
+
+            if (selectedStaffIds.size === 0) {
+                if(emptyMsg) emptyMsg.style.display = "block";
+                container.appendChild(emptyMsg || createEmptyMsg());
+            } else {
+                if(emptyMsg) emptyMsg.style.display = "none";
+                selectedStaffIds.forEach(phone => {
+                    const staff = staffList.find(s => s.phone === phone);
+                    if (staff) {
+                        const div = createCard(staff, 'target');
+                        container.appendChild(div);
+                    }
+                });
+            }
+            document.getElementById('countBadge').innerText = `${selectedStaffIds.size} 人`;
+        }
+
+        function createEmptyMsg() {
+            const div = document.createElement('div');
+            div.id = 'emptyMsg';
+            div.style.textAlign = 'center'; div.style.color = '#666'; div.style.fontSize = '12px'; div.style.marginTop = '20px';
+            div.innerText = '請從左側拖入或點擊人員';
+            return div;
+        }
+
+        // 建立卡片元件
+        function createCard(staff, type) {
+            const div = document.createElement('div');
+            div.className = `staff-item ${type === 'target' ? 'selected-item' : ''}`;
+            div.draggable = true;
+            div.dataset.phone = staff.phone;
+            
+            // 拖拉事件
+            div.ondragstart = (e) => {
+                e.dataTransfer.setData("phone", staff.phone);
+                e.dataTransfer.setData("origin", type);
+            };
+
+            // 點擊事件 (快速移動)
+            div.onclick = () => {
+                if (type === 'source') {
+                    selectedStaffIds.add(staff.phone);
+                } else {
+                    selectedStaffIds.delete(staff.phone);
+                }
+                refreshAll();
+            };
+
+            const icon = type === 'source' ? '➜' : '✕';
+            
+            div.innerHTML = `
+                <div class="s-info">
+                    <span class="s-name">${staff.name}</span>
+                    <span class="s-phone">${staff.phone}</span>
+                </div>
+                <div class="s-action">${icon}</div>
+            `;
+            return div;
+        }
+
+        function filterSource() {
+            renderSource();
+        }
+
+        function refreshAll() {
+            renderSource();
+            renderTarget();
+        }
+
+        function clearTarget() {
+            if(confirm("確定要清空名單嗎？")) {
+                selectedStaffIds.clear();
+                refreshAll();
+            }
+        }
+
+        // === 拖拉相關邏輯 ===
+        function allowDrop(ev) {
+            ev.preventDefault();
+            ev.currentTarget.classList.add('drag-over');
+        }
+
+        function drop(ev, targetType) {
+            ev.preventDefault();
+            document.querySelectorAll('.list-area').forEach(el => el.classList.remove('drag-over'));
+            
+            const phone = ev.dataTransfer.getData("phone");
+            const origin = ev.dataTransfer.getData("origin");
+
+            if (targetType === 'target' && origin === 'source') {
+                selectedStaffIds.add(phone);
+            } else if (targetType === 'source' && origin === 'target') {
+                selectedStaffIds.delete(phone);
+            }
+            refreshAll();
+        }
+        
+        // 修正：拖拉離開時移除樣式
+        document.querySelectorAll('.list-area').forEach(el => {
+            el.addEventListener('dragleave', () => el.classList.remove('drag-over'));
+        });
+
+        // === 🔥 核心：一鍵生成並複製 ===
+        function generateAndCopy() {
+            if (selectedStaffIds.size === 0) { alert("請先選擇人員！"); return; }
+
+            // 讓使用者輸入地點 (選填)
+            const loc = prompt("請輸入投保地點 (例如：台中大遠百)，不填則留空", "");
+            let text = loc ? `${loc}\n\n` : "";
+
+            let index = 1;
+            selectedStaffIds.forEach(phone => {
+                const s = staffList.find(st => st.phone === phone);
+                if (s) {
+                    // 處理生日 (轉民國年)
+                    let bDayStr = s.birthday || "";
+                    let rocBday = "??.??.??";
+                    
+                    // 支援 / . - 等分隔符
+                    let parts = bDayStr.split(/[-/.]/); 
+                    if (parts.length >= 3) {
+                        let y = parseInt(parts[0]);
+                        let m = parts[1];
+                        let d = parts[2];
+                        if (y > 1911) y -= 1911; // 轉民國
+                        rocBday = `${y}.${m}.${d}`;
+                    } else if (bDayStr.length >= 6) {
+                        rocBday = bDayStr; 
+                    }
+
+                    // 格式：1.姓名 / 生日 / 身分證 / 電話
+                    text += `${index}.${s.name} / ${rocBday} / ${s.id || "無身分證"} / ${s.phone}\n`;
+                    index++;
+                }
+            });
+
+            navigator.clipboard.writeText(text).then(() => {
+                alert(`✅ 已複製 ${selectedStaffIds.size} 人的保險資料！\n\n${text}`);
+            }).catch(err => {
+                alert("❌ 複製失敗，請手動複製。\n\n" + text);
+            });
+        }
+
+    </script>
 </body>
 </html>
