@@ -39,20 +39,10 @@
             display: flex; flex-direction: column; align-items: center; justify-content: center;
         }
 
-        /* 正面 (一般員工) */
         .login-card { background: var(--card-bg); border: 1px solid rgba(255,255,255,0.1); }
-        
-        /* 背面 (管理員 - 紅色警戒) */
-        .login-card-back { 
-            background: #2c0000; border: 2px solid #ff4444; 
-            transform: rotateY(180deg); color: #ffcccc;
-        }
+        .login-card-back { background: #2c0000; border: 2px solid #ff4444; transform: rotateY(180deg); color: #ffcccc; }
 
-        /* 隱形密道按鈕 */
-        .secret-trigger {
-            position: fixed; top: 0; left: 0; width: 100%; height: 50px; z-index: 999;
-        }
-
+        .secret-trigger { position: fixed; top: 0; left: 0; width: 100%; height: 50px; z-index: 999; }
         .logo { width: 80px; height: 80px; border-radius: 20px; margin-bottom: 20px; }
         h1 { font-size: 24px; margin-bottom: 5px; }
         p { color: var(--text-sub); font-size: 14px; margin-bottom: 30px; }
@@ -66,23 +56,24 @@
         }
         input:focus { border-color: var(--primary); }
 
-        .btn-main {
-            width: 100%; padding: 16px; margin-top: 10px;
-            background-color: var(--primary); color: #000;
-            border: none; border-radius: 100px; font-weight: bold; cursor: pointer;
-        }
+        .btn-main { width: 100%; padding: 16px; margin-top: 10px; background-color: var(--primary); color: #000; border: none; border-radius: 100px; font-weight: bold; cursor: pointer; }
         .btn-admin { background-color: #ff4444; color: white; } 
 
-        #status-msg { font-size: 12px; color: var(--text-sub); margin-top: 25px; opacity: 0.8; }
-        
-        #install-btn {
-            display: none; margin-top: 15px;
-            background: rgba(255, 255, 255, 0.1); color: var(--primary);
-            padding: 8px 16px; border-radius: 20px; font-size: 12px; 
-            cursor: pointer; border: 1px solid var(--primary);
+        /* 🔥 資料同步訊息：強制單行顯示 */
+        #status-msg { 
+            font-size: 12px; color: var(--text-sub); margin-top: 25px; opacity: 0.8; 
+            display: flex; align-items: center; justify-content: center; gap: 5px; white-space: nowrap;
         }
         
-        .theme-toggle { position: fixed; bottom: 20px; font-size: 12px; cursor: pointer; color: var(--text-sub); padding: 8px 16px; background: rgba(255,255,255,0.1); border-radius: 20px; }
+        #install-btn { display: none; margin-top: 15px; background: rgba(255, 255, 255, 0.1); color: var(--primary); padding: 8px 16px; border-radius: 20px; font-size: 12px; cursor: pointer; border: 1px solid var(--primary); }
+        
+        /* 🔥 固定右上角的日夜切換 */
+        .theme-toggle { 
+            position: fixed; top: 20px; right: 20px; 
+            font-size: 12px; cursor: pointer; color: var(--text-sub); 
+            padding: 8px 16px; background: rgba(255,255,255,0.1); border-radius: 20px; 
+            z-index: 1000;
+        }
     </style>
 </head>
 <body>
@@ -93,16 +84,8 @@
         <div class="login-card">
             <img src="img/logo.png" class="logo">
             <h1>陳記元宵</h1>
-            <p>數位戰情中心 (一般通道)</p>
-            
-            <div class="input-group">
-                <label>手機號碼</label>
-                <input type="tel" id="account" placeholder="09xxxxxxxx" maxlength="10">
-            </div>
-            <div class="input-group">
-                <label>密碼 (生日)</label>
-                <input type="password" id="pwd" placeholder="例如：870101" maxlength="6">
-            </div>
+            <p>數位戰情中心</p> <div class="input-group"><label>手機號碼</label><input type="tel" id="account" placeholder="09xxxxxxxx" maxlength="10"></div>
+            <div class="input-group"><label>密碼 (生日)</label><input type="password" id="pwd" placeholder="例如：870101" maxlength="6"></div>
 
             <button id="loginBtn" class="btn-main" onclick="login('STAFF')" disabled>連線中...</button>
             <button id="install-btn">📲 點我安裝於桌面</button>
@@ -113,22 +96,14 @@
             <img src="img/logo.png" class="logo" style="filter: hue-rotate(140deg);">
             <h1 style="color:#ff4444;">最高權限後台</h1>
             <p style="color:#faa;">非管理人員請勿嘗試</p>
-            
-            <div class="input-group">
-                <label style="color:#faa;">管理員帳號</label>
-                <input type="tel" id="admin-account" placeholder="09xxxxxxxx" style="background:#4a0000; border-color:#800000; color:#fff;">
-            </div>
-            <div class="input-group">
-                <label style="color:#faa;">管理員密碼</label>
-                <input type="password" id="admin-pwd" placeholder="生日" style="background:#4a0000; border-color:#800000; color:#fff;">
-            </div>
-
+            <div class="input-group"><label style="color:#faa;">管理員帳號</label><input type="tel" id="admin-account" placeholder="09xxxxxxxx" style="background:#4a0000; border-color:#800000; color:#fff;"></div>
+            <div class="input-group"><label style="color:#faa;">管理員密碼</label><input type="password" id="admin-pwd" placeholder="生日" style="background:#4a0000; border-color:#800000; color:#fff;"></div>
             <button class="btn-main btn-admin" onclick="login('ADMIN')">解鎖戰情室</button>
             <div style="margin-top:20px; font-size:12px; cursor:pointer; opacity:0.5;" onclick="toggleAdminMode()">⬅️ 返回一般通道</div>
         </div>
     </div>
 
-    <div class="theme-toggle" onclick="toggleTheme()">🌙 / ☀️ 切換</div>
+    <div class="theme-toggle" onclick="toggleTheme()">🌙 / ☀️</div>
 
     <script>
         function toggleTheme() {
@@ -137,25 +112,19 @@
         }
         if (localStorage.getItem('theme') === 'light') document.body.classList.add('light-mode');
 
-        function toggleAdminMode() {
-            document.getElementById('cardStack').classList.toggle('flipped');
-        }
+        function toggleAdminMode() { document.getElementById('cardStack').classList.toggle('flipped'); }
 
-        // 🔴 已更新您的新佈署連結 (V5.0 薪資履歷版)
-        const API_URL = "https://script.google.com/macros/s/AKfycbwf3pxGcLPji15sP0ba7IRyAF547CAwhVcqQHRSYkj0HBy3_wRMQQ2u38rpUvdNipbM2A/exec"; 
+        const API_URL = "https://script.google.com/macros/s/AKfycbzoKZF4S-glIAc9mf5taRQymcicddF6BQAIzDyrf2qCLO2DN-oD_ECVO-ooYcMUfrO7JA/exec"; 
         
         let STAFF_DB = {};
         const cachedData = localStorage.getItem('STAFF_DB_CACHE');
-        if (cachedData) {
-            STAFF_DB = JSON.parse(cachedData);
-            enableLogin("已載入快取資料");
-        }
+        if (cachedData) { STAFF_DB = JSON.parse(cachedData); enableLogin("已載入快取資料"); }
 
         fetch(API_URL).then(res => res.json()).then(data => {
             STAFF_DB = data;
             localStorage.setItem('STAFF_DB_CACHE', JSON.stringify(data));
             const now = new Date();
-            const timeStr = `${now.getFullYear()}年${String(now.getMonth()+1).padStart(2,'0')}月${String(now.getDate()).padStart(2,'0')}日 ${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
+            const timeStr = `${now.getHours().toString().padStart(2,'0')}:${now.getMinutes().toString().padStart(2,'0')}:${now.getSeconds().toString().padStart(2,'0')}`;
             enableLogin(`資料庫已同步最新版 (${timeStr}) ✅`);
             
             const savedPhone = localStorage.getItem('loginPhone');
@@ -179,7 +148,6 @@
             const acc = document.getElementById(isBackdoor ? 'admin-account' : 'account').value;
             const pwd = document.getElementById(isBackdoor ? 'admin-pwd' : 'pwd').value;
 
-            // 特例：老闆無敵帳號 (NICK)
             if (acc === "0936588349" && pwd === "831222") {
                  localStorage.setItem('loginPhone', acc);
                  if(!STAFF_DB[acc]) STAFF_DB[acc] = { name: "NICK", role: "ADMIN", origin: "管理員" };
@@ -191,25 +159,16 @@
 
             if (STAFF_DB[acc] && String(STAFF_DB[acc].pwd) === String(pwd)) {
                 localStorage.setItem('loginPhone', acc);
-                
-                // === 關鍵邏輯：透過哪扇門進來的？ ===
                 if (isBackdoor) {
                     const userRole = (STAFF_DB[acc].role || "").toUpperCase();
-                    if (userRole.includes("ADMIN")) {
-                        alert("管理員身分確認，歡迎進入戰情室。");
-                        window.location.replace('dashboard.html');
-                    } else {
-                        alert("權限不足！您雖是員工但非管理職，請走正面通道。");
-                    }
+                    if (userRole.includes("ADMIN")) { alert("管理員身分確認"); window.location.replace('dashboard.html'); } 
+                    else { alert("權限不足！"); }
                 } else {
-                    // 走正門：一律強制設為 STAFF
                     STAFF_DB[acc].role = "STAFF";
                     localStorage.setItem('STAFF_DB_CACHE', JSON.stringify(STAFF_DB));
                     window.location.replace('dashboard.html');
                 }
-            } else {
-                alert("帳號或密碼錯誤");
-            }
+            } else { alert("帳號或密碼錯誤"); }
         }
 
         let deferredPrompt;
