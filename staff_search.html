@@ -69,27 +69,29 @@
         .icon-btn { text-decoration: none; font-size: 20px; transition: transform 0.2s; }
         .icon-btn:active { transform: scale(1.2); }
 
-        /* 🔥 新增：檔期履歷列表樣式 */
         .history-list { display: flex; flex-direction: column; gap: 8px; margin-top: 10px; }
-        .history-item { 
-            padding: 12px; border-radius: 12px; display: flex; justify-content: space-between; align-items: center; 
-            font-size: 14px; border: 1px solid transparent; 
-        }
-        /* 亮燈：做過 */
+        .history-item { padding: 12px; border-radius: 12px; display: flex; justify-content: space-between; align-items: center; font-size: 14px; border: 1px solid transparent; }
         .history-item.active { background: rgba(255, 213, 79, 0.15); border-color: var(--tag-active); color: var(--text-main); font-weight: bold; }
         .history-item.active .h-tag { background: var(--tag-active); color: #000; padding: 2px 8px; border-radius: 4px; font-size: 12px; }
-        /* 滅燈：沒做過 */
         .history-item.inactive { background: rgba(125,125,125,0.05); color: #666; }
         .history-item.inactive .h-tag { display: none; }
         
-        /* 🔥 新增：檔期名單 Modal 樣式 */
-        .roster-group { margin-bottom: 15px; }
-        .roster-loc { font-weight: bold; color: var(--primary); margin-bottom: 5px; border-bottom: 1px dashed #555; padding-bottom: 2px; }
+        /* 檔期名單 Modal */
+        .roster-group { margin-bottom: 20px; background: rgba(255,255,255,0.03); padding: 10px; border-radius: 12px; }
+        .roster-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; border-bottom: 1px dashed #555; padding-bottom: 5px; }
+        .roster-loc { font-weight: bold; color: var(--primary); font-size: 15px; }
         .roster-names { display: flex; flex-wrap: wrap; gap: 8px; }
         .roster-person { background: var(--card-bg); border: 1px solid #555; padding: 4px 10px; border-radius: 12px; font-size: 13px; cursor: pointer; }
         .roster-person:active { background: var(--primary); color: #fff; }
         
-        /* 算命區樣式 */
+        /* 🔥 複製保險名單按鈕 */
+        .btn-copy-ins { 
+            background: #4285F4; color: white; border: none; border-radius: 20px; 
+            padding: 4px 10px; font-size: 11px; cursor: pointer; display: flex; align-items: center; gap: 4px; 
+        }
+        .btn-copy-ins:active { transform: scale(0.95); opacity: 0.8; }
+
+        /* 算命區 */
         .fate-group { margin-bottom: 20px; }
         .fate-header { display: flex; align-items: center; margin-bottom: 8px; }
         .fate-num { width: 30px; height: 30px; background: var(--primary); color: white; border-radius: 50%; text-align: center; line-height: 30px; font-weight: bold; margin-right: 10px; }
@@ -132,7 +134,6 @@
         <div class="chart-card"><div class="chart-title">📍 居住地 (縣市)</div><div id="chart-loc"></div></div>
         <div class="chart-card"><div class="chart-title">🎓 學校/科系</div><div id="chart-school"></div></div>
     </div>
-
     <div id="birthday-section" class="section">
         <div class="calendar-header">
             <button class="cal-btn" onclick="changeMonth(-1)">◀</button>
@@ -142,7 +143,6 @@
         <div class="calendar-grid"><div class="cal-day-header">日</div><div class="cal-day-header">一</div><div class="cal-day-header">二</div><div class="cal-day-header">三</div><div class="cal-day-header">四</div><div class="cal-day-header">五</div><div class="cal-day-header">六</div></div>
         <div id="cal-body" class="calendar-grid"></div>
     </div>
-
     <div id="fate-section" class="section">
         <div class="chart-card"><div class="chart-title">🔢 生命靈數分析</div><div id="fate-container"></div></div>
     </div>
@@ -195,8 +195,6 @@
         if (!cachedDB) { alert('請先登入以同步資料'); window.location.href = 'index.html'; }
         
         const STAFF_DB = JSON.parse(cachedDB);
-        
-        // 處理檔期列表
         const ALL_EVENTS = STAFF_DB["_ALL_EVENTS_"] || [];
         delete STAFF_DB["_ALL_EVENTS_"];
         delete STAFF_DB["_ERROR_"];
@@ -208,7 +206,6 @@
         const itemsPerPage = 20;
         let filteredList = staffList;
 
-        // 1. 列表渲染
         function renderList() {
             const listEl = document.getElementById('list');
             listEl.innerHTML = "";
@@ -234,7 +231,6 @@
                     avatarHtml = `<img src="${photoUrl}" class="avatar-small" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex'"><div class="avatar-small" style="display:none">${staff.name.slice(-2)}</div>`;
                 }
 
-                // 顯示服務檔期數
                 let serviceCount = staff.history ? Object.keys(staff.history).length : 0;
                 let serviceTag = serviceCount > 0 ? `<span class="tag" style="color:var(--highlight)">★${serviceCount}檔</span>` : "";
 
@@ -249,17 +245,12 @@
             });
         }
 
-        // 2. 搜尋 (含檔期)
         function searchStaff() {
             const k = document.getElementById('searchInput').value.toLowerCase();
             filteredList = staffList.filter(s => {
                 let basicMatch = (s.name && s.name.includes(k)) || (s.phone && s.phone.includes(k)) || (s.school && s.school.includes(k));
                 let historyMatch = false;
-                if (s.history) {
-                    for (let event in s.history) {
-                        if (event.includes(k)) { historyMatch = true; break; }
-                    }
-                }
+                if (s.history) { for (let event in s.history) { if (event.includes(k)) { historyMatch = true; break; } } }
                 return basicMatch || historyMatch;
             });
             currentPage = 1;
@@ -267,36 +258,29 @@
             renderList();
         }
 
-        // 3. 詳細資料 (含履歷亮燈)
         function showDetail(staff) {
             document.getElementById('d-name').innerText = staff.name;
             document.getElementById('d-phone').innerText = staff.phone;
             document.getElementById('d-entry').innerText = getEntryDate(staff.entryDate);
             document.getElementById('d-school').innerText = staff.school || "-";
             document.getElementById('d-id').innerText = staff.id || "-";
-            
             document.getElementById('d-call-btn').href = `tel:${staff.phone}`;
             const lineBtn = document.getElementById('d-line-btn');
             if(staff.lineId) { lineBtn.href = `https://line.me/ti/p/~${staff.lineId}`; lineBtn.style.display = 'inline-flex'; } else { lineBtn.style.display = 'none'; }
-            
             const mapBtn = document.getElementById('d-map-btn');
             document.getElementById('d-addr').innerText = staff.address || "-";
             if(staff.address) { mapBtn.href = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(staff.address)}`; mapBtn.style.display = 'inline-flex'; } else { mapBtn.style.display = 'none'; }
-
             const photoEl = document.getElementById('d-photo');
             const avatarText = document.getElementById('d-avatar-text');
             photoEl.classList.remove('zoomed'); 
-            if (staff.photo) { photoEl.src = convertDriveLink(staff.photo); photoEl.style.display = 'block'; avatarText.style.display = 'none'; } 
-            else { photoEl.style.display = 'none'; avatarText.innerText = staff.name.slice(-2); avatarText.style.display = 'flex'; }
+            if (staff.photo) { photoEl.src = convertDriveLink(staff.photo); photoEl.style.display = 'block'; avatarText.style.display = 'none'; } else { photoEl.style.display = 'none'; avatarText.innerText = staff.name.slice(-2); avatarText.style.display = 'flex'; }
 
-            // 統計
             const history = staff.history || {};
             const count = Object.keys(history).length;
             const hours = staff.totalHours || 0;
             document.getElementById('d-count').innerText = count;
             document.getElementById('d-hours').innerText = hours;
 
-            // 履歷列表
             const listEl = document.getElementById('d-history-list');
             listEl.innerHTML = "";
             let sortedEvents = [...ALL_EVENTS].sort().reverse(); 
@@ -305,7 +289,6 @@
                 const isAttended = history[eventName] !== undefined;
                 const record = history[eventName] || {};
                 const div = document.createElement('div');
-                
                 if (isAttended) {
                     div.className = 'history-item active';
                     div.innerHTML = `${eventName} <span class="h-tag">${record.hours}h | ${record.loc}</span>`;
@@ -319,11 +302,10 @@
                 }
                 listEl.appendChild(div);
             });
-
             document.getElementById('detailModal').style.display = 'flex';
         }
 
-        // 4. 檔期名單
+        // 4. 檔期名單 Modal (含保險生成功能)
         function openRosterModal(eventName) {
             document.getElementById('r-title').innerText = `${eventName} 人員名單`;
             const contentEl = document.getElementById('r-content');
@@ -345,10 +327,25 @@
             for (let loc in groups) {
                 let section = document.createElement('div');
                 section.className = 'roster-group';
-                let title = document.createElement('div');
+                
+                // 🔥 Header: 地點 + 複製按鈕
+                let header = document.createElement('div');
+                header.className = 'roster-header';
+                
+                let title = document.createElement('span');
                 title.className = 'roster-loc';
                 title.innerText = `📍 ${loc}`;
-                section.appendChild(title);
+                
+                let copyBtn = document.createElement('button');
+                copyBtn.className = 'btn-copy-ins';
+                copyBtn.innerHTML = '📋 複製保險名單';
+                // 綁定複製事件，傳入地點與人員陣列
+                copyBtn.onclick = () => copyInsuranceList(loc, groups[loc]);
+                
+                header.appendChild(title);
+                header.appendChild(copyBtn);
+                section.appendChild(header);
+
                 let namesDiv = document.createElement('div');
                 namesDiv.className = 'roster-names';
                 groups[loc].forEach(s => {
@@ -364,7 +361,44 @@
             document.getElementById('rosterModal').style.display = 'flex';
         }
 
-        // 輔助函式
+        // 🔥 核心功能：生成並複製保險名單
+        function copyInsuranceList(locName, staffArray) {
+            let text = `${locName}\n\n`;
+            
+            staffArray.forEach((s, index) => {
+                // 1. 處理民國年生日
+                let bDayStr = s.birthday || "";
+                let rocBday = "??.??.??";
+                
+                // 嘗試解析 YYYY/MM/DD 或 YYYY-MM-DD
+                let parts = bDayStr.split(/[-/]/); 
+                if (parts.length >= 3) {
+                    let y = parseInt(parts[0]);
+                    let m = parts[1];
+                    let d = parts[2];
+                    
+                    // 如果是西元，轉民國
+                    if (y > 1911) y -= 1911;
+                    
+                    rocBday = `${y}.${m}.${d}`;
+                } else if (bDayStr.length >= 6) {
+                    // 如果原本就是類似 831222 的格式
+                    rocBday = bDayStr; 
+                }
+
+                // 2. 組合字串
+                // 格式：1.陳皓揚 / 83.12.22 / F129356872 / 0936588349
+                text += `${index + 1}.${s.name} / ${rocBday} / ${s.id || "無身分證"} / ${s.phone}\n`;
+            });
+
+            // 3. 複製到剪貼簿
+            navigator.clipboard.writeText(text).then(() => {
+                alert(`✅ 已複製 [${locName}] 的保險名單！\n\n內容如下：\n${text}`);
+            }).catch(err => {
+                alert("❌ 複製失敗，請手動複製。\n\n" + text);
+            });
+        }
+
         function closeRosterModal(e) { if(e.target.id === 'rosterModal') document.getElementById('rosterModal').style.display = 'none'; }
         function getAge(birthdayStr) { if(!birthdayStr) return "?"; let parts = String(birthdayStr).split('/'); if(parts.length < 1) return "?"; let y = parseInt(parts[0]); if(y < 1911) y += 1911; return new Date().getFullYear() - y; }
         function getEntryDate(ts) { if(!ts) return "未登記"; const d = new Date(ts); return `${d.getFullYear()}/${d.getMonth()+1}/${d.getDate()}`; }
@@ -372,7 +406,6 @@
         function toggleZoom(container) { const img = container.querySelector('img'); if(img && img.style.display !== 'none') img.classList.toggle('zoomed'); }
         function closeModal(e) { if(e.target.id === 'detailModal') document.getElementById('detailModal').style.display = 'none'; }
         
-        // 分頁與頁籤
         function prevPage() { if(currentPage > 1) { currentPage--; renderList(); window.scrollTo(0,0); } }
         function nextPage() { if(currentPage * itemsPerPage < filteredList.length) { currentPage++; renderList(); window.scrollTo(0,0); } }
         function switchTab(tabName) {
@@ -385,7 +418,6 @@
              if(tabName === 'analysis') renderAnalysis(); if(tabName === 'birthday') renderBirthday(); if(tabName === 'fate') renderFate();
         }
         
-        // 算命與分析圖表 (保持原邏輯)
         function renderFate() {
             const el = document.getElementById('fate-container'); el.innerHTML = ""; let groups = {};
             staffList.forEach(s => { if(!s.birthday) return; let num = calcLifePath(s.birthday); if(!groups[num]) groups[num] = []; groups[num].push(s); });
@@ -428,7 +460,7 @@
                 el.innerHTML += html + `</div>`;
             }
         }
-        function changeMonth(delta) { /* 需宣告全域 calDate 變數，略，功能保留 */ }
+        function changeMonth(delta) { /* 略 */ }
         function findAndShow(phone) { const s = staffList.find(x => x.phone === phone); if(s) showDetail(s); }
 
         renderList();
