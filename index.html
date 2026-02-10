@@ -54,7 +54,8 @@
         }
         input:focus { border-color: var(--primary); }
 
-        .btn-main { width: 100%; padding: 16px; margin-top: 10px; background-color: var(--primary); color: #000; border: none; border-radius: 100px; font-weight: bold; cursor: pointer; }
+        .btn-main { width: 100%; padding: 16px; margin-top: 10px; background-color: var(--primary); color: #000; border: none; border-radius: 100px; font-weight: bold; cursor: pointer; transition: 0.3s; }
+        .btn-main:disabled { background-color: #555; color: #888; cursor: not-allowed; }
         .btn-admin { background-color: #ff4444; color: white; } 
 
         #status-msg { 
@@ -88,7 +89,7 @@
 
             <button id="loginBtn" class="btn-main" onclick="login('STAFF')" disabled>連線中...</button>
             <button id="install-btn">📲 點我安裝於桌面</button>
-            <div id="status-msg"><span class="loader"></span> 強制同步最新資料中...</div>
+            <div id="status-msg"><span class="loader"></span> 同步資料中...</div>
         </div>
 
         <div class="login-card-back">
@@ -110,24 +111,27 @@
 
         function toggleAdminMode() { document.getElementById('cardStack').classList.toggle('flipped'); }
 
-        // 🔴 請確保這個網址是 Apps Script 最新部署出來的網址
-        const API_URL = "https://script.google.com/macros/s/AKfycbz3AuLNKyBqZGvOM7iP-qb7-BuGTxX3XCwb4GSPEcwbqRLkqk2sEIyW8tTgidkQCUy11g/exec"; 
+        // 🔴 請填入你剛剛部署的新網址 (如果沒變就用原本的)
+        const API_URL = "https://script.google.com/macros/s/AKfycbyLO3zTxyFKgotNziNKwua_jjIXbco0HDPsjggPezC_HcJdZzOkqtI3EMqiAPRr-ueAiQ/exec"; 
         
         let STAFF_DB = {};
         
-        // 🔥 這裡改了！我們會優先嘗試抓新資料，抓不到才用快取
+        // 🔥 秒開邏輯：只要有快取，馬上開啟按鈕
         const cachedData = localStorage.getItem('STAFF_DB_CACHE');
         if (cachedData) { 
-            STAFF_DB = JSON.parse(cachedData); 
-            // 雖然有快取，但按鈕先不開，等更新完再說 (為了確保生日資料載入)
+            try {
+                STAFF_DB = JSON.parse(cachedData); 
+                document.getElementById('loginBtn').disabled = false; // 按鈕亮起
+                document.getElementById('loginBtn').innerText = "登入系統";
+                console.log("已載入快取，可立即登入");
+            } catch(e) { console.log("快取損毀"); }
         }
 
-        // 🔥 強制加入時間戳記 (Cache Buster)，逼迫 Google 給我們最新資料
+        // 🔥 背景更新：加上時間戳避免快取死角
         const noCacheUrl = API_URL + "?t=" + new Date().getTime();
 
         fetch(noCacheUrl).then(res => res.json()).then(data => {
             STAFF_DB = data;
-            // 覆蓋舊資料
             localStorage.setItem('STAFF_DB_CACHE', JSON.stringify(data));
             
             const now = new Date();
@@ -136,33 +140,31 @@
             const statusEl = document.getElementById('status-msg');
             statusEl.innerHTML = `✅ 資料同步完成 (${timeStr})`;
             statusEl.style.color = "var(--primary)";
-            enableLogin();
             
-            // 自動登入判斷
+            // 如果這是第一次載入(沒快取)，現在才開啟按鈕
+            if (document.getElementById('loginBtn').disabled) {
+                document.getElementById('loginBtn').disabled = false;
+                document.getElementById('loginBtn').innerText = "登入系統";
+            }
+            
+            // 自動登入檢查
             const savedPhone = localStorage.getItem('loginPhone');
             if (savedPhone && STAFF_DB[savedPhone]) {
-                // 如果是自動登入，也要確保資料已經更新了
-                window.location.replace('dashboard.html');
+                // 不自動轉跳，避免無限迴圈，除非在 login 頁面
+                // window.location.replace('dashboard.html'); 
+                // 註：這裡建議不要自動轉跳，讓使用者看一眼狀態比較安全
             }
         }).catch(err => {
             if(cachedData) {
-                // 如果連線失敗但有舊資料，勉強讓能登入
                 const statusEl = document.getElementById('status-msg');
-                statusEl.innerHTML = "⚠️ 連線失敗 (使用舊資料)";
+                statusEl.innerHTML = "⚠️ 使用離線資料";
                 statusEl.style.color = "#FF9800";
-                enableLogin();
             } else {
                 const statusEl = document.getElementById('status-msg');
-                statusEl.innerHTML = "❌ 連線失敗，請檢查網路";
+                statusEl.innerHTML = "❌ 連線失敗";
                 statusEl.style.color = "#FF5252";
             }
         });
-
-        function enableLogin() {
-            const btn = document.getElementById('loginBtn');
-            btn.disabled = false;
-            btn.innerText = "登入系統";
-        }
 
         function login(mode) {
             const isBackdoor = (mode === 'ADMIN');
