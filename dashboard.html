@@ -9,38 +9,71 @@
     <link rel="icon" href="img/logo.png" type="image/png">
     
     <style>
-        /* CSS 保持不變 */
-        :root { --bg-color: #121212; --text-main: #E0E0E0; --text-sub: #AAAAAA; --card-bg: #1E1E1E; --yellow-card: #3E3820; --yellow-text: #FFD54F; --pink-card: #3E2028; --pink-text: #F48FB1; --purple-card: #2D203E; --purple-text: #CE93D8; --avatar-border: #333; }
-        body.light-mode { --bg-color: #FDFCF4; --text-main: #1C1B1F; --text-sub: #666666; --card-bg: #FFF; --yellow-card: #FFE16D; --yellow-text: #221B00; --pink-card: #FFD8E4; --pink-text: #31111D; --purple-card: #E8DEF8; --purple-text: #1D192B; --avatar-border: #fff; }
+        :root { 
+            --bg-color: #121212; --text-main: #E0E0E0; --text-sub: #AAAAAA; --card-bg: #1E1E1E; 
+            --yellow-card: #3E3820; --yellow-text: #FFD54F; /* 暗色模式的黃：亮黃 */
+            --pink-card: #3E2028; --pink-text: #F48FB1; 
+            --purple-card: #2D203E; --purple-text: #CE93D8; 
+            --avatar-border: #333; 
+            --border-line: rgba(255,255,255,0.1);
+        }
+        body.light-mode { 
+            --bg-color: #FDFCF4; --text-main: #1C1B1F; --text-sub: #666666; --card-bg: #FFF; 
+            --yellow-card: #FFF8E1; --yellow-text: #B08D00; /* 🔥 白天模式的黃：改為深古銅金，不再刺眼 */
+            --pink-card: #FFEBEE; --pink-text: #C2185B; 
+            --purple-card: #F3E5F5; --purple-text: #7B1FA2; 
+            --avatar-border: #fff; 
+            --border-line: #E0E0E0;
+        }
+        
         body { font-family: 'MiSans', sans-serif; background-color: var(--bg-color); margin: 0; padding: 20px; padding-bottom: 100px; color: var(--text-main); transition: 0.3s; animation: fadeIn 0.3s; }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        
         .top-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; margin-top: 10px; }
         .greeting h2 { margin: 0; font-size: 20px; font-weight: normal; color: var(--text-sub); }
         .greeting span { font-weight: bold; font-size: 28px; color: var(--text-main); }
         .text-avatar { width: 60px; height: 60px; border-radius: 50%; background: #FFD54F; color: #333; cursor: pointer; display: flex; justify-content: center; align-items: center; font-size: 22px; font-weight: bold; border: 3px solid var(--avatar-border); box-shadow: 0 4px 10px rgba(0,0,0,0.2); }
+        
         .category-label { font-size: 14px; font-weight: bold; color: var(--text-sub); margin-bottom: 10px; margin-left: 5px; margin-top: 25px; }
         .card-container { display: flex; flex-direction: column; gap: 12px; }
-        .menu-item { display: flex; align-items: center; justify-content: space-between; padding: 20px 24px; border-radius: 24px; text-decoration: none; font-weight: 500; }
+        .menu-item { display: flex; align-items: center; justify-content: space-between; padding: 20px 24px; border-radius: 24px; text-decoration: none; font-weight: 500; border: 1px solid transparent; }
+        /* 白天模式加個細邊框增加層次 */
+        body.light-mode .menu-item { border-color: rgba(0,0,0,0.05); box-shadow: 0 2px 5px rgba(0,0,0,0.02); }
+        
         .menu-item:active { transform: scale(0.98); opacity: 0.8; }
         .vip-only { display: none; } 
         .bg-yellow { background-color: var(--yellow-card); color: var(--yellow-text); }
         .bg-pink { background-color: var(--pink-card); color: var(--pink-text); }
         .bg-purple { background-color: var(--purple-card); color: var(--purple-text); }
-        .btn-logout { display: block; width: 100%; text-align: center; padding: 15px; margin-bottom: 80px; color: var(--text-sub); text-decoration: none; font-size: 14px; }
-        .theme-toggle { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background: rgba(125,125,125,0.2); color: var(--text-sub); padding: 8px 16px; border-radius: 20px; font-size: 12px; cursor: pointer; backdrop-filter: blur(5px); border: 1px solid rgba(255,255,255,0.1); }
         
+        .btn-logout { display: block; width: 100%; text-align: center; padding: 15px; margin-bottom: 80px; color: var(--text-sub); text-decoration: none; font-size: 14px; }
+        .theme-toggle { position: fixed; top: 20px; right: 20px; font-size: 12px; cursor: pointer; color: var(--text-sub); padding: 8px 16px; background: rgba(255,255,255,0.1); border-radius: 20px; z-index: 1000; }
+        body.light-mode .theme-toggle { background: rgba(0,0,0,0.05); }
+
+        /* Modal 優化 */
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); display: none; justify-content: center; align-items: center; z-index: 1000; backdrop-filter: blur(5px); }
         .modal { background: var(--card-bg); width: 85%; max-width: 350px; max-height: 80vh; overflow-y: auto; border-radius: 24px; padding: 30px; text-align: center; position: relative; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
         .modal-close { position: absolute; top: 15px; right: 15px; font-size: 24px; cursor: pointer; color: var(--text-sub); }
-        .profile-stat { margin-top: 20px; text-align: left; background: rgba(125,125,125,0.1); padding: 15px; border-radius: 12px; }
-        
-        /* 🔥 標題樣式優化 */
+        .profile-stat { margin-top: 20px; text-align: left; background: rgba(125,125,125,0.05); padding: 15px; border-radius: 12px; }
         .profile-stat label { font-size: 14px; color: var(--text-main); font-weight: bold; display: flex; align-items: center; gap: 5px; }
         .profile-stat div { font-size: 16px; color: var(--text-sub); margin-top: 5px; font-weight: normal; }
         
+        /* 🔥 歷史列表視覺大改版：去背、純文字、分隔線 */
         .history-list { margin-top: 20px; text-align: left; max-height: 200px; overflow-y: auto; }
-        .history-item { padding: 8px; border-bottom: 1px solid rgba(125,125,125,0.2); font-size: 13px; display: flex; justify-content: space-between; }
-        .h-tag { background: var(--yellow-text); color: #000; padding: 1px 6px; border-radius: 4px; font-size: 11px; }
+        .history-item { 
+            padding: 12px 5px; 
+            border-bottom: 1px solid var(--border-line); 
+            font-size: 14px; 
+            display: flex; justify-content: space-between; align-items: center;
+            color: var(--text-main);
+        }
+        /* 右側資訊改用顏色區分，不用背景塊 */
+        .h-tag { 
+            color: var(--yellow-text); 
+            font-weight: bold; 
+            font-size: 12px; 
+            text-align: right;
+        }
     </style>
 </head>
 <body>
@@ -73,14 +106,14 @@
     </div>
 
     <a href="#" class="btn-logout" onclick="logout()">🔒 登出系統</a>
-    <div class="theme-toggle" onclick="toggleTheme()">🌙 / ☀️ 切換</div>
+    <div class="theme-toggle" onclick="toggleTheme()">🌙 / ☀️</div>
 
     <div id="profileModal" class="modal-overlay" onclick="closeProfile(event)">
         <div class="modal">
             <span class="modal-close" onclick="document.getElementById('profileModal').style.display='none'">×</span>
             <div id="modal-avatar" class="text-avatar" style="width:80px; height:80px; margin:0 auto; font-size:30px;">員</div>
             <h2 id="modal-name" style="margin-top:15px; margin-bottom:5px;">姓名</h2>
-            <p id="modal-role" style="color:var(--yellow-text); font-size:12px; margin:0;">職位</p>
+            <p id="modal-role" style="color:var(--yellow-text); font-size:12px; margin:0; font-weight:bold;">職位</p>
             
             <div class="profile-stat">
                 <label>📅 入職時間</label>
@@ -133,27 +166,31 @@
                 document.getElementById('modal-entry').innerText = `${entry.getFullYear()}/${entry.getMonth()+1}/${entry.getDate()}`;
             } else { document.getElementById('modal-entry').innerText = "未登記"; }
 
-            // 🔥 計算排名與格式
+            // 排名
             let allHours = Object.values(STAFF_DB).map(s => s.totalHours || 0);
             allHours.sort((a, b) => b - a);
             let myRank = allHours.indexOf(user.totalHours || 0) + 1;
             let totalPeople = allHours.length;
             
-            // 標題改為：服務資歷 (時數排名 117/306)
-            document.getElementById('modal-rank-label').innerHTML = `🚀 服務資歷 <span style="font-size:12px; color:#888;">(時數排名 ${myRank}/${totalPeople})</span>`;
+            document.getElementById('modal-rank-label').innerHTML = `🚀 服務資歷 <span style="font-size:12px; color:var(--text-sub); font-weight:normal;">(時數排名 ${myRank}/${totalPeople})</span>`;
             
-            // 內容改為：共 7 檔期，累積 9.5 小時
             let serviceCount = user.history ? Object.keys(user.history).length : 0;
             document.getElementById('modal-days').innerText = `共 ${serviceCount} 檔期，累積 ${user.totalHours||0} 小時`;
 
+            // 🔥 乾淨列表生成 (無背景)
             const listEl = document.getElementById('modal-history');
             listEl.innerHTML = "";
             if(user.history) {
                 let events = Object.keys(user.history).sort().reverse();
                 events.forEach(evt => {
                     let record = user.history[evt];
-                    let niceLoc = (record.loc || "").replace(/\s*[|｜│]\s*/g, "");
-                    listEl.innerHTML += `<div class="history-item"><span>${evt}</span><span class="h-tag">${record.hours}h | ${niceLoc}</span></div>`;
+                    let niceLoc = (record.loc || "").replace(/\s*[|｜│]\s*/g, ""); // 清除符號
+                    // 這裡改用純文字結構，移除 background
+                    listEl.innerHTML += `
+                        <div class="history-item">
+                            <span>${evt}</span>
+                            <span class="h-tag">${record.hours}h │ ${niceLoc}</span>
+                        </div>`;
                 });
             }
 
