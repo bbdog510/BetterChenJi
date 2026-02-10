@@ -57,7 +57,6 @@
         .btn-main { width: 100%; padding: 16px; margin-top: 10px; background-color: var(--primary); color: #000; border: none; border-radius: 100px; font-weight: bold; cursor: pointer; }
         .btn-admin { background-color: #ff4444; color: white; } 
 
-        /* 🔥 修復綠勾勾換行問題 */
         #status-msg { 
             font-size: 12px; color: var(--text-sub); margin-top: 25px; opacity: 0.8; height: 20px; 
             display: flex; align-items: center; justify-content: center; gap: 8px; white-space: nowrap; 
@@ -71,14 +70,7 @@
         @keyframes rotation { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
         #install-btn { display: none; margin-top: 15px; background: rgba(255, 255, 255, 0.1); color: var(--primary); padding: 8px 16px; border-radius: 20px; font-size: 12px; cursor: pointer; border: 1px solid var(--primary); }
-        
-        /* 🔥 修復日夜切換位置 */
-        .theme-toggle { 
-            position: fixed; top: 20px; right: 20px; 
-            font-size: 12px; cursor: pointer; color: var(--text-sub); 
-            padding: 8px 16px; background: rgba(255,255,255,0.1); border-radius: 20px; 
-            z-index: 1000; 
-        }
+        .theme-toggle { position: fixed; top: 20px; right: 20px; font-size: 12px; cursor: pointer; color: var(--text-sub); padding: 8px 16px; background: rgba(255,255,255,0.1); border-radius: 20px; z-index: 1000; }
     </style>
 </head>
 <body>
@@ -89,12 +81,14 @@
         <div class="login-card">
             <img src="img/logo.png" class="logo">
             <h1>陳記元宵</h1>
-            <p>數位戰情中心</p> <div class="input-group"><label>手機號碼</label><input type="tel" id="account" placeholder="09xxxxxxxx" maxlength="10"></div>
+            <p>數位戰情中心</p>
+            
+            <div class="input-group"><label>手機號碼</label><input type="tel" id="account" placeholder="09xxxxxxxx" maxlength="10"></div>
             <div class="input-group"><label>密碼 (生日)</label><input type="password" id="pwd" placeholder="例如：870101" maxlength="6"></div>
 
             <button id="loginBtn" class="btn-main" onclick="login('STAFF')" disabled>連線中...</button>
             <button id="install-btn">📲 點我安裝於桌面</button>
-            <div id="status-msg"><span class="loader"></span> Loading...</div>
+            <div id="status-msg"><span class="loader"></span> 強制同步最新資料中...</div>
         </div>
 
         <div class="login-card-back">
@@ -116,19 +110,26 @@
 
         function toggleAdminMode() { document.getElementById('cardStack').classList.toggle('flipped'); }
 
+        // 🔴 請確保這個網址是 Apps Script 最新部署出來的網址
         const API_URL = "https://script.google.com/macros/s/AKfycbz3AuLNKyBqZGvOM7iP-qb7-BuGTxX3XCwb4GSPEcwbqRLkqk2sEIyW8tTgidkQCUy11g/exec"; 
         
         let STAFF_DB = {};
+        
+        // 🔥 這裡改了！我們會優先嘗試抓新資料，抓不到才用快取
         const cachedData = localStorage.getItem('STAFF_DB_CACHE');
         if (cachedData) { 
             STAFF_DB = JSON.parse(cachedData); 
-            document.getElementById('loginBtn').disabled = false;
-            document.getElementById('loginBtn').innerText = "登入系統";
+            // 雖然有快取，但按鈕先不開，等更新完再說 (為了確保生日資料載入)
         }
 
-        fetch(API_URL).then(res => res.json()).then(data => {
+        // 🔥 強制加入時間戳記 (Cache Buster)，逼迫 Google 給我們最新資料
+        const noCacheUrl = API_URL + "?t=" + new Date().getTime();
+
+        fetch(noCacheUrl).then(res => res.json()).then(data => {
             STAFF_DB = data;
+            // 覆蓋舊資料
             localStorage.setItem('STAFF_DB_CACHE', JSON.stringify(data));
+            
             const now = new Date();
             const timeStr = `${now.getHours().toString().padStart(2,'0')}:${now.getMinutes().toString().padStart(2,'0')}`;
             
@@ -137,12 +138,22 @@
             statusEl.style.color = "var(--primary)";
             enableLogin();
             
+            // 自動登入判斷
             const savedPhone = localStorage.getItem('loginPhone');
-            if (savedPhone && STAFF_DB[savedPhone]) window.location.replace('dashboard.html');
+            if (savedPhone && STAFF_DB[savedPhone]) {
+                // 如果是自動登入，也要確保資料已經更新了
+                window.location.replace('dashboard.html');
+            }
         }).catch(err => {
-            if(!cachedData) {
+            if(cachedData) {
+                // 如果連線失敗但有舊資料，勉強讓能登入
                 const statusEl = document.getElementById('status-msg');
-                statusEl.innerHTML = "❌ 連線失敗";
+                statusEl.innerHTML = "⚠️ 連線失敗 (使用舊資料)";
+                statusEl.style.color = "#FF9800";
+                enableLogin();
+            } else {
+                const statusEl = document.getElementById('status-msg');
+                statusEl.innerHTML = "❌ 連線失敗，請檢查網路";
                 statusEl.style.color = "#FF5252";
             }
         });
