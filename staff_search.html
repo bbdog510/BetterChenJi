@@ -60,19 +60,13 @@
         .icon-btn { text-decoration: none; font-size: 20px; transition: transform 0.2s; }
         .icon-btn:active { transform: scale(1.2); }
 
-        /* 歷史履歷列表 */
         .history-list { display: flex; flex-direction: column; gap: 5px; margin-top: 10px; }
-        .history-item { 
-            padding: 12px 5px; border-bottom: 1px solid var(--border-line); 
-            display: flex; justify-content: space-between; align-items: center; 
-            font-size: 14px; color: var(--text-main);
-        }
+        .history-item { padding: 12px 5px; border-bottom: 1px solid var(--border-line); display: flex; justify-content: space-between; align-items: center; font-size: 14px; color: var(--text-main); }
         .history-item.active { font-weight: bold; }
         .history-item.active .h-tag { color: var(--tag-active); font-weight: bold; font-size: 12px; }
         .history-item.inactive { color: var(--text-sub); opacity: 0.7; }
         .history-item.inactive .h-tag { display: none; }
         
-        /* 檔期名單 Modal */
         .roster-group { margin-bottom: 20px; background: rgba(255,255,255,0.03); padding: 10px; border-radius: 12px; }
         .roster-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; border-bottom: 1px dashed #555; padding-bottom: 5px; }
         .roster-loc { font-weight: bold; color: var(--primary); font-size: 15px; }
@@ -80,37 +74,23 @@
         .roster-person { background: var(--card-bg); border: 1px solid #555; padding: 4px 10px; border-radius: 12px; font-size: 13px; cursor: pointer; }
         .btn-copy-ins { background: #4285F4; color: white; border: none; border-radius: 20px; padding: 4px 10px; font-size: 11px; cursor: pointer; display: flex; align-items: center; gap: 4px; }
 
-        /* 🔥 新增：撈資料區塊樣式 */
+        /* 撈資料樣式 */
         .filter-container { background: var(--card-bg); padding: 15px; border-radius: 16px; margin-bottom: 15px; border: 1px solid var(--border); }
         .filter-title { font-size: 14px; color: var(--primary); margin-bottom: 10px; font-weight: bold; }
         .checkbox-group { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 15px; }
         .checkbox-item { display: flex; align-items: center; gap: 5px; font-size: 14px; background: rgba(125,125,125,0.1); padding: 6px 12px; border-radius: 20px; cursor: pointer; transition: 0.2s; border: 1px solid transparent; }
         .checkbox-item.checked { background: var(--primary); color: #fff; border-color: var(--primary); }
-        .checkbox-item input { display: none; } /* 隱藏原生 checkbox */
+        .checkbox-item input { display: none; }
         
-        .btn-filter { width: 100%; padding: 12px; background: var(--highlight); color: #000; font-weight: bold; border: none; border-radius: 12px; cursor: pointer; font-size: 16px; }
-        .btn-filter:active { transform: scale(0.98); }
+        .btn-filter { width: 100%; padding: 12px; background: var(--highlight); color: #000; font-weight: bold; border: none; border-radius: 12px; cursor: pointer; font-size: 16px; margin-bottom: 10px;}
+        
+        /* 🔥 匯出按鈕 */
+        .btn-export { width: 100%; padding: 12px; background: #4CAF50; color: #fff; font-weight: bold; border: none; border-radius: 12px; cursor: pointer; font-size: 16px; display: none; } 
+        .btn-export:active { transform: scale(0.98); }
+
         .filter-result-count { text-align: center; margin: 10px 0; font-size: 12px; color: var(--text-sub); }
 
-        /* 算命與圖表CSS (略，保持原樣) */
-        .chart-card { background: var(--card-bg); padding: 20px; border-radius: 16px; margin-bottom: 15px; }
-        .chart-title { font-weight: bold; margin-bottom: 15px; color: var(--primary); }
-        .bar-row { display: flex; align-items: center; margin-bottom: 8px; font-size: 12px; }
-        .bar-label { width: 100px; text-align: right; margin-right: 10px; color: var(--text-sub); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-        .bar-bg { flex: 1; background: rgba(125,125,125,0.1); height: 10px; border-radius: 5px; overflow: hidden; }
-        .bar-fill { height: 100%; background: var(--primary); border-radius: 5px; }
-        .bar-val { width: 40px; margin-left: 10px; color: var(--text-main); font-size: 11px;}
-        .calendar-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; background: var(--card-bg); padding: 10px; border-radius: 12px; }
-        .cal-btn { background: none; border: none; font-size: 20px; color: var(--primary); cursor: pointer; padding: 0 15px; }
-        .cal-month { font-size: 18px; font-weight: bold; }
-        .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 5px; text-align: center; font-size: 12px; }
-        .cal-day-header { color: var(--text-sub); padding-bottom: 5px; }
-        .cal-cell { min-height: 50px; background: var(--card-bg); border-radius: 8px; border: 1px solid var(--border); padding: 4px; display: flex; flex-direction: column; align-items: center; }
-        .cal-cell.today { border: 2px solid var(--primary); background: rgba(206, 147, 216, 0.1); }
-        .cal-date-num { font-weight: bold; margin-bottom: 2px; }
-        .cal-person { background: var(--primary); color: #fff; font-size: 10px; border-radius: 4px; padding: 2px 4px; margin-top: 2px; cursor: pointer; width: 90%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        .cal-person.is-me { background: var(--highlight); color: #000; border: 1px solid #fff; }
-        .fate-group { margin-bottom: 20px; } .fate-header { display: flex; align-items: center; margin-bottom: 8px; } .fate-num { width: 30px; height: 30px; background: var(--primary); color: white; border-radius: 50%; text-align: center; line-height: 30px; font-weight: bold; margin-right: 10px; } .fate-desc { font-size: 14px; font-weight: bold; } .fate-detail { font-size: 12px; color: var(--text-sub); margin-bottom: 10px; line-height: 1.4; padding-left: 40px; } .fate-list { display: flex; flex-wrap: wrap; gap: 8px; padding-left: 40px; } .fate-person { background: var(--card-bg); border: 1px solid var(--border); padding: 6px 12px; border-radius: 20px; font-size: 13px; cursor: pointer; } .fate-person.is-me { border: 2px solid var(--highlight); background: rgba(255, 213, 79, 0.2); font-weight: bold; }
+        .chart-card { background: var(--card-bg); padding: 20px; border-radius: 16px; margin-bottom: 15px; } .chart-title { font-weight: bold; margin-bottom: 15px; color: var(--primary); } .bar-row { display: flex; align-items: center; margin-bottom: 8px; font-size: 12px; } .bar-label { width: 100px; text-align: right; margin-right: 10px; color: var(--text-sub); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; } .bar-bg { flex: 1; background: rgba(125,125,125,0.1); height: 10px; border-radius: 5px; overflow: hidden; } .bar-fill { height: 100%; background: var(--primary); border-radius: 5px; } .bar-val { width: 40px; margin-left: 10px; color: var(--text-main); font-size: 11px;} .calendar-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; background: var(--card-bg); padding: 10px; border-radius: 12px; } .cal-btn { background: none; border: none; font-size: 20px; color: var(--primary); cursor: pointer; padding: 0 15px; } .cal-month { font-size: 18px; font-weight: bold; } .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 5px; text-align: center; font-size: 12px; } .cal-day-header { color: var(--text-sub); padding-bottom: 5px; } .cal-cell { min-height: 50px; background: var(--card-bg); border-radius: 8px; border: 1px solid var(--border); padding: 4px; display: flex; flex-direction: column; align-items: center; } .cal-cell.today { border: 2px solid var(--primary); background: rgba(206, 147, 216, 0.1); } .cal-date-num { font-weight: bold; margin-bottom: 2px; } .cal-person { background: var(--primary); color: #fff; font-size: 10px; border-radius: 4px; padding: 2px 4px; margin-top: 2px; cursor: pointer; width: 90%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; } .cal-person.is-me { background: var(--highlight); color: #000; border: 1px solid #fff; } .fate-group { margin-bottom: 20px; } .fate-header { display: flex; align-items: center; margin-bottom: 8px; } .fate-num { width: 30px; height: 30px; background: var(--primary); color: white; border-radius: 50%; text-align: center; line-height: 30px; font-weight: bold; margin-right: 10px; } .fate-desc { font-size: 14px; font-weight: bold; } .fate-detail { font-size: 12px; color: var(--text-sub); margin-bottom: 10px; line-height: 1.4; padding-left: 40px; } .fate-list { display: flex; flex-wrap: wrap; gap: 8px; padding-left: 40px; } .fate-person { background: var(--card-bg); border: 1px solid var(--border); padding: 6px 12px; border-radius: 20px; font-size: 13px; cursor: pointer; } .fate-person.is-me { border: 2px solid var(--highlight); background: rgba(255, 213, 79, 0.2); font-weight: bold; }
     </style>
 </head>
 <body>
@@ -121,7 +101,8 @@
 
     <div class="tabs">
         <div class="tab-btn active" onclick="switchTab('list')">👥 列表</div>
-        <div class="tab-btn" onclick="switchTab('filter')">🔍 撈資料</div> <div class="tab-btn" onclick="switchTab('analysis')">📊 大數據</div>
+        <div class="tab-btn" onclick="switchTab('filter')">🔍 撈資料</div>
+        <div class="tab-btn" onclick="switchTab('analysis')">📊 大數據</div>
         <div class="tab-btn" onclick="switchTab('birthday')">📅 壽星行事曆</div>
         <div class="tab-btn" onclick="switchTab('fate')">🔮 靈數算命</div>
     </div>
@@ -135,14 +116,13 @@
     <div id="filter-section" class="section">
         <div class="filter-container">
             <div class="filter-title">📅 年份選擇 (可複選)</div>
-            <div id="filter-years" class="checkbox-group">
-                </div>
+            <div id="filter-years" class="checkbox-group"></div>
             
             <div class="filter-title">🏮 檔期類型 (可複選)</div>
-            <div id="filter-events" class="checkbox-group">
-                </div>
+            <div id="filter-events" class="checkbox-group"></div>
             
             <button class="btn-filter" onclick="executeFilter()">🚀 開始撈取</button>
+            <button id="btn-export" class="btn-export" onclick="exportData()">📊 匯出成 Google Sheet</button>
         </div>
         
         <div id="filter-result-info" class="filter-result-count">請勾選條件並按按鈕</div>
@@ -219,34 +199,28 @@
         let currentPage = 1;
         const itemsPerPage = 20;
         let filteredList = staffList;
+        // 🔥 新增：用來存篩選後的名單，供匯出用
+        let currentFilterResults = []; 
+
         const CITY_ORDER = ["基隆", "台北", "新北", "桃園", "新竹", "苗栗", "台中", "彰化", "南投", "雲林", "嘉義", "台南", "高雄", "屏東", "宜蘭", "花蓮", "台東"];
         let calDate = new Date();
 
-        // === 初始化：撈資料選項 ===
+        // 🔴 請在這裡填入你剛剛新部署得到的 API 網址！ (很重要！)
+        const API_URL = "https://script.google.com/macros/s/AKfycby6dWhq1Zdjhq9Qb6B6onPmMdh8pulsxdwj8WLKO_vfefyxFdGpc4dDf0FBLNcU83NFag/exec"; 
+
         initFilterOptions();
 
         function initFilterOptions() {
             let years = new Set();
             let events = new Set();
-
             ALL_EVENTS.forEach(evt => {
-                // 解析 "2026元宵" -> 2026, 元宵
                 let match = evt.match(/(\d{4})(.+)/);
-                if (match) {
-                    years.add(match[1]);
-                    events.add(match[2]);
-                } else {
-                    events.add(evt); // 無法解析就整串當活動
-                }
+                if (match) { years.add(match[1]); events.add(match[2]); } else { events.add(evt); }
             });
-
-            // 渲染年份Checkbox
             const yearContainer = document.getElementById('filter-years');
             Array.from(years).sort().reverse().forEach(y => {
                 yearContainer.innerHTML += `<div class="checkbox-item" onclick="toggleCheck(this)">${y}<input type="checkbox" value="${y}"></div>`;
             });
-
-            // 渲染活動Checkbox
             const eventContainer = document.getElementById('filter-events');
             Array.from(events).sort().forEach(e => {
                 eventContainer.innerHTML += `<div class="checkbox-item" onclick="toggleCheck(this)">${e}<input type="checkbox" value="${e}"></div>`;
@@ -259,280 +233,118 @@
             checkbox.checked = !checkbox.checked;
         }
 
-        // 🔥 核心：執行篩選
+        // 執行篩選
         function executeFilter() {
-            // 1. 收集選中的年份
             const selectedYears = Array.from(document.querySelectorAll('#filter-years input:checked')).map(cb => cb.value);
-            // 2. 收集選中的活動
             const selectedEvents = Array.from(document.querySelectorAll('#filter-events input:checked')).map(cb => cb.value);
 
-            if (selectedYears.length === 0 && selectedEvents.length === 0) {
-                alert("請至少選擇一個年份或檔期類型！");
-                return;
-            }
+            if (selectedYears.length === 0 && selectedEvents.length === 0) { alert("請至少選擇一個年份或檔期類型！"); return; }
 
-            // 3. 過濾
             const resultList = document.getElementById('filter-list');
             resultList.innerHTML = "";
-            let matchCount = 0;
+            currentFilterResults = []; // 清空匯出清單
 
             staffList.forEach(staff => {
                 if (!staff.history) return;
-                
-                // 檢查該員工是否有任一符合的履歷
                 let hasMatch = false;
-                const myHistory = Object.keys(staff.history); // ["2026元宵", "2025冬至"]
+                const myHistory = Object.keys(staff.history); 
 
                 for (let h of myHistory) {
-                    let yMatch = false;
-                    let eMatch = false;
-
-                    // 年份檢查 (如果沒選年份，視為通過)
-                    if (selectedYears.length === 0) yMatch = true;
-                    else {
-                        for (let y of selectedYears) { if (h.includes(y)) { yMatch = true; break; } }
-                    }
-
-                    // 活動檢查 (如果沒選活動，視為通過)
-                    if (selectedEvents.length === 0) eMatch = true;
-                    else {
-                        for (let e of selectedEvents) { if (h.includes(e)) { eMatch = true; break; } }
-                    }
-
-                    if (yMatch && eMatch) {
-                        hasMatch = true;
-                        break; // 只要有一個符合就算中
-                    }
+                    let yMatch = (selectedYears.length === 0);
+                    let eMatch = (selectedEvents.length === 0);
+                    if (!yMatch) { for (let y of selectedYears) { if (h.includes(y)) { yMatch = true; break; } } }
+                    if (!eMatch) { for (let e of selectedEvents) { if (h.includes(e)) { eMatch = true; break; } } }
+                    if (yMatch && eMatch) { hasMatch = true; break; }
                 }
 
                 if (hasMatch) {
-                    matchCount++;
-                    // 渲染卡片 (簡化版)
+                    currentFilterResults.push(staff); // 加入匯出清單
+                    
                     let card = document.createElement('div');
                     card.className = "staff-card";
                     card.onclick = () => showDetail(staff);
-                    
                     let avatarHtml = `<div class="avatar-small">${staff.name.slice(-2)}</div>`;
                     if (staff.photo) {
                         const photoUrl = convertDriveLink(staff.photo);
                         avatarHtml = `<img src="${photoUrl}" class="avatar-small" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex'"><div class="avatar-small" style="display:none">${staff.name.slice(-2)}</div>`;
                     }
-                    
-                    // 顯示符合的檔期標籤 (選填)
                     let serviceTag = `<span class="tag" style="color:var(--highlight)">${Object.keys(staff.history).length}檔</span>`;
-
-                    card.innerHTML = `
-                        ${avatarHtml}
-                        <div class="info">
-                            <div class="name">${staff.name}</div>
-                            <div class="sub-info"><span class="tag">${staff.phone}</span> ${serviceTag}</div>
-                        </div>
-                    `;
+                    card.innerHTML = `${avatarHtml}<div class="info"><div class="name">${staff.name}</div><div class="sub-info"><span class="tag">${staff.phone}</span> ${serviceTag}</div></div>`;
                     resultList.appendChild(card);
                 }
             });
 
-            document.getElementById('filter-result-info').innerText = `共找到 ${matchCount} 位符合條件的夥伴`;
+            document.getElementById('filter-result-info').innerText = `共找到 ${currentFilterResults.length} 位符合條件的夥伴`;
+            // 顯示或隱藏匯出按鈕
+            const btnExport = document.getElementById('btn-export');
+            btnExport.style.display = currentFilterResults.length > 0 ? "block" : "none";
         }
 
-        // --- 其他既有功能保持不變 ---
-        function renderList() {
-            const listEl = document.getElementById('list'); listEl.innerHTML = "";
-            const start = (currentPage - 1) * itemsPerPage; const end = start + itemsPerPage; const pageData = filteredList.slice(start, end);
-            document.getElementById('pageInfo').innerText = `第 ${currentPage} 頁 / 共 ${Math.ceil(filteredList.length / itemsPerPage)} 頁`;
-            pageData.forEach(staff => {
-                let age = getAge(staff.birthday); let school = staff.school || "無"; let phone = staff.phone || "";
-                const isMeClass = (staff.phone === loggedInPhone) ? "is-me" : "";
-                const card = document.createElement('div'); card.className = `staff-card ${isMeClass}`; card.onclick = () => showDetail(staff);
-                let avatarHtml = `<div class="avatar-small">${staff.name.slice(-2)}</div>`;
-                if (staff.photo) { const photoUrl = convertDriveLink(staff.photo); avatarHtml = `<img src="${photoUrl}" class="avatar-small" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex'"><div class="avatar-small" style="display:none">${staff.name.slice(-2)}</div>`; }
-                let serviceCount = staff.history ? Object.keys(staff.history).length : 0;
-                let serviceTag = serviceCount > 0 ? `<span class="tag" style="color:var(--highlight)">★${serviceCount}檔</span>` : "";
-                card.innerHTML = `${avatarHtml}<div class="info"><div class="name">${staff.name} ${staff.alias ? `<small>(${staff.alias})</small>` : ''}</div><div class="sub-info"><span class="tag">${age}歲</span><span class="tag">${school}</span>${serviceTag}</div></div>`;
-                listEl.appendChild(card);
-            });
-        }
-
-        function searchStaff() {
-            const k = document.getElementById('searchInput').value.toLowerCase();
-            filteredList = staffList.filter(s => {
-                let basicMatch = (s.name && s.name.includes(k)) || (s.phone && s.phone.includes(k)) || (s.school && s.school.includes(k));
-                let historyMatch = false;
-                if (s.history) { for (let event in s.history) { if (event.includes(k)) { historyMatch = true; break; } } }
-                return basicMatch || historyMatch;
-            });
-            currentPage = 1; switchTab('list'); renderList();
-        }
-
-        function showDetail(staff) {
-            document.getElementById('d-name').innerText = staff.name;
-            document.getElementById('d-phone').innerText = staff.phone;
-            document.getElementById('d-entry').innerText = getEntryDate(staff.entryDate);
-            document.getElementById('d-school').innerText = staff.school || "-";
-            document.getElementById('d-id').innerText = staff.id || "-";
+        // 🔥 匯出功能
+        function exportData() {
+            if (currentFilterResults.length === 0) return;
             
-            let age = getAge(staff.birthday);
-            let bdayText = staff.birthday || "?";
-            let parts = bdayText.split(/[-/.]/);
-            if(parts.length >= 3) { let y = parseInt(parts[0]); if(y < 1911) y += 1911; bdayText = `${y}.${parts[1]}.${parts[2]}`; }
-            document.getElementById('d-age').innerText = `${bdayText} (${age}歲)`;
+            const btn = document.getElementById('btn-export');
+            btn.innerText = "⏳ 正在建立試算表...";
+            btn.disabled = true;
 
-            document.getElementById('d-call-btn').href = `tel:${staff.phone}`;
-            const lineBtn = document.getElementById('d-line-btn');
-            if(staff.lineId) { lineBtn.href = `https://line.me/ti/p/~${staff.lineId}`; lineBtn.style.display = 'inline-flex'; } else { lineBtn.style.display = 'none'; }
-            const mapBtn = document.getElementById('d-map-btn');
-            document.getElementById('d-addr').innerText = staff.address || "-";
-            if(staff.address) { mapBtn.href = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(staff.address)}`; mapBtn.style.display = 'inline-flex'; } else { mapBtn.style.display = 'none'; }
-            const photoEl = document.getElementById('d-photo');
-            const avatarText = document.getElementById('d-avatar-text');
-            photoEl.classList.remove('zoomed'); 
-            if (staff.photo) { photoEl.src = convertDriveLink(staff.photo); photoEl.style.display = 'block'; avatarText.style.display = 'none'; } else { photoEl.style.display = 'none'; avatarText.innerText = staff.name.slice(-2); avatarText.style.display = 'flex'; }
+            // 整理資料：姓名, 生日, 電話, 地址, 總次數, 最後檔期, 最後專櫃
+            let dataToSend = currentFilterResults.map(s => {
+                let historyKeys = s.history ? Object.keys(s.history).sort().reverse() : [];
+                let lastEvent = historyKeys.length > 0 ? historyKeys[0] : "-";
+                let lastLoc = (lastEvent !== "-" && s.history[lastEvent]) ? s.history[lastEvent].loc : "-";
+                lastLoc = lastLoc.replace(/\|/g, "");
 
-            const history = staff.history || {};
-            const count = Object.keys(history).length;
-            const hours = staff.totalHours || 0;
-            document.getElementById('d-count').innerText = count;
-            document.getElementById('d-hours').innerText = hours;
+                return [
+                    s.name, 
+                    s.birthday || "", 
+                    "'"+s.phone, // 強制轉文字防止0開頭消失
+                    s.address || "", 
+                    historyKeys.length, 
+                    lastEvent, 
+                    lastLoc
+                ];
+            });
 
-            const listEl = document.getElementById('d-history-list');
-            listEl.innerHTML = "";
-            let sortedEvents = [...ALL_EVENTS].sort().reverse(); 
-
-            sortedEvents.forEach(eventName => {
-                const isAttended = history[eventName] !== undefined;
-                const record = history[eventName] || {};
-                const div = document.createElement('div');
-                if (isAttended) {
-                    div.className = 'history-item active';
-                    let rawLoc = record.loc || "";
-                    let niceLoc = rawLoc.replace(/\s*[|｜│]\s*/g, ""); 
-                    div.innerHTML = `${eventName} <span class="h-tag">${record.hours}h│${niceLoc}</span>`;
-                    div.style.cursor = "pointer";
-                    div.onclick = (e) => { e.stopPropagation(); openRosterModal(eventName); };
+            fetch(API_URL, {
+                method: "POST",
+                mode: "text", // 這裡使用 text 模式來接收回傳的網址
+                headers: { "Content-Type": "text/plain;charset=utf-8" },
+                body: JSON.stringify({ 
+                    action: "export_staff", 
+                    data: dataToSend 
+                })
+            }).then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    btn.innerText = "✅ 匯出成功！(開啟中)";
+                    window.open(data.url, '_blank'); // 🔥 直接打開新表格
                 } else {
-                    div.className = 'history-item inactive';
-                    div.innerHTML = `${eventName} (未參加)`;
-                    div.style.cursor = "pointer";
-                    div.onclick = (e) => { e.stopPropagation(); openRosterModal(eventName); };
+                    alert("匯出失敗：" + data.msg);
+                    btn.innerText = "📊 匯出成 Google Sheet";
                 }
-                listEl.appendChild(div);
+                btn.disabled = false;
+            }).catch(e => {
+                // 如果遇到 CORS 擋住 (有時候會發生)，至少提示使用者
+                alert("⚠️ 請求已發送！如果沒有自動跳轉，請檢查您的 Google Drive。");
+                btn.innerText = "📊 匯出成 Google Sheet";
+                btn.disabled = false;
             });
-            document.getElementById('detailModal').style.display = 'flex';
         }
 
-        function openRosterModal(eventName) {
-            document.getElementById('r-title').innerText = `${eventName} 人員名單`;
-            const contentEl = document.getElementById('r-content');
-            contentEl.innerHTML = "載入中...";
-            let groups = {}; 
-            staffList.forEach(s => {
-                if (s.history && s.history[eventName]) {
-                    let loc = s.history[eventName].loc || "未知地點";
-                    let cleanLoc = loc.replace(/\s*[|｜│]\s*/g, "");
-                    if (!groups[cleanLoc]) groups[cleanLoc] = [];
-                    groups[cleanLoc].push(s);
-                }
-            });
-            contentEl.innerHTML = "";
-            if (Object.keys(groups).length === 0) { contentEl.innerHTML = "<div style='text-align:center; color:#888;'>此檔期尚無人員紀錄</div>"; return; }
-            let sortedKeys = Object.keys(groups).sort((a, b) => {
-                let indexA = CITY_ORDER.findIndex(city => a.includes(city));
-                let indexB = CITY_ORDER.findIndex(city => b.includes(city));
-                return (indexA === -1 ? 999 : indexA) - (indexB === -1 ? 999 : indexB);
-            });
-            sortedKeys.forEach(loc => {
-                let section = document.createElement('div');
-                section.className = 'roster-group';
-                let header = document.createElement('div'); header.className = 'roster-header';
-                let title = document.createElement('span'); title.className = 'roster-loc'; title.innerText = `📍 ${loc}`;
-                let copyBtn = document.createElement('button'); copyBtn.className = 'btn-copy-ins'; copyBtn.innerHTML = '📋 複製保險名單';
-                copyBtn.onclick = () => copyInsuranceList(loc, groups[loc]);
-                header.appendChild(title); header.appendChild(copyBtn); section.appendChild(header);
-                let namesDiv = document.createElement('div'); namesDiv.className = 'roster-names';
-                groups[loc].forEach(s => {
-                    let span = document.createElement('span'); span.className = 'roster-person'; span.innerText = s.name;
-                    span.onclick = () => { document.getElementById('rosterModal').style.display = 'none'; showDetail(s); };
-                    namesDiv.appendChild(span);
-                });
-                section.appendChild(namesDiv);
-                contentEl.appendChild(section);
-            });
-            document.getElementById('rosterModal').style.display = 'flex';
-        }
-
-        function copyInsuranceList(locName, staffArray) {
-            let text = `${locName}\n\n`;
-            staffArray.forEach((s, index) => {
-                let bDayStr = s.birthday || ""; let rocBday = "??.??.??";
-                let parts = bDayStr.split(/[-/.]/); 
-                if (parts.length >= 3) { let y = parseInt(parts[0]); let m = parts[1]; let d = parts[2]; if (y > 1911) y -= 1911; rocBday = `${y}.${m}.${d}`; } 
-                else if (bDayStr.length >= 6) { rocBday = bDayStr; }
-                text += `${index + 1}.${s.name} / ${rocBday} / ${s.id || "無身分證"} / ${s.phone}\n`;
-            });
-            navigator.clipboard.writeText(text).then(() => { alert(`✅ 已複製！`); }).catch(err => { alert("❌ 複製失敗"); });
-        }
-
-        function renderAnalysis() {
-            let gender={ "男":0, "女":0, "未知":0 }, age={ "18以下":0, "19-22":0, "23-25":0, "26以上":0 }, loc={}, school={};
-            let topHours = [], topCounts = [];
-            staffList.forEach(s => {
-                if(s.id && s.id.length === 10) { let g = s.id[1]; if(g === '1') gender["男"]++; else if(g === '2') gender["女"]++; else gender["未知"]++; } else gender["未知"]++;
-                let a = getAge(s.birthday); if(a!=="?") { if(a<=18) age["18以下"]++; else if(a<=22) age["19-22"]++; else if(a<=25) age["23-25"]++; else age["26以上"]++; }
-                if(s.address) { let l = s.address.substring(0, 3); loc[l] = (loc[l] || 0) + 1; }
-                if(s.school) { let sc = s.school.split('/')[0] || s.school; school[sc] = (school[sc] || 0) + 1; }
-                if(s.totalHours > 0) topHours.push({name: s.name, val: s.totalHours});
-                let count = s.history ? Object.keys(s.history).length : 0;
-                if(count > 0) topCounts.push({name: s.name, val: count});
-            });
-            drawChart('chart-age', age); drawChart('chart-gender', gender); drawChart('chart-loc', loc); drawChart('chart-school', school);
-            topHours.sort((a,b) => b.val - a.val); topCounts.sort((a,b) => b.val - a.val);
-            drawRanking('chart-top-hours', topHours.slice(0, 10), 'hr'); drawRanking('chart-top-count', topCounts.slice(0, 10), '次');
-        }
+        // ... (其他既有函式保持不變) ...
+        function renderList() { const listEl = document.getElementById('list'); listEl.innerHTML = ""; const start = (currentPage - 1) * itemsPerPage; const end = start + itemsPerPage; const pageData = filteredList.slice(start, end); document.getElementById('pageInfo').innerText = `第 ${currentPage} 頁 / 共 ${Math.ceil(filteredList.length / itemsPerPage)} 頁`; pageData.forEach(staff => { let age = getAge(staff.birthday); let school = staff.school || "無"; let phone = staff.phone || ""; const isMeClass = (staff.phone === loggedInPhone) ? "is-me" : ""; const card = document.createElement('div'); card.className = `staff-card ${isMeClass}`; card.onclick = () => showDetail(staff); let avatarHtml = `<div class="avatar-small">${staff.name.slice(-2)}</div>`; if (staff.photo) { const photoUrl = convertDriveLink(staff.photo); avatarHtml = `<img src="${photoUrl}" class="avatar-small" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex'"><div class="avatar-small" style="display:none">${staff.name.slice(-2)}</div>`; } let serviceCount = staff.history ? Object.keys(staff.history).length : 0; let serviceTag = serviceCount > 0 ? `<span class="tag" style="color:var(--highlight)">★${serviceCount}檔</span>` : ""; card.innerHTML = `${avatarHtml}<div class="info"><div class="name">${staff.name} ${staff.alias ? `<small>(${staff.alias})</small>` : ''}</div><div class="sub-info"><span class="tag">${age}歲</span><span class="tag">${school}</span>${serviceTag}</div></div>`; listEl.appendChild(card); }); }
+        function searchStaff() { const k = document.getElementById('searchInput').value.toLowerCase(); filteredList = staffList.filter(s => { let basicMatch = (s.name && s.name.includes(k)) || (s.phone && s.phone.includes(k)) || (s.school && s.school.includes(k)); let historyMatch = false; if (s.history) { for (let event in s.history) { if (event.includes(k)) { historyMatch = true; break; } } } return basicMatch || historyMatch; }); currentPage = 1; switchTab('list'); renderList(); }
+        function showDetail(staff) { document.getElementById('d-name').innerText = staff.name; document.getElementById('d-phone').innerText = staff.phone; document.getElementById('d-entry').innerText = getEntryDate(staff.entryDate); document.getElementById('d-school').innerText = staff.school || "-"; document.getElementById('d-id').innerText = staff.id || "-"; let age = getAge(staff.birthday); let bdayText = staff.birthday || "?"; let parts = bdayText.split(/[-/.]/); if(parts.length >= 3) { let y = parseInt(parts[0]); if(y < 1911) y += 1911; bdayText = `${y}.${parts[1]}.${parts[2]}`; } document.getElementById('d-age').innerText = `${bdayText} (${age}歲)`; document.getElementById('d-call-btn').href = `tel:${staff.phone}`; const lineBtn = document.getElementById('d-line-btn'); if(staff.lineId) { lineBtn.href = `https://line.me/ti/p/~${staff.lineId}`; lineBtn.style.display = 'inline-flex'; } else { lineBtn.style.display = 'none'; } const mapBtn = document.getElementById('d-map-btn'); document.getElementById('d-addr').innerText = staff.address || "-"; if(staff.address) { mapBtn.href = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(staff.address)}`; mapBtn.style.display = 'inline-flex'; } else { mapBtn.style.display = 'none'; } const photoEl = document.getElementById('d-photo'); const avatarText = document.getElementById('d-avatar-text'); photoEl.classList.remove('zoomed'); if (staff.photo) { photoEl.src = convertDriveLink(staff.photo); photoEl.style.display = 'block'; avatarText.style.display = 'none'; } else { photoEl.style.display = 'none'; avatarText.innerText = staff.name.slice(-2); avatarText.style.display = 'flex'; } const history = staff.history || {}; const count = Object.keys(history).length; const hours = staff.totalHours || 0; document.getElementById('d-count').innerText = count; document.getElementById('d-hours').innerText = hours; const listEl = document.getElementById('d-history-list'); listEl.innerHTML = ""; let sortedEvents = [...ALL_EVENTS].sort().reverse(); sortedEvents.forEach(eventName => { const isAttended = history[eventName] !== undefined; const record = history[eventName] || {}; const div = document.createElement('div'); if (isAttended) { div.className = 'history-item active'; let rawLoc = record.loc || ""; let niceLoc = rawLoc.replace(/\s*[|｜│]\s*/g, ""); div.innerHTML = `${eventName} <span class="h-tag">${record.hours}h│${niceLoc}</span>`; div.style.cursor = "pointer"; div.onclick = (e) => { e.stopPropagation(); openRosterModal(eventName); }; } else { div.className = 'history-item inactive'; div.innerHTML = `${eventName} (未參加)`; div.style.cursor = "pointer"; div.onclick = (e) => { e.stopPropagation(); openRosterModal(eventName); }; } listEl.appendChild(div); }); document.getElementById('detailModal').style.display = 'flex'; }
+        function openRosterModal(eventName) { document.getElementById('r-title').innerText = `${eventName} 人員名單`; const contentEl = document.getElementById('r-content'); contentEl.innerHTML = "載入中..."; let groups = {}; staffList.forEach(s => { if (s.history && s.history[eventName]) { let loc = s.history[eventName].loc || "未知地點"; let cleanLoc = loc.replace(/\s*[|｜│]\s*/g, ""); if (!groups[cleanLoc]) groups[cleanLoc] = []; groups[cleanLoc].push(s); } }); contentEl.innerHTML = ""; if (Object.keys(groups).length === 0) { contentEl.innerHTML = "<div style='text-align:center; color:#888;'>此檔期尚無人員紀錄</div>"; return; } let sortedKeys = Object.keys(groups).sort((a, b) => { let indexA = CITY_ORDER.findIndex(city => a.includes(city)); let indexB = CITY_ORDER.findIndex(city => b.includes(city)); return (indexA === -1 ? 999 : indexA) - (indexB === -1 ? 999 : indexB); }); sortedKeys.forEach(loc => { let section = document.createElement('div'); section.className = 'roster-group'; let header = document.createElement('div'); header.className = 'roster-header'; let title = document.createElement('span'); title.className = 'roster-loc'; title.innerText = `📍 ${loc}`; let copyBtn = document.createElement('button'); copyBtn.className = 'btn-copy-ins'; copyBtn.innerHTML = '📋 複製保險名單'; copyBtn.onclick = () => copyInsuranceList(loc, groups[loc]); header.appendChild(title); header.appendChild(copyBtn); section.appendChild(header); let namesDiv = document.createElement('div'); namesDiv.className = 'roster-names'; groups[loc].forEach(s => { let span = document.createElement('span'); span.className = 'roster-person'; span.innerText = s.name; span.onclick = () => { document.getElementById('rosterModal').style.display = 'none'; showDetail(s); }; namesDiv.appendChild(span); }); section.appendChild(namesDiv); contentEl.appendChild(section); }); document.getElementById('rosterModal').style.display = 'flex'; }
+        function copyInsuranceList(locName, staffArray) { let text = `${locName}\n\n`; staffArray.forEach((s, index) => { let bDayStr = s.birthday || ""; let rocBday = "??.??.??"; let parts = bDayStr.split(/[-/.]/); if (parts.length >= 3) { let y = parseInt(parts[0]); let m = parts[1]; let d = parts[2]; if (y > 1911) y -= 1911; rocBday = `${y}.${m}.${d}`; } else if (bDayStr.length >= 6) { rocBday = bDayStr; } text += `${index + 1}.${s.name} / ${rocBday} / ${s.id || "無身分證"} / ${s.phone}\n`; }); navigator.clipboard.writeText(text).then(() => { alert(`✅ 已複製！`); }).catch(err => { alert("❌ 複製失敗"); }); }
+        function renderAnalysis() { let gender={ "男":0, "女":0, "未知":0 }, age={ "18以下":0, "19-22":0, "23-25":0, "26以上":0 }, loc={}, school={}; let topHours = [], topCounts = []; staffList.forEach(s => { if(s.id && s.id.length === 10) { let g = s.id[1]; if(g === '1') gender["男"]++; else if(g === '2') gender["女"]++; else gender["未知"]++; } else gender["未知"]++; let a = getAge(s.birthday); if(a!=="?") { if(a<=18) age["18以下"]++; else if(a<=22) age["19-22"]++; else if(a<=25) age["23-25"]++; else age["26以上"]++; } if(s.address) { let l = s.address.substring(0, 3); loc[l] = (loc[l] || 0) + 1; } if(s.school) { let sc = s.school.split('/')[0] || s.school; school[sc] = (school[sc] || 0) + 1; } if(s.totalHours > 0) topHours.push({name: s.name, val: s.totalHours}); let count = s.history ? Object.keys(s.history).length : 0; if(count > 0) topCounts.push({name: s.name, val: count}); }); drawChart('chart-age', age); drawChart('chart-gender', gender); drawChart('chart-loc', loc); drawChart('chart-school', school); topHours.sort((a,b) => b.val - a.val); topCounts.sort((a,b) => b.val - a.val); drawRanking('chart-top-hours', topHours.slice(0, 10), 'hr'); drawRanking('chart-top-count', topCounts.slice(0, 10), '次'); }
         function drawChart(id, data) { const el = document.getElementById(id); el.innerHTML = ""; let total = Object.values(data).reduce((a,b)=>a+b, 0); let sorted = Object.entries(data).sort((a,b)=>b[1]-a[1]).slice(0, 8); sorted.forEach(([label, val]) => { let pct = Math.round((val / total) * 100); el.innerHTML += `<div class="bar-row"><div class="bar-label">${label}</div><div class="bar-bg"><div class="bar-fill" style="width:${pct}%"></div></div><div class="bar-val">${val}</div></div>`; }); }
         function drawRanking(id, data, unit) { const el = document.getElementById(id); el.innerHTML = ""; if(data.length === 0) { el.innerHTML = "無資料"; return; } let max = data[0].val; data.forEach((item, i) => { let pct = (item.val / max) * 100; el.innerHTML += `<div class="bar-row"><div class="bar-label" style="width:30px;">#${i+1}</div><div class="bar-label">${item.name}</div><div class="bar-bg"><div class="bar-fill" style="width:${pct}%; background:#FFD54F;"></div></div><div class="bar-val" style="width:50px;">${item.val}${unit}</div></div>`; }); }
-
-        function renderBirthday() {
-            const m = calDate.getMonth();
-            document.getElementById('calMonth').innerText = `${calDate.getFullYear()}年 ${m+1}月`;
-            const first = new Date(calDate.getFullYear(), m, 1).getDay();
-            const days = new Date(calDate.getFullYear(), m+1, 0).getDate();
-            const el = document.getElementById('cal-body');
-            el.innerHTML = "";
-            for(let i=0; i<first; i++) el.innerHTML += `<div class="cal-cell"></div>`;
-            const today = new Date();
-            for(let d=1; d<=days; d++) {
-                let isToday = (d === today.getDate() && m === today.getMonth());
-                let html = `<div class="cal-cell ${isToday?'today':''}"><div class="cal-date-num">${d}</div>`;
-                staffList.forEach(s => {
-                    if(!s.birthday) return;
-                    let parts = String(s.birthday).split(/[-/.]/);
-                    if(parts.length < 2) return;
-                    let bM = parseInt(parts[1]); let bD = parseInt(parts[2]);
-                    if(bM === (m+1) && bD === d) {
-                        const isMe = (s.phone === loggedInPhone) ? "is-me" : "";
-                        html += `<div class="cal-person ${isMe}" onclick='findAndShow("${s.phone}")'>${s.name}</div>`;
-                    }
-                });
-                el.innerHTML += html + `</div>`;
-            }
-        }
+        function renderBirthday() { const m = calDate.getMonth(); document.getElementById('calMonth').innerText = `${calDate.getFullYear()}年 ${m+1}月`; const first = new Date(calDate.getFullYear(), m, 1).getDay(); const days = new Date(calDate.getFullYear(), m+1, 0).getDate(); const el = document.getElementById('cal-body'); el.innerHTML = ""; for(let i=0; i<first; i++) el.innerHTML += `<div class="cal-cell"></div>`; const today = new Date(); for(let d=1; d<=days; d++) { let isToday = (d === today.getDate() && m === today.getMonth()); let html = `<div class="cal-cell ${isToday?'today':''}"><div class="cal-date-num">${d}</div>`; staffList.forEach(s => { if(!s.birthday) return; let parts = String(s.birthday).split(/[-/.]/); if(parts.length < 2) return; let bM = parseInt(parts[1]); let bD = parseInt(parts[2]); if(bM === (m+1) && bD === d) { const isMe = (s.phone === loggedInPhone) ? "is-me" : ""; html += `<div class="cal-person ${isMe}" onclick='findAndShow("${s.phone}")'>${s.name}</div>`; } }); el.innerHTML += html + `</div>`; } }
         function changeMonth(delta) { calDate.setMonth(calDate.getMonth() + delta); renderBirthday(); }
-
-        function renderFate() {
-            const el = document.getElementById('fate-container'); el.innerHTML = ""; let groups = {};
-            staffList.forEach(s => { if(!s.birthday) return; let num = calcLifePath(s.birthday); if(num===0)return; if(!groups[num]) groups[num] = []; groups[num].push(s); });
-            const meanings = { 1:{title:"開創數", desc:"獨立、領導"}, 2:{title:"協調數", desc:"合作、細節"}, 3:{title:"創意數", desc:"表達、藝術"}, 4:{title:"穩定數", desc:"秩序、建設"}, 5:{title:"自由數", desc:"冒險、變化"}, 6:{title:"關懷數", desc:"奉獻、責任"}, 7:{title:"真理數", desc:"分析、幸運"}, 8:{title:"權力數", desc:"掌控、富足"}, 9:{title:"智慧數", desc:"大愛、夢想"}, 11:{title:"大師數", desc:"靈感"}, 22:{title:"大師數", desc:"夢想成真"}, 33:{title:"大師數", desc:"療癒"} };
-            const order = [1,2,3,4,5,6,7,8,9,11,22,33];
-            order.forEach(num => {
-                if(groups[num] && groups[num].length > 0) {
-                    let names = groups[num].map(s => { const isMe = (s.phone === loggedInPhone) ? "is-me" : ""; return `<span class="fate-person ${isMe}" onclick='findAndShow("${s.phone}")'>${s.name}</span>`; }).join("");
-                    let info = meanings[num] || {title:"未知", desc:""};
-                    el.innerHTML += `<div class="fate-group"><div class="fate-header"><div class="fate-num">${num}</div><div class="fate-desc">${info.title}</div></div><div class="fate-list">${names}</div></div>`;
-                }
-            });
-        }
+        function renderFate() { const el = document.getElementById('fate-container'); el.innerHTML = ""; let groups = {}; staffList.forEach(s => { if(!s.birthday) return; let num = calcLifePath(s.birthday); if(num===0)return; if(!groups[num]) groups[num] = []; groups[num].push(s); }); const meanings = { 1:{title:"開創數", desc:"獨立、領導"}, 2:{title:"協調數", desc:"合作、細節"}, 3:{title:"創意數", desc:"表達、藝術"}, 4:{title:"穩定數", desc:"秩序、建設"}, 5:{title:"自由數", desc:"冒險、變化"}, 6:{title:"關懷數", desc:"奉獻、責任"}, 7:{title:"真理數", desc:"分析、幸運"}, 8:{title:"權力數", desc:"掌控、富足"}, 9:{title:"智慧數", desc:"大愛、夢想"}, 11:{title:"大師數", desc:"靈感"}, 22:{title:"大師數", desc:"夢想成真"}, 33:{title:"大師數", desc:"療癒"} }; const order = [1,2,3,4,5,6,7,8,9,11,22,33]; order.forEach(num => { if(groups[num] && groups[num].length > 0) { let names = groups[num].map(s => { const isMe = (s.phone === loggedInPhone) ? "is-me" : ""; return `<span class="fate-person ${isMe}" onclick='findAndShow("${s.phone}")'>${s.name}</span>`; }).join(""); let info = meanings[num] || {title:"未知", desc:""}; el.innerHTML += `<div class="fate-group"><div class="fate-header"><div class="fate-num">${num}</div><div class="fate-desc">${info.title}</div></div><div class="fate-list">${names}</div></div>`; } }); }
         function calcLifePath(dateStr) { let parts = dateStr.split(/[-/.]/); if(parts.length < 3) return 0; let y = parseInt(parts[0]); if(y < 1911) y += 1911; let fullStr = "" + y + parts[1] + parts[2]; let sum = fullStr.split('').map(Number).reduce((a,b)=>a+b, 0); while(sum > 9 && sum !== 11 && sum !== 22 && sum !== 33) { sum = String(sum).split('').map(Number).reduce((a,b)=>a+b, 0); } return sum; }
-
         function closeRosterModal(e) { if(e.target.id === 'rosterModal') document.getElementById('rosterModal').style.display = 'none'; }
         function getAge(birthdayStr) { if(!birthdayStr) return "?"; let parts = String(birthdayStr).split(/[-/.]/); if(parts.length < 3) return "?"; let y = parseInt(parts[0]); if(y < 1911) y += 1911; return new Date().getFullYear() - y; }
         function getEntryDate(ts) { if(!ts) return "未登記"; const d = new Date(ts); return `${d.getFullYear()}/${d.getMonth()+1}/${d.getDate()}`; }
