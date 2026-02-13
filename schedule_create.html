@@ -17,14 +17,7 @@
         .btn-gen { width: 100%; padding: 15px; background: var(--primary); color: #000; font-weight: bold; font-size: 18px; border: none; border-radius: 50px; cursor: pointer; transition: 0.3s; }
         .btn-gen:disabled { background: #555; color: #888; cursor: not-allowed; }
         
-        /* 🔥 新增：前往班表按鈕 */
-        .btn-link { 
-            display: none; /* 預設隱藏 */
-            width: 100%; padding: 15px; margin-top: 15px; 
-            background: #4CAF50; color: #fff; font-weight: bold; font-size: 16px; 
-            border: none; border-radius: 50px; text-align: center; text-decoration: none; 
-            box-sizing: border-box; cursor: pointer;
-        }
+        .btn-link { display: none; width: 100%; padding: 15px; margin-top: 15px; background: #4CAF50; color: #fff; font-weight: bold; font-size: 16px; border: none; border-radius: 50px; text-align: center; text-decoration: none; box-sizing: border-box; cursor: pointer; }
         .btn-link:hover { background: #45a049; }
 
         .status { text-align: center; margin-top: 20px; font-weight: bold; white-space: pre-line; min-height: 24px;}
@@ -36,26 +29,83 @@
 <body>
 
     <div class="container">
-        <h1>📅 智慧排班表生成器 V5.1</h1>
+        <h1>📅 智慧排班表生成器 V5.2</h1>
         
         <div class="row-group">
             <div><label>年份</label><input type="number" id="yearInput" value="2026"></div>
-            <div><label>檔期名稱 (如:元宵)</label><input type="text" id="eventInput" value="元宵"></div>
+            <div><label>檔期名稱</label><input type="text" id="eventInput" value="元宵"></div>
         </div>
         
-        <label>原始資料 (請直接貼上 LINE/文字檔)</label>
+        <label>原始資料 (請直接貼上)</label>
         <textarea id="dataInput" placeholder="範例：
 1.City’Super 復興SOGO店
 時間：2026/2/19（四）- 2026/3/3（二）
 ..."></textarea>
 
         <button id="genBtn" class="btn-gen" onclick="generate()">🚀 開始生成</button>
-        
         <div id="status" class="status"></div>
-        
         <a id="sheetLink" href="#" target="_blank" class="btn-link">📂 開啟生成的班表</a>
-        
         <a href="dashboard.html" class="btn-back">⬅️ 返回戰情室</a>
     </div>
 
     <script>
+        // 🔴 請務必填入「權限為任何人」的新網址
+        const API_URL = "https://script.google.com/macros/s/AKfycbxHlrHtxs3TEU0waQi0Dy-CVKSg-FBONbApp3xhyO1kMfRGvHCQzECz3pWcpbDhAl67PA/exec"; 
+        
+        // 這是您的內部班表連結
+        const SHEET_URL = "https://docs.google.com/spreadsheets/d/1GyPTKfZvHd7bHHiz2UMj5gfATwAhNCsqZwLmT1W-DsE/edit";
+
+        function generate() {
+            // 1. 強制測試按鈕是否活著
+            console.log("按鈕被點擊了"); 
+            
+            const btn = document.getElementById('genBtn');
+            const status = document.getElementById('status');
+            const linkBtn = document.getElementById('sheetLink');
+            const text = document.getElementById('dataInput').value;
+            const year = document.getElementById('yearInput').value;
+            const eventName = document.getElementById('eventInput').value;
+
+            if(!text.trim()) { alert("❌ 請先貼上資料！"); return; }
+
+            // 2. 介面鎖定
+            btn.disabled = true;
+            btn.innerText = "⏳ 正在傳送資料...";
+            status.innerText = "訊號發射中，請稍候...";
+            status.style.color = "#FFD54F";
+            linkBtn.style.display = "none";
+
+            // 3. 發送請求
+            // 使用 no-cors 模式，這是最不容易被擋的模式，但無法確認後端是否報錯
+            fetch(API_URL, {
+                method: "POST",
+                mode: "no-cors", 
+                headers: { "Content-Type": "text/plain;charset=utf-8" },
+                body: JSON.stringify({ year: year, eventName: eventName, text: text })
+            })
+            .then(() => {
+                // 4. 因為是 no-cors，只要送出去了就會進來這裡
+                status.innerText = "✅ 指令已送達！系統正在後台繪製表格。\n請等待約 10 秒後，點擊下方按鈕查看。";
+                status.style.color = "#4CAF50";
+                
+                btn.innerText = "🚀 再次生成";
+                btn.disabled = false;
+                
+                // 顯示連結
+                linkBtn.href = SHEET_URL;
+                linkBtn.style.display = "block";
+                
+                // 震動回饋 (手機版)
+                if(navigator.vibrate) navigator.vibrate(200);
+            })
+            .catch(err => {
+                alert("❌ 發送失敗，請截圖給工程師：\n" + err);
+                status.innerText = "❌ 發送失敗";
+                status.style.color = "#FF5252";
+                btn.disabled = false;
+                btn.innerText = "🚀 開始生成";
+            });
+        }
+    </script>
+</body>
+</html>
