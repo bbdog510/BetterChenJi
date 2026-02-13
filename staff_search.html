@@ -87,6 +87,10 @@
         /* 🔥 匯出按鈕 */
         .btn-export { width: 100%; padding: 12px; background: #4CAF50; color: #fff; font-weight: bold; border: none; border-radius: 12px; cursor: pointer; font-size: 16px; display: none; } 
         .btn-export:active { transform: scale(0.98); }
+        
+        /* 🔥 下載連結 */
+        .download-link { display: none; text-align: center; margin-top: 10px; }
+        .download-link a { color: #4CAF50; font-weight: bold; text-decoration: underline; font-size: 16px; }
 
         .filter-result-count { text-align: center; margin: 10px 0; font-size: 12px; color: var(--text-sub); }
 
@@ -123,6 +127,10 @@
             
             <button class="btn-filter" onclick="executeFilter()">🚀 開始撈取</button>
             <button id="btn-export" class="btn-export" onclick="exportData()">📊 匯出成 Google Sheet</button>
+            
+            <div id="export-link-area" class="download-link">
+                <a id="export-link" href="#" target="_blank">📂 點我開啟剛生成的表格</a>
+            </div>
         </div>
         
         <div id="filter-result-info" class="filter-result-count">請勾選條件並按按鈕</div>
@@ -205,8 +213,8 @@
         const CITY_ORDER = ["基隆", "台北", "新北", "桃園", "新竹", "苗栗", "台中", "彰化", "南投", "雲林", "嘉義", "台南", "高雄", "屏東", "宜蘭", "花蓮", "台東"];
         let calDate = new Date();
 
-        // 🔴 請在這裡填入你剛剛新部署得到的 API 網址！ (很重要！)
-        const API_URL = "https://script.google.com/macros/s/AKfycby6dWhq1Zdjhq9Qb6B6onPmMdh8pulsxdwj8WLKO_vfefyxFdGpc4dDf0FBLNcU83NFag/exec"; 
+        // 🔴 使用您提供的最新 API 網址
+        const API_URL = "https://script.google.com/macros/s/AKfycbwikCCZA4p64zGzFtCch2dAu_aXxMFeURJlHuoplU2Rgbh_hULtjpxLgKyO4dK3eOc6bw/exec"; 
 
         initFilterOptions();
 
@@ -275,9 +283,11 @@
             });
 
             document.getElementById('filter-result-info').innerText = `共找到 ${currentFilterResults.length} 位符合條件的夥伴`;
-            // 顯示或隱藏匯出按鈕
+            
             const btnExport = document.getElementById('btn-export');
+            const linkArea = document.getElementById('export-link-area');
             btnExport.style.display = currentFilterResults.length > 0 ? "block" : "none";
+            linkArea.style.display = "none"; // 重置連結顯示
         }
 
         // 🔥 匯出功能
@@ -285,6 +295,9 @@
             if (currentFilterResults.length === 0) return;
             
             const btn = document.getElementById('btn-export');
+            const linkArea = document.getElementById('export-link-area');
+            const link = document.getElementById('export-link');
+            
             btn.innerText = "⏳ 正在建立試算表...";
             btn.disabled = true;
 
@@ -308,8 +321,7 @@
 
             fetch(API_URL, {
                 method: "POST",
-                mode: "text", // 這裡使用 text 模式來接收回傳的網址
-                headers: { "Content-Type": "text/plain;charset=utf-8" },
+                headers: { "Content-Type": "text/plain;charset=utf-8" }, // 移除 no-cors
                 body: JSON.stringify({ 
                     action: "export_staff", 
                     data: dataToSend 
@@ -317,16 +329,21 @@
             }).then(response => response.json())
             .then(data => {
                 if (data.success) {
-                    btn.innerText = "✅ 匯出成功！(開啟中)";
-                    window.open(data.url, '_blank'); // 🔥 直接打開新表格
+                    btn.innerText = "✅ 匯出成功！";
+                    
+                    // 1. 自動打開
+                    window.open(data.url, '_blank');
+                    
+                    // 2. 顯示備用連結 (防止彈跳視窗被擋)
+                    link.href = data.url;
+                    linkArea.style.display = "block";
                 } else {
                     alert("匯出失敗：" + data.msg);
                     btn.innerText = "📊 匯出成 Google Sheet";
                 }
                 btn.disabled = false;
             }).catch(e => {
-                // 如果遇到 CORS 擋住 (有時候會發生)，至少提示使用者
-                alert("⚠️ 請求已發送！如果沒有自動跳轉，請檢查您的 Google Drive。");
+                alert("❌ 連線失敗，請檢查網路或 API 設定。");
                 btn.innerText = "📊 匯出成 Google Sheet";
                 btn.disabled = false;
             });
