@@ -6,7 +6,6 @@
     <title>排班表生成器</title>
     <link rel="icon" href="img/logo.png" type="image/png">
     <style>
-        /* ... (CSS 保持不變) ... */
         :root { --bg: #121212; --card: #1E1E1E; --text: #E0E0E0; --primary: #FFD54F; }
         body { font-family: 'MiSans', sans-serif; background: var(--bg); color: var(--text); padding: 20px; display: flex; flex-direction: column; align-items: center; }
         .container { width: 100%; max-width: 600px; background: var(--card); padding: 30px; border-radius: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.5); }
@@ -15,38 +14,28 @@
         input, textarea { width: 100%; box-sizing: border-box; background: #333; border: 1px solid #555; color: #fff; padding: 12px; border-radius: 10px; font-size: 16px; margin-bottom: 20px; outline: none; }
         textarea { height: 300px; font-family: monospace; line-height: 1.5; }
         .btn-gen { width: 100%; padding: 15px; background: var(--primary); color: #000; font-weight: bold; font-size: 18px; border: none; border-radius: 50px; cursor: pointer; transition: 0.3s; }
-        .btn-gen:hover { transform: scale(1.02); opacity: 0.9; }
         .btn-gen:disabled { background: #555; color: #888; cursor: not-allowed; }
-        .note { font-size: 12px; color: #888; background: rgba(255,255,255,0.05); padding: 10px; border-radius: 8px; margin-bottom: 20px; }
-        .status { text-align: center; margin-top: 20px; font-weight: bold; min-height: 24px; white-space: pre-line; }
-        .btn-back { display: block; margin-top: 20px; color: #888; text-decoration: none; text-align: center; }
+        .status { text-align: center; margin-top: 20px; font-weight: bold; white-space: pre-line; min-height: 24px;}
         .row-group { display: flex; gap: 10px; }
         .row-group input { flex: 1; }
+        .btn-back { display: block; margin-top: 20px; color: #888; text-decoration: none; text-align: center; }
     </style>
 </head>
 <body>
 
     <div class="container">
-        <h1>📅 智慧排班表生成器</h1>
+        <h1>📅 智慧排班表生成器 V5.0</h1>
         
         <div class="row-group">
-            <div style="flex:1">
-                <label>年份</label>
-                <input type="number" id="yearInput" value="2026">
-            </div>
-            <div style="flex:1">
-                <label>檔期名稱 (分頁名)</label>
-                <input type="text" id="eventInput" value="元宵">
-            </div>
+            <div><label>年份</label><input type="number" id="yearInput" value="2026"></div>
+            <div><label>檔期名稱 (如:元宵)</label><input type="text" id="eventInput" value="元宵"></div>
         </div>
         
-        <label>貼上檔期資料 (格式：店名 月/日-月/日)</label>
-        <div class="note">
-            範例：<br>
-            巨蛋 2/24-3/3<br>
-            大樂 2/26-3/3
-        </div>
-        <textarea id="dataInput" placeholder="請在此貼上文字..."></textarea>
+        <label>原始資料 (請直接貼上 LINE/文字檔)</label>
+        <textarea id="dataInput" placeholder="範例：
+1.City’Super 復興SOGO店
+時間：2026/2/19（四）- 2026/3/3（二）
+..."></textarea>
 
         <button id="genBtn" class="btn-gen" onclick="generate()">🚀 開始生成</button>
         <div id="status" class="status"></div>
@@ -55,8 +44,8 @@
     </div>
 
     <script>
-        // 🔴 請記得換成剛剛重新部署的網址！
-        const API_URL = "https://script.google.com/macros/s/AKfycbz6CbX4F_f84aDn6CKQjgQSrums3XTqsuEKd30qZw6_y8IWD8zJbaLzHm1BuFhPxktBrg/exec"; 
+        // 🔴 請填入你剛剛部署的 API 網址
+        const API_URL = "https://script.google.com/macros/s/AKfycbxHlrHtxs3TEU0waQi0Dy-CVKSg-FBONbApp3xhyO1kMfRGvHCQzECz3pWcpbDhAl67PA/exec"; 
 
         function generate() {
             const year = document.getElementById('yearInput').value;
@@ -68,8 +57,8 @@
             if(!text.trim()) { alert("請貼上資料！"); return; }
 
             btn.disabled = true;
-            btn.innerText = "⏳ 正在生成雙表格...";
-            status.innerText = "指令已發送，請稍候...";
+            btn.innerText = "⏳ 正在分析資料並繪製表格...";
+            status.innerText = "指令已發送，約需 10-20 秒，請稍候...";
             status.style.color = "#FFD54F";
 
             fetch(API_URL, {
@@ -85,8 +74,7 @@
                 btn.disabled = false;
             })
             .catch(err => {
-                console.error(err);
-                status.innerText = "❌ 發送失敗，請檢查網路";
+                status.innerText = "❌ 發送失敗";
                 btn.disabled = false;
             });
         }
