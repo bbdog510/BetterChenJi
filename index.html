@@ -27,4 +27,177 @@
             width: 85%; max-width: 320px; height: 450px; position: relative;
             transform-style: preserve-3d; transition: transform 0.6s;
         }
-        .flip-
+        .flip-container.flipped { transform: rotateY(180deg); }
+
+        .login-card, .login-card-back {
+            position: absolute; width: 100%; height: 100%;
+            backface-visibility: hidden; border-radius: 28px;
+            padding: 40px 30px; box-sizing: border-box; text-align: center;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+        }
+
+        .login-card { background: var(--card-bg); border: 1px solid rgba(255,255,255,0.1); }
+        .login-card-back { background: #2c0000; border: 2px solid #ff4444; transform: rotateY(180deg); color: #ffcccc; }
+
+        .secret-trigger { position: fixed; top: 0; left: 0; width: 100%; height: 50px; z-index: 999; }
+        .logo { width: 80px; height: 80px; border-radius: 20px; margin-bottom: 20px; }
+        h1 { font-size: 24px; margin-bottom: 5px; }
+        p { color: var(--text-sub); font-size: 14px; margin-bottom: 30px; }
+
+        .input-group { width: 100%; margin-bottom: 15px; text-align: left; }
+        label { font-size: 12px; color: var(--text-sub); display: block; margin-bottom: 5px; }
+        input {
+            width: 100%; padding: 16px; border: 2px solid var(--input-border);
+            border-radius: 16px; background: var(--input-bg); color: var(--text-main);
+            outline: none; box-sizing: border-box; transition: 0.3s;
+        }
+        input:focus { border-color: var(--primary); }
+
+        .btn-main { width: 100%; padding: 16px; margin-top: 10px; background-color: var(--primary); color: #000; border: none; border-radius: 100px; font-weight: bold; cursor: pointer; transition: 0.3s; }
+        .btn-main:disabled { background-color: #555; color: #888; cursor: not-allowed; }
+        .btn-admin { background-color: #ff4444; color: white; } 
+
+        #status-msg { 
+            font-size: 12px; color: var(--text-sub); margin-top: 25px; opacity: 0.8; height: 20px; 
+            display: flex; align-items: center; justify-content: center; gap: 8px; white-space: nowrap; 
+        }
+        
+        .loader {
+            width: 12px; height: 12px; border: 2px solid var(--text-sub);
+            border-bottom-color: transparent; border-radius: 50%;
+            display: inline-block; animation: rotation 1s linear infinite;
+        }
+        @keyframes rotation { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+        #install-btn { display: none; margin-top: 15px; background: rgba(255, 255, 255, 0.1); color: var(--primary); padding: 8px 16px; border-radius: 20px; font-size: 12px; cursor: pointer; border: 1px solid var(--primary); }
+        .theme-toggle { position: fixed; top: 20px; right: 20px; font-size: 12px; cursor: pointer; color: var(--text-sub); padding: 8px 16px; background: rgba(255,255,255,0.1); border-radius: 20px; z-index: 1000; }
+    </style>
+</head>
+<body>
+
+    <div class="secret-trigger" ondblclick="toggleAdminMode()"></div>
+
+    <div class="flip-container" id="cardStack">
+        <div class="login-card">
+            <img src="img/logo.png" class="logo">
+            <h1>陳記元宵</h1>
+            <p>數位戰情中心</p>
+            
+            <div class="input-group"><label>手機號碼</label><input type="tel" id="account" placeholder="09xxxxxxxx" maxlength="10"></div>
+            <div class="input-group"><label>密碼 (生日)</label><input type="password" id="pwd" placeholder="例如：870101" maxlength="6"></div>
+
+            <button id="loginBtn" class="btn-main" onclick="login('STAFF')" disabled>連線中...</button>
+            <button id="install-btn">📲 點我安裝於桌面</button>
+            <div id="status-msg"><span class="loader"></span> 同步資料中...</div>
+        </div>
+
+        <div class="login-card-back">
+            <img src="img/logo.png" class="logo" style="filter: hue-rotate(140deg);">
+            <h1 style="color:#ff4444;">最高權限後台</h1>
+            <p style="color:#faa;">非管理人員請勿嘗試</p>
+            <div class="input-group"><label style="color:#faa;">管理員帳號</label><input type="tel" id="admin-account" placeholder="09xxxxxxxx" style="background:#4a0000; border-color:#800000; color:#fff;"></div>
+            <div class="input-group"><label style="color:#faa;">管理員密碼</label><input type="password" id="admin-pwd" placeholder="生日" style="background:#4a0000; border-color:#800000; color:#fff;"></div>
+            <button class="btn-main btn-admin" onclick="login('ADMIN')">解鎖戰情室</button>
+            <div style="margin-top:20px; font-size:12px; cursor:pointer; opacity:0.5;" onclick="toggleAdminMode()">⬅️ 返回一般通道</div>
+        </div>
+    </div>
+
+    <div class="theme-toggle" onclick="toggleTheme()">🌙 / ☀️</div>
+
+    <script>
+        function toggleTheme() { document.body.classList.toggle('light-mode'); localStorage.setItem('theme', document.body.classList.contains('light-mode') ? 'light' : 'dark'); }
+        if (localStorage.getItem('theme') === 'light') document.body.classList.add('light-mode');
+
+        function toggleAdminMode() { document.getElementById('cardStack').classList.toggle('flipped'); }
+
+        // 🔴 已更新為新 API
+        const API_URL = "https://script.google.com/macros/s/AKfycbzjta0MS5xtzE15r9ZoooqxJ8Ypfw1w-DSMT6HVtWbkf9hLtczq13BTNLZTjW1x3nmc3A/exec"; 
+        
+        let STAFF_DB = {};
+        
+        // 🔥 秒開邏輯：只要有快取，馬上開啟按鈕
+        const cachedData = localStorage.getItem('STAFF_DB_CACHE');
+        if (cachedData) { 
+            try {
+                STAFF_DB = JSON.parse(cachedData); 
+                document.getElementById('loginBtn').disabled = false; // 按鈕亮起
+                document.getElementById('loginBtn').innerText = "登入系統";
+                console.log("已載入快取，可立即登入");
+            } catch(e) { console.log("快取損毀"); }
+        }
+
+        // 🔥 背景更新：加上時間戳避免快取死角
+        const noCacheUrl = API_URL + "?t=" + new Date().getTime();
+
+        fetch(noCacheUrl).then(res => res.json()).then(data => {
+            STAFF_DB = data;
+            localStorage.setItem('STAFF_DB_CACHE', JSON.stringify(data));
+            
+            const now = new Date();
+            const timeStr = `${now.getHours().toString().padStart(2,'0')}:${now.getMinutes().toString().padStart(2,'0')}`;
+            
+            const statusEl = document.getElementById('status-msg');
+            statusEl.innerHTML = `✅ 資料同步完成 (${timeStr})`;
+            statusEl.style.color = "var(--primary)";
+            
+            // 如果這是第一次載入(沒快取)，現在才開啟按鈕
+            if (document.getElementById('loginBtn').disabled) {
+                document.getElementById('loginBtn').disabled = false;
+                document.getElementById('loginBtn').innerText = "登入系統";
+            }
+            
+            // 自動登入檢查
+            const savedPhone = localStorage.getItem('loginPhone');
+            if (savedPhone && STAFF_DB[savedPhone]) {
+                // 不自動轉跳，避免無限迴圈，除非在 login 頁面
+                // window.location.replace('dashboard.html'); 
+                // 註：這裡建議不要自動轉跳，讓使用者看一眼狀態比較安全
+            }
+        }).catch(err => {
+            if(cachedData) {
+                const statusEl = document.getElementById('status-msg');
+                statusEl.innerHTML = "⚠️ 使用離線資料";
+                statusEl.style.color = "#FF9800";
+            } else {
+                const statusEl = document.getElementById('status-msg');
+                statusEl.innerHTML = "❌ 連線失敗";
+                statusEl.style.color = "#FF5252";
+            }
+        });
+
+        function login(mode) {
+            const isBackdoor = (mode === 'ADMIN');
+            const acc = document.getElementById(isBackdoor ? 'admin-account' : 'account').value;
+            const pwd = document.getElementById(isBackdoor ? 'admin-pwd' : 'pwd').value;
+
+            if (acc === "0936588349" && pwd === "831222") {
+                 localStorage.setItem('loginPhone', acc);
+                 if(!STAFF_DB[acc]) STAFF_DB[acc] = { name: "NICK", role: "ADMIN", origin: "管理員" };
+                 else STAFF_DB[acc].role = "ADMIN"; 
+                 localStorage.setItem('STAFF_DB_CACHE', JSON.stringify(STAFF_DB));
+                 window.location.replace('dashboard.html');
+                 return;
+            }
+
+            if (STAFF_DB[acc] && String(STAFF_DB[acc].pwd) === String(pwd)) {
+                localStorage.setItem('loginPhone', acc);
+                if (isBackdoor) {
+                    const userRole = (STAFF_DB[acc].role || "").toUpperCase();
+                    if (userRole.includes("ADMIN")) { alert("管理員身分確認"); window.location.replace('dashboard.html'); } 
+                    else { alert("權限不足！"); }
+                } else {
+                    STAFF_DB[acc].role = "STAFF";
+                    localStorage.setItem('STAFF_DB_CACHE', JSON.stringify(STAFF_DB));
+                    window.location.replace('dashboard.html');
+                }
+            } else { alert("帳號或密碼錯誤"); }
+        }
+
+        let deferredPrompt;
+        const installBtn = document.getElementById('install-btn');
+        window.addEventListener('beforeinstallprompt', (e) => { e.preventDefault(); deferredPrompt = e; installBtn.style.display = 'inline-block'; });
+        installBtn.addEventListener('click', async () => { if (deferredPrompt) { deferredPrompt.prompt(); deferredPrompt = null; installBtn.style.display = 'none'; } });
+    </script>
+</body>
+</html>
