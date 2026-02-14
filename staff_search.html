@@ -78,18 +78,16 @@
         .filter-container { background: var(--card-bg); padding: 15px; border-radius: 16px; margin-bottom: 15px; border: 1px solid var(--border); }
         .filter-title { font-size: 14px; color: var(--primary); margin-bottom: 10px; font-weight: bold; margin-top: 15px; }
         .filter-title:first-child { margin-top: 0; }
-        .checkbox-group { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 15px; max-height: 150px; overflow-y: auto; } /* 點位多時可捲動 */
+        .checkbox-group { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 15px; max-height: 150px; overflow-y: auto; }
         .checkbox-item { display: flex; align-items: center; gap: 5px; font-size: 14px; background: rgba(125,125,125,0.1); padding: 6px 12px; border-radius: 20px; cursor: pointer; transition: 0.2s; border: 1px solid transparent; }
         .checkbox-item.checked { background: var(--primary); color: #fff; border-color: var(--primary); }
         .checkbox-item input { display: none; }
         
         .btn-filter { width: 100%; padding: 12px; background: var(--highlight); color: #000; font-weight: bold; border: none; border-radius: 12px; cursor: pointer; font-size: 16px; margin-bottom: 10px;}
         
-        /* 🔥 匯出按鈕 */
         .btn-export { width: 100%; padding: 12px; background: #4CAF50; color: #fff; font-weight: bold; border: none; border-radius: 12px; cursor: pointer; font-size: 16px; display: none; } 
         .btn-export:active { transform: scale(0.98); }
         
-        /* 🔥 下載連結 */
         .download-link { display: none; text-align: center; margin-top: 10px; }
         .download-link a { color: #4CAF50; font-weight: bold; text-decoration: underline; font-size: 16px; }
 
@@ -174,6 +172,12 @@
             <div class="detail-row"><div class="detail-label">地址</div><div class="detail-val inline-content"><span id="d-addr" style="flex:1;"></span><a id="d-map-btn" href="#" target="_blank" class="icon-btn">🗺️</a></div></div>
             <div class="detail-row"><div class="detail-label">學校/系級</div><div class="detail-val" id="d-school"></div></div>
             <div class="detail-row"><div class="detail-label">身分證</div><div class="detail-val" id="d-id"></div></div>
+            
+            <div class="detail-row">
+                <div class="detail-label">自我介紹</div>
+                <div class="detail-val" id="d-intro" style="white-space: pre-wrap; line-height: 1.5; color: #ddd; background: rgba(255,255,255,0.05); padding: 10px; border-radius: 8px;"></div>
+            </div>
+
             <div class="detail-row">
                 <div class="detail-label">服務紀錄與履歷</div>
                 <div class="detail-val" style="color:var(--highlight); font-weight:bold; margin-bottom:10px;">
@@ -216,7 +220,7 @@
         const CITY_ORDER = ["基隆", "台北", "新北", "桃園", "新竹", "苗栗", "台中", "彰化", "南投", "雲林", "嘉義", "台南", "高雄", "屏東", "宜蘭", "花蓮", "台東"];
         let calDate = new Date();
 
-        // 🔴 正確的 API 網址 (與 index.html 相同)
+        // 🔴 正確 API 網址 (維持你剛剛給的)
         const API_URL = "https://script.google.com/macros/s/AKfycbyMBHte8bMkDta5ygAU6lS36JZelPni9oQIGbtqZ203jDpcWrcQA33dbTTC4kaAZDGJPw/exec"; 
 
         initFilterOptions();
@@ -224,39 +228,34 @@
         function initFilterOptions() {
             let years = new Set();
             let events = new Set();
-            let locs = new Set(); // 🔥 新增：地點 Set
+            let locs = new Set(); 
 
-            // 1. 蒐集年份與檔期名稱
+            // 1. 年份與檔期
             ALL_EVENTS.forEach(evt => {
                 let match = evt.match(/(\d{4})(.+)/);
                 if (match) { years.add(match[1]); events.add(match[2]); } else { events.add(evt); }
             });
 
-            // 2. 🔥 新增：蒐集所有做過的地點
+            // 2. 地點蒐集
             staffList.forEach(staff => {
                 if (staff.history) {
                     Object.values(staff.history).forEach(record => {
                         if (record.loc) {
-                            // 清理地點名稱 (去除 | 和 📍，並修剪空白)
                             let cleanLoc = record.loc.replace(/[|📍]/g, "").trim();
-                            // 這裡可以選擇是否要更精簡，目前先保留原始點位名稱
                             if(cleanLoc) locs.add(cleanLoc);
                         }
                     });
                 }
             });
 
-            // 渲染年份
             const yearContainer = document.getElementById('filter-years');
             Array.from(years).sort().reverse().forEach(y => {
                 yearContainer.innerHTML += `<div class="checkbox-item" onclick="toggleCheck(this)">${y}<input type="checkbox" value="${y}"></div>`;
             });
-            // 渲染活動
             const eventContainer = document.getElementById('filter-events');
             Array.from(events).sort().forEach(e => {
                 eventContainer.innerHTML += `<div class="checkbox-item" onclick="toggleCheck(this)">${e}<input type="checkbox" value="${e}"></div>`;
             });
-            // 🔥 渲染地點
             const locContainer = document.getElementById('filter-locs');
             Array.from(locs).sort().forEach(l => {
                 locContainer.innerHTML += `<div class="checkbox-item" onclick="toggleCheck(this)">${l}<input type="checkbox" value="${l}"></div>`;
@@ -269,11 +268,10 @@
             checkbox.checked = !checkbox.checked;
         }
 
-        // 🔥 更新後的篩選邏輯 (支援地點)
         function executeFilter() {
             const selectedYears = Array.from(document.querySelectorAll('#filter-years input:checked')).map(cb => cb.value);
             const selectedEvents = Array.from(document.querySelectorAll('#filter-events input:checked')).map(cb => cb.value);
-            const selectedLocs = Array.from(document.querySelectorAll('#filter-locs input:checked')).map(cb => cb.value); // 🔥 新增
+            const selectedLocs = Array.from(document.querySelectorAll('#filter-locs input:checked')).map(cb => cb.value); 
 
             if (selectedYears.length === 0 && selectedEvents.length === 0 && selectedLocs.length === 0) { 
                 alert("請至少選擇一個年份、檔期或地點！"); return; 
@@ -289,31 +287,23 @@
                 const myHistory = Object.keys(staff.history); 
 
                 for (let h of myHistory) {
-                    // 1. 年份檢查
-                    let yMatch = (selectedYears.length === 0); // 沒選就視為通過
+                    let yMatch = (selectedYears.length === 0);
                     if (!yMatch) { for (let y of selectedYears) { if (h.includes(y)) { yMatch = true; break; } } }
 
-                    // 2. 檔期檢查
                     let eMatch = (selectedEvents.length === 0);
                     if (!eMatch) { for (let e of selectedEvents) { if (h.includes(e)) { eMatch = true; break; } } }
 
-                    // 3. 🔥 地點檢查
                     let lMatch = (selectedLocs.length === 0);
                     if (!lMatch) {
                         let record = staff.history[h];
                         if (record && record.loc) {
                             for (let l of selectedLocs) { 
-                                // 模糊比對：只要履歷地點包含勾選的地點關鍵字
                                 if (record.loc.includes(l)) { lMatch = true; break; } 
                             }
                         }
                     }
 
-                    // 必須三個條件都通過 (AND)
-                    if (yMatch && eMatch && lMatch) { 
-                        hasMatch = true; 
-                        break; // 只要有一筆履歷符合，這個人就算選中
-                    }
+                    if (yMatch && eMatch && lMatch) { hasMatch = true; break; }
                 }
 
                 if (hasMatch) {
@@ -339,7 +329,6 @@
             linkArea.style.display = "none";
         }
 
-        // 匯出功能 (保持不變)
         function exportData() {
             if (currentFilterResults.length === 0) return;
             const btn = document.getElementById('btn-export');
@@ -385,44 +374,45 @@
             });
         }
 
-        // 🔥 更新後的搜尋邏輯：支援地點搜尋
         function searchStaff() {
             const k = document.getElementById('searchInput').value.toLowerCase();
             filteredList = staffList.filter(s => {
-                // 1. 基本資料搜尋
                 let basicMatch = (s.name && s.name.includes(k)) || 
                                  (s.phone && s.phone.includes(k)) || 
                                  (s.school && s.school.includes(k));
                 
-                // 2. 履歷搜尋 (包含：檔期名稱、地點)
                 let historyMatch = false;
                 let locationMatch = false;
 
                 if (s.history) {
                     for (let event in s.history) {
-                        // 檢查檔期名稱 (例如: 2026元宵)
-                        if (event.includes(k)) {
-                            historyMatch = true;
-                        }
-                        
-                        // 🔥 檢查地點 (例如: 台中大遠百)
+                        if (event.includes(k)) { historyMatch = true; }
                         let record = s.history[event];
-                        if (record && record.loc && record.loc.includes(k)) {
-                            locationMatch = true;
-                        }
-
+                        if (record && record.loc && record.loc.includes(k)) { locationMatch = true; }
                         if (historyMatch || locationMatch) break;
                     }
                 }
                 return basicMatch || historyMatch || locationMatch;
             });
-            currentPage = 1; 
-            switchTab('list'); 
-            renderList();
+            currentPage = 1; switchTab('list'); renderList();
         }
 
         function renderList() { const listEl = document.getElementById('list'); listEl.innerHTML = ""; const start = (currentPage - 1) * itemsPerPage; const end = start + itemsPerPage; const pageData = filteredList.slice(start, end); document.getElementById('pageInfo').innerText = `第 ${currentPage} 頁 / 共 ${Math.ceil(filteredList.length / itemsPerPage)} 頁`; pageData.forEach(staff => { let age = getAge(staff.birthday); let school = staff.school || "無"; let phone = staff.phone || ""; const isMeClass = (staff.phone === loggedInPhone) ? "is-me" : ""; const card = document.createElement('div'); card.className = `staff-card ${isMeClass}`; card.onclick = () => showDetail(staff); let avatarHtml = `<div class="avatar-small">${staff.name.slice(-2)}</div>`; if (staff.photo) { const photoUrl = convertDriveLink(staff.photo); avatarHtml = `<img src="${photoUrl}" class="avatar-small" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex'"><div class="avatar-small" style="display:none">${staff.name.slice(-2)}</div>`; } let serviceCount = staff.history ? Object.keys(staff.history).length : 0; let serviceTag = serviceCount > 0 ? `<span class="tag" style="color:var(--highlight)">★${serviceCount}檔</span>` : ""; card.innerHTML = `${avatarHtml}<div class="info"><div class="name">${staff.name} ${staff.alias ? `<small>(${staff.alias})</small>` : ''}</div><div class="sub-info"><span class="tag">${age}歲</span><span class="tag">${school}</span>${serviceTag}</div></div>`; listEl.appendChild(card); }); }
-        function showDetail(staff) { document.getElementById('d-name').innerText = staff.name; document.getElementById('d-phone').innerText = staff.phone; document.getElementById('d-entry').innerText = getEntryDate(staff.entryDate); document.getElementById('d-school').innerText = staff.school || "-"; document.getElementById('d-id').innerText = staff.id || "-"; let age = getAge(staff.birthday); let bdayText = staff.birthday || "?"; let parts = bdayText.split(/[-/.]/); if(parts.length >= 3) { let y = parseInt(parts[0]); if(y < 1911) y += 1911; bdayText = `${y}.${parts[1]}.${parts[2]}`; } document.getElementById('d-age').innerText = `${bdayText} (${age}歲)`; document.getElementById('d-call-btn').href = `tel:${staff.phone}`; const lineBtn = document.getElementById('d-line-btn'); if(staff.lineId) { lineBtn.href = `https://line.me/ti/p/~${staff.lineId}`; lineBtn.style.display = 'inline-flex'; } else { lineBtn.style.display = 'none'; } const mapBtn = document.getElementById('d-map-btn'); document.getElementById('d-addr').innerText = staff.address || "-"; if(staff.address) { mapBtn.href = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(staff.address)}`; mapBtn.style.display = 'inline-flex'; } else { mapBtn.style.display = 'none'; } const photoEl = document.getElementById('d-photo'); const avatarText = document.getElementById('d-avatar-text'); photoEl.classList.remove('zoomed'); if (staff.photo) { photoEl.src = convertDriveLink(staff.photo); photoEl.style.display = 'block'; avatarText.style.display = 'none'; } else { photoEl.style.display = 'none'; avatarText.innerText = staff.name.slice(-2); avatarText.style.display = 'flex'; } const history = staff.history || {}; const count = Object.keys(history).length; const hours = staff.totalHours || 0; document.getElementById('d-count').innerText = count; document.getElementById('d-hours').innerText = hours; const listEl = document.getElementById('d-history-list'); listEl.innerHTML = ""; let sortedEvents = [...ALL_EVENTS].sort().reverse(); sortedEvents.forEach(eventName => { const isAttended = history[eventName] !== undefined; const record = history[eventName] || {}; const div = document.createElement('div'); if (isAttended) { div.className = 'history-item active'; let rawLoc = record.loc || ""; let niceLoc = rawLoc.replace(/\s*[|｜│]\s*/g, ""); div.innerHTML = `${eventName} <span class="h-tag">${record.hours}h│${niceLoc}</span>`; div.style.cursor = "pointer"; div.onclick = (e) => { e.stopPropagation(); openRosterModal(eventName); }; } else { div.className = 'history-item inactive'; div.innerHTML = `${eventName} (未參加)`; div.style.cursor = "pointer"; div.onclick = (e) => { e.stopPropagation(); openRosterModal(eventName); }; } listEl.appendChild(div); }); document.getElementById('detailModal').style.display = 'flex'; }
+        
+        // 🔥 更新後的 showDetail：加入自我介紹欄位
+        function showDetail(staff) { 
+            document.getElementById('d-name').innerText = staff.name; 
+            document.getElementById('d-phone').innerText = staff.phone; 
+            document.getElementById('d-entry').innerText = getEntryDate(staff.entryDate); 
+            document.getElementById('d-school').innerText = staff.school || "-"; 
+            document.getElementById('d-id').innerText = staff.id || "-"; 
+            
+            // 填入自我介紹
+            document.getElementById('d-intro').innerText = staff.intro || "無自我介紹";
+
+            let age = getAge(staff.birthday); let bdayText = staff.birthday || "?"; let parts = bdayText.split(/[-/.]/); if(parts.length >= 3) { let y = parseInt(parts[0]); if(y < 1911) y += 1911; bdayText = `${y}.${parts[1]}.${parts[2]}`; } document.getElementById('d-age').innerText = `${bdayText} (${age}歲)`; document.getElementById('d-call-btn').href = `tel:${staff.phone}`; const lineBtn = document.getElementById('d-line-btn'); if(staff.lineId) { lineBtn.href = `https://line.me/ti/p/~${staff.lineId}`; lineBtn.style.display = 'inline-flex'; } else { lineBtn.style.display = 'none'; } const mapBtn = document.getElementById('d-map-btn'); document.getElementById('d-addr').innerText = staff.address || "-"; if(staff.address) { mapBtn.href = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(staff.address)}`; mapBtn.style.display = 'inline-flex'; } else { mapBtn.style.display = 'none'; } const photoEl = document.getElementById('d-photo'); const avatarText = document.getElementById('d-avatar-text'); photoEl.classList.remove('zoomed'); if (staff.photo) { photoEl.src = convertDriveLink(staff.photo); photoEl.style.display = 'block'; avatarText.style.display = 'none'; } else { photoEl.style.display = 'none'; avatarText.innerText = staff.name.slice(-2); avatarText.style.display = 'flex'; } const history = staff.history || {}; const count = Object.keys(history).length; const hours = staff.totalHours || 0; document.getElementById('d-count').innerText = count; document.getElementById('d-hours').innerText = hours; const listEl = document.getElementById('d-history-list'); listEl.innerHTML = ""; let sortedEvents = [...ALL_EVENTS].sort().reverse(); sortedEvents.forEach(eventName => { const isAttended = history[eventName] !== undefined; const record = history[eventName] || {}; const div = document.createElement('div'); if (isAttended) { div.className = 'history-item active'; let rawLoc = record.loc || ""; let niceLoc = rawLoc.replace(/\s*[|｜│]\s*/g, ""); div.innerHTML = `${eventName} <span class="h-tag">${record.hours}h│${niceLoc}</span>`; div.style.cursor = "pointer"; div.onclick = (e) => { e.stopPropagation(); openRosterModal(eventName); }; } else { div.className = 'history-item inactive'; div.innerHTML = `${eventName} (未參加)`; div.style.cursor = "pointer"; div.onclick = (e) => { e.stopPropagation(); openRosterModal(eventName); }; } listEl.appendChild(div); }); document.getElementById('detailModal').style.display = 'flex'; 
+        }
+        
         function openRosterModal(eventName) { document.getElementById('r-title').innerText = `${eventName} 人員名單`; const contentEl = document.getElementById('r-content'); contentEl.innerHTML = "載入中..."; let groups = {}; staffList.forEach(s => { if (s.history && s.history[eventName]) { let loc = s.history[eventName].loc || "未知地點"; let cleanLoc = loc.replace(/\s*[|｜│]\s*/g, ""); if (!groups[cleanLoc]) groups[cleanLoc] = []; groups[cleanLoc].push(s); } }); contentEl.innerHTML = ""; if (Object.keys(groups).length === 0) { contentEl.innerHTML = "<div style='text-align:center; color:#888;'>此檔期尚無人員紀錄</div>"; return; } let sortedKeys = Object.keys(groups).sort((a, b) => { let indexA = CITY_ORDER.findIndex(city => a.includes(city)); let indexB = CITY_ORDER.findIndex(city => b.includes(city)); return (indexA === -1 ? 999 : indexA) - (indexB === -1 ? 999 : indexB); }); sortedKeys.forEach(loc => { let section = document.createElement('div'); section.className = 'roster-group'; let header = document.createElement('div'); header.className = 'roster-header'; let title = document.createElement('span'); title.className = 'roster-loc'; title.innerText = `📍 ${loc}`; let copyBtn = document.createElement('button'); copyBtn.className = 'btn-copy-ins'; copyBtn.innerHTML = '📋 複製保險名單'; copyBtn.onclick = () => copyInsuranceList(loc, groups[loc]); header.appendChild(title); header.appendChild(copyBtn); section.appendChild(header); let namesDiv = document.createElement('div'); namesDiv.className = 'roster-names'; groups[loc].forEach(s => { let span = document.createElement('span'); span.className = 'roster-person'; span.innerText = s.name; span.onclick = () => { document.getElementById('rosterModal').style.display = 'none'; showDetail(s); }; namesDiv.appendChild(span); }); section.appendChild(namesDiv); contentEl.appendChild(section); }); document.getElementById('rosterModal').style.display = 'flex'; }
         function copyInsuranceList(locName, staffArray) { let text = `${locName}\n\n`; staffArray.forEach((s, index) => { let bDayStr = s.birthday || ""; let rocBday = "??.??.??"; let parts = bDayStr.split(/[-/.]/); if (parts.length >= 3) { let y = parseInt(parts[0]); let m = parts[1]; let d = parts[2]; if (y > 1911) y -= 1911; rocBday = `${y}.${m}.${d}`; } else if (bDayStr.length >= 6) { rocBday = bDayStr; } text += `${index + 1}.${s.name} / ${rocBday} / ${s.id || "無身分證"} / ${s.phone}\n`; }); navigator.clipboard.writeText(text).then(() => { alert(`✅ 已複製！`); }).catch(err => { alert("❌ 複製失敗"); }); }
         function renderAnalysis() { let gender={ "男":0, "女":0, "未知":0 }, age={ "18以下":0, "19-22":0, "23-25":0, "26以上":0 }, loc={}, school={}; let topHours = [], topCounts = []; staffList.forEach(s => { if(s.id && s.id.length === 10) { let g = s.id[1]; if(g === '1') gender["男"]++; else if(g === '2') gender["女"]++; else gender["未知"]++; } else gender["未知"]++; let a = getAge(s.birthday); if(a!=="?") { if(a<=18) age["18以下"]++; else if(a<=22) age["19-22"]++; else if(a<=25) age["23-25"]++; else age["26以上"]++; } if(s.address) { let l = s.address.substring(0, 3); loc[l] = (loc[l] || 0) + 1; } if(s.school) { let sc = s.school.split('/')[0] || s.school; school[sc] = (school[sc] || 0) + 1; } if(s.totalHours > 0) topHours.push({name: s.name, val: s.totalHours}); let count = s.history ? Object.keys(s.history).length : 0; if(count > 0) topCounts.push({name: s.name, val: count}); }); drawChart('chart-age', age); drawChart('chart-gender', gender); drawChart('chart-loc', loc); drawChart('chart-school', school); topHours.sort((a,b) => b.val - a.val); topCounts.sort((a,b) => b.val - a.val); drawRanking('chart-top-hours', topHours.slice(0, 10), 'hr'); drawRanking('chart-top-count', topCounts.slice(0, 10), '次'); }
