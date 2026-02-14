@@ -76,17 +76,20 @@
 
         /* 撈資料樣式 */
         .filter-container { background: var(--card-bg); padding: 15px; border-radius: 16px; margin-bottom: 15px; border: 1px solid var(--border); }
-        .filter-title { font-size: 14px; color: var(--primary); margin-bottom: 10px; font-weight: bold; }
-        .checkbox-group { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 15px; }
+        .filter-title { font-size: 14px; color: var(--primary); margin-bottom: 10px; font-weight: bold; margin-top: 15px; }
+        .filter-title:first-child { margin-top: 0; }
+        .checkbox-group { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 15px; max-height: 150px; overflow-y: auto; } /* 點位多時可捲動 */
         .checkbox-item { display: flex; align-items: center; gap: 5px; font-size: 14px; background: rgba(125,125,125,0.1); padding: 6px 12px; border-radius: 20px; cursor: pointer; transition: 0.2s; border: 1px solid transparent; }
         .checkbox-item.checked { background: var(--primary); color: #fff; border-color: var(--primary); }
         .checkbox-item input { display: none; }
         
         .btn-filter { width: 100%; padding: 12px; background: var(--highlight); color: #000; font-weight: bold; border: none; border-radius: 12px; cursor: pointer; font-size: 16px; margin-bottom: 10px;}
         
+        /* 🔥 匯出按鈕 */
         .btn-export { width: 100%; padding: 12px; background: #4CAF50; color: #fff; font-weight: bold; border: none; border-radius: 12px; cursor: pointer; font-size: 16px; display: none; } 
         .btn-export:active { transform: scale(0.98); }
         
+        /* 🔥 下載連結 */
         .download-link { display: none; text-align: center; margin-top: 10px; }
         .download-link a { color: #4CAF50; font-weight: bold; text-decoration: underline; font-size: 16px; }
 
@@ -122,6 +125,9 @@
             
             <div class="filter-title">🏮 檔期類型 (可複選)</div>
             <div id="filter-events" class="checkbox-group"></div>
+            
+            <div class="filter-title">📍 點位/地點 (可複選)</div>
+            <div id="filter-locs" class="checkbox-group"></div>
             
             <button class="btn-filter" onclick="executeFilter()">🚀 開始撈取</button>
             <button id="btn-export" class="btn-export" onclick="exportData()">📊 匯出成 Google Sheet</button>
@@ -210,7 +216,7 @@
         const CITY_ORDER = ["基隆", "台北", "新北", "桃園", "新竹", "苗栗", "台中", "彰化", "南投", "雲林", "嘉義", "台南", "高雄", "屏東", "宜蘭", "花蓮", "台東"];
         let calDate = new Date();
 
-        // ✅ 正確的 STAFFNAME.gs API 網址
+        // 🔴 正確的 API 網址 (與 index.html 相同)
         const API_URL = "https://script.google.com/macros/s/AKfycbyMBHte8bMkDta5ygAU6lS36JZelPni9oQIGbtqZ203jDpcWrcQA33dbTTC4kaAZDGJPw/exec"; 
 
         initFilterOptions();
@@ -218,17 +224,42 @@
         function initFilterOptions() {
             let years = new Set();
             let events = new Set();
+            let locs = new Set(); // 🔥 新增：地點 Set
+
+            // 1. 蒐集年份與檔期名稱
             ALL_EVENTS.forEach(evt => {
                 let match = evt.match(/(\d{4})(.+)/);
                 if (match) { years.add(match[1]); events.add(match[2]); } else { events.add(evt); }
             });
+
+            // 2. 🔥 新增：蒐集所有做過的地點
+            staffList.forEach(staff => {
+                if (staff.history) {
+                    Object.values(staff.history).forEach(record => {
+                        if (record.loc) {
+                            // 清理地點名稱 (去除 | 和 📍，並修剪空白)
+                            let cleanLoc = record.loc.replace(/[|📍]/g, "").trim();
+                            // 這裡可以選擇是否要更精簡，目前先保留原始點位名稱
+                            if(cleanLoc) locs.add(cleanLoc);
+                        }
+                    });
+                }
+            });
+
+            // 渲染年份
             const yearContainer = document.getElementById('filter-years');
             Array.from(years).sort().reverse().forEach(y => {
                 yearContainer.innerHTML += `<div class="checkbox-item" onclick="toggleCheck(this)">${y}<input type="checkbox" value="${y}"></div>`;
             });
+            // 渲染活動
             const eventContainer = document.getElementById('filter-events');
             Array.from(events).sort().forEach(e => {
                 eventContainer.innerHTML += `<div class="checkbox-item" onclick="toggleCheck(this)">${e}<input type="checkbox" value="${e}"></div>`;
+            });
+            // 🔥 渲染地點
+            const locContainer = document.getElementById('filter-locs');
+            Array.from(locs).sort().forEach(l => {
+                locContainer.innerHTML += `<div class="checkbox-item" onclick="toggleCheck(this)">${l}<input type="checkbox" value="${l}"></div>`;
             });
         }
 
@@ -238,11 +269,15 @@
             checkbox.checked = !checkbox.checked;
         }
 
+        // 🔥 更新後的篩選邏輯 (支援地點)
         function executeFilter() {
             const selectedYears = Array.from(document.querySelectorAll('#filter-years input:checked')).map(cb => cb.value);
             const selectedEvents = Array.from(document.querySelectorAll('#filter-events input:checked')).map(cb => cb.value);
+            const selectedLocs = Array.from(document.querySelectorAll('#filter-locs input:checked')).map(cb => cb.value); // 🔥 新增
 
-            if (selectedYears.length === 0 && selectedEvents.length === 0) { alert("請至少選擇一個年份或檔期類型！"); return; }
+            if (selectedYears.length === 0 && selectedEvents.length === 0 && selectedLocs.length === 0) { 
+                alert("請至少選擇一個年份、檔期或地點！"); return; 
+            }
 
             const resultList = document.getElementById('filter-list');
             resultList.innerHTML = "";
@@ -254,11 +289,31 @@
                 const myHistory = Object.keys(staff.history); 
 
                 for (let h of myHistory) {
-                    let yMatch = (selectedYears.length === 0);
-                    let eMatch = (selectedEvents.length === 0);
+                    // 1. 年份檢查
+                    let yMatch = (selectedYears.length === 0); // 沒選就視為通過
                     if (!yMatch) { for (let y of selectedYears) { if (h.includes(y)) { yMatch = true; break; } } }
+
+                    // 2. 檔期檢查
+                    let eMatch = (selectedEvents.length === 0);
                     if (!eMatch) { for (let e of selectedEvents) { if (h.includes(e)) { eMatch = true; break; } } }
-                    if (yMatch && eMatch) { hasMatch = true; break; }
+
+                    // 3. 🔥 地點檢查
+                    let lMatch = (selectedLocs.length === 0);
+                    if (!lMatch) {
+                        let record = staff.history[h];
+                        if (record && record.loc) {
+                            for (let l of selectedLocs) { 
+                                // 模糊比對：只要履歷地點包含勾選的地點關鍵字
+                                if (record.loc.includes(l)) { lMatch = true; break; } 
+                            }
+                        }
+                    }
+
+                    // 必須三個條件都通過 (AND)
+                    if (yMatch && eMatch && lMatch) { 
+                        hasMatch = true; 
+                        break; // 只要有一筆履歷符合，這個人就算選中
+                    }
                 }
 
                 if (hasMatch) {
@@ -284,6 +339,7 @@
             linkArea.style.display = "none";
         }
 
+        // 匯出功能 (保持不變)
         function exportData() {
             if (currentFilterResults.length === 0) return;
             const btn = document.getElementById('btn-export');
