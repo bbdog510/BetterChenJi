@@ -2,7 +2,7 @@
 <html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>員工資料庫</title>
     <link rel="icon" href="img/logo.png" type="image/png">
     <style>
@@ -17,36 +17,43 @@
             --border-line: #E0E0E0;
         }
         
-        body { font-family: 'MiSans', sans-serif; background: var(--bg-color); color: var(--text-main); padding: 20px; margin: 0; padding-bottom: 80px; }
+        * { box-sizing: border-box; } /* 防止寬度計算錯誤 */
+
+        body { 
+            font-family: 'MiSans', sans-serif; background: var(--bg-color); color: var(--text-main); 
+            padding: 15px; margin: 0; padding-bottom: 80px; overflow-x: hidden; 
+        }
         
         .search-box { position: sticky; top: 0; background: var(--bg-color); padding: 10px 0; z-index: 10; display: flex; gap: 10px; border-bottom: 1px solid var(--border); }
         input[type="text"] { flex: 1; padding: 12px; border-radius: 12px; border: 1px solid var(--border); background: var(--card-bg); color: var(--text-main); outline: none; font-size: 16px; }
         
-        .tabs { display: flex; gap: 8px; margin-top: 15px; flex-wrap: wrap; }
-        .tab-btn { background: var(--card-bg); color: var(--text-sub); border: 1px solid var(--border); padding: 8px 16px; border-radius: 20px; cursor: pointer; font-size: 14px; flex: 1 0 auto; text-align: center; }
+        .tabs { display: flex; gap: 8px; margin-top: 15px; overflow-x: auto; padding-bottom: 5px; white-space: nowrap; }
+        .tabs::-webkit-scrollbar { display: none; }
+        .tab-btn { background: var(--card-bg); color: var(--text-sub); border: 1px solid var(--border); padding: 8px 16px; border-radius: 20px; cursor: pointer; font-size: 14px; flex-shrink: 0; text-align: center; }
         .tab-btn.active { background: var(--primary); color: #fff; border-color: var(--primary); }
         
-        .section { display: none; margin-top: 20px; }
+        .section { display: none; margin-top: 20px; animation: fadeIn 0.3s; }
         .section.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
 
         /* 卡片樣式 */
-        .staff-card { background: var(--card-bg); padding: 15px; border-radius: 16px; margin-bottom: 10px; display: flex; align-items: center; gap: 15px; cursor: pointer; border: 1px solid transparent; transition: 0.2s; }
+        .staff-card { background: var(--card-bg); padding: 15px; border-radius: 16px; margin-bottom: 10px; display: flex; align-items: center; gap: 15px; cursor: pointer; border: 1px solid transparent; transition: 0.2s; position: relative; overflow: hidden; }
         .staff-card:active { transform: scale(0.98); }
         .staff-card.is-me { border: 2px solid var(--highlight); background: rgba(255, 213, 79, 0.1); }
         body.light-mode .staff-card { box-shadow: 0 2px 5px rgba(0,0,0,0.02); }
         
         .avatar-small { width: 50px; height: 50px; border-radius: 50%; background: var(--primary); color: #fff; display: flex; justify-content: center; align-items: center; font-weight: bold; font-size: 18px; object-fit: cover; flex-shrink: 0; }
-        .info { flex: 1; }
-        .name { font-size: 18px; font-weight: bold; }
-        .sub-info { font-size: 12px; color: var(--text-sub); margin-top: 4px; display: flex; flex-wrap: wrap; gap: 8px; }
-        .tag { background: rgba(125,125,125,0.1); padding: 2px 6px; border-radius: 4px; }
+        .info { flex: 1; min-width: 0; /* 防止文字撐爆 */ }
+        .name { font-size: 17px; font-weight: bold; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .sub-info { font-size: 12px; color: var(--text-sub); margin-top: 4px; display: flex; flex-wrap: wrap; gap: 6px; }
+        .tag { background: rgba(125,125,125,0.1); padding: 2px 6px; border-radius: 4px; white-space: nowrap; }
 
         .pagination { display: flex; justify-content: space-between; margin: 20px 0; }
         .page-btn { padding: 8px 16px; background: var(--card-bg); border-radius: 12px; cursor: pointer; border: 1px solid var(--border); color: var(--text-main); }
 
         /* Modal */
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); display: none; justify-content: center; align-items: center; z-index: 100; backdrop-filter: blur(5px); }
-        .modal { background: var(--card-bg); width: 90%; max-width: 400px; max-height: 90vh; border-radius: 24px; padding: 25px; overflow-y: auto; position: relative; display: flex; flex-direction: column; }
+        .modal { background: var(--card-bg); width: 90%; max-width: 400px; max-height: 85vh; border-radius: 24px; padding: 25px; overflow-y: auto; position: relative; display: flex; flex-direction: column; }
         .modal-close { position: absolute; top: 15px; right: 15px; font-size: 24px; cursor: pointer; z-index: 10; background: rgba(0,0,0,0.5); width: 30px; height: 30px; text-align: center; line-height: 30px; border-radius: 50%; color: white; }
         .detail-row { margin-bottom: 15px; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 10px; }
         .detail-label { font-size: 12px; color: var(--text-sub); margin-bottom: 5px; }
@@ -71,29 +78,55 @@
         .roster-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; border-bottom: 1px dashed #555; padding-bottom: 5px; }
         .roster-loc { font-weight: bold; color: var(--primary); font-size: 15px; }
         .roster-names { display: flex; flex-wrap: wrap; gap: 8px; }
-        .roster-person { background: var(--card-bg); border: 1px solid #555; padding: 4px 10px; border-radius: 12px; font-size: 13px; cursor: pointer; }
+        .roster-person { background: var(--card-bg); border: 1px solid #555; padding: 4px 10px; border-radius: 12px; font-size: 13px; cursor: pointer; margin-bottom: 5px;}
         .btn-copy-ins { background: #4285F4; color: white; border: none; border-radius: 20px; padding: 4px 10px; font-size: 11px; cursor: pointer; display: flex; align-items: center; gap: 4px; }
 
         /* 撈資料樣式 */
         .filter-container { background: var(--card-bg); padding: 15px; border-radius: 16px; margin-bottom: 15px; border: 1px solid var(--border); }
         .filter-title { font-size: 14px; color: var(--primary); margin-bottom: 10px; font-weight: bold; margin-top: 15px; }
         .filter-title:first-child { margin-top: 0; }
-        .checkbox-group { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 15px; max-height: 150px; overflow-y: auto; }
-        .checkbox-item { display: flex; align-items: center; gap: 5px; font-size: 14px; background: rgba(125,125,125,0.1); padding: 6px 12px; border-radius: 20px; cursor: pointer; transition: 0.2s; border: 1px solid transparent; }
+        .checkbox-group { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 15px; max-height: 180px; overflow-y: auto; }
+        .checkbox-item { display: flex; align-items: center; gap: 5px; font-size: 13px; background: rgba(125,125,125,0.1); padding: 6px 10px; border-radius: 20px; cursor: pointer; transition: 0.2s; border: 1px solid transparent; }
         .checkbox-item.checked { background: var(--primary); color: #fff; border-color: var(--primary); }
         .checkbox-item input { display: none; }
         
         .btn-filter { width: 100%; padding: 12px; background: var(--highlight); color: #000; font-weight: bold; border: none; border-radius: 12px; cursor: pointer; font-size: 16px; margin-bottom: 10px;}
-        
         .btn-export { width: 100%; padding: 12px; background: #4CAF50; color: #fff; font-weight: bold; border: none; border-radius: 12px; cursor: pointer; font-size: 16px; display: none; } 
         .btn-export:active { transform: scale(0.98); }
-        
         .download-link { display: none; text-align: center; margin-top: 10px; }
         .download-link a { color: #4CAF50; font-weight: bold; text-decoration: underline; font-size: 16px; }
-
         .filter-result-count { text-align: center; margin: 10px 0; font-size: 12px; color: var(--text-sub); }
 
-        .chart-card { background: var(--card-bg); padding: 20px; border-radius: 16px; margin-bottom: 15px; } .chart-title { font-weight: bold; margin-bottom: 15px; color: var(--primary); } .bar-row { display: flex; align-items: center; margin-bottom: 8px; font-size: 12px; } .bar-label { width: 100px; text-align: right; margin-right: 10px; color: var(--text-sub); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; } .bar-bg { flex: 1; background: rgba(125,125,125,0.1); height: 10px; border-radius: 5px; overflow: hidden; } .bar-fill { height: 100%; background: var(--primary); border-radius: 5px; } .bar-val { width: 40px; margin-left: 10px; color: var(--text-main); font-size: 11px;} .calendar-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; background: var(--card-bg); padding: 10px; border-radius: 12px; } .cal-btn { background: none; border: none; font-size: 20px; color: var(--primary); cursor: pointer; padding: 0 15px; } .cal-month { font-size: 18px; font-weight: bold; } .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 5px; text-align: center; font-size: 12px; } .cal-day-header { color: var(--text-sub); padding-bottom: 5px; } .cal-cell { min-height: 50px; background: var(--card-bg); border-radius: 8px; border: 1px solid var(--border); padding: 4px; display: flex; flex-direction: column; align-items: center; } .cal-cell.today { border: 2px solid var(--primary); background: rgba(206, 147, 216, 0.1); } .cal-date-num { font-weight: bold; margin-bottom: 2px; } .cal-person { background: var(--primary); color: #fff; font-size: 10px; border-radius: 4px; padding: 2px 4px; margin-top: 2px; cursor: pointer; width: 90%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; } .cal-person.is-me { background: var(--highlight); color: #000; border: 1px solid #fff; } .fate-group { margin-bottom: 20px; } .fate-header { display: flex; align-items: center; margin-bottom: 8px; } .fate-num { width: 30px; height: 30px; background: var(--primary); color: white; border-radius: 50%; text-align: center; line-height: 30px; font-weight: bold; margin-right: 10px; } .fate-desc { font-size: 14px; font-weight: bold; } .fate-detail { font-size: 12px; color: var(--text-sub); margin-bottom: 10px; line-height: 1.4; padding-left: 40px; } .fate-list { display: flex; flex-wrap: gap: 8px; padding-left: 40px; } .fate-person { background: var(--card-bg); border: 1px solid var(--border); padding: 6px 12px; border-radius: 20px; font-size: 13px; cursor: pointer; } .fate-person.is-me { border: 2px solid var(--highlight); background: rgba(255, 213, 79, 0.2); font-weight: bold; }
+        /* 圖表與分析 */
+        .chart-card { background: var(--card-bg); padding: 20px; border-radius: 16px; margin-bottom: 15px; } 
+        .chart-title { font-weight: bold; margin-bottom: 15px; color: var(--primary); } 
+        .bar-row { display: flex; align-items: center; margin-bottom: 8px; font-size: 12px; } 
+        .bar-label { width: 90px; text-align: right; margin-right: 10px; color: var(--text-sub); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; } 
+        .bar-bg { flex: 1; background: rgba(125,125,125,0.1); height: 10px; border-radius: 5px; overflow: hidden; } 
+        .bar-fill { height: 100%; background: var(--primary); border-radius: 5px; } 
+        .bar-val { width: 35px; margin-left: 8px; color: var(--text-main); font-size: 11px;} 
+        
+        /* 📅 日曆樣式 (手機優化) */
+        .calendar-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; background: var(--card-bg); padding: 10px; border-radius: 12px; } 
+        .cal-btn { background: none; border: none; font-size: 20px; color: var(--primary); cursor: pointer; padding: 0 15px; } 
+        .cal-month { font-size: 18px; font-weight: bold; } 
+        .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; text-align: center; font-size: 12px; } 
+        .cal-day-header { color: var(--text-sub); padding-bottom: 5px; font-size: 11px; } 
+        .cal-cell { min-height: 50px; background: var(--card-bg); border-radius: 8px; border: 1px solid var(--border); padding: 2px; display: flex; flex-direction: column; align-items: center; overflow: hidden;} 
+        .cal-cell.today { border: 2px solid var(--primary); background: rgba(206, 147, 216, 0.1); } 
+        .cal-date-num { font-weight: bold; margin-bottom: 2px; font-size: 11px; } 
+        .cal-person { background: var(--primary); color: #fff; font-size: 10px; border-radius: 4px; padding: 2px 2px; margin-top: 1px; cursor: pointer; width: 100%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; } 
+        .cal-person.is-me { background: var(--highlight); color: #000; border: 1px solid #fff; } 
+        
+        /* 🔮 靈數樣式 (修復版) */
+        .fate-group { margin-bottom: 20px; } 
+        .fate-header { display: flex; align-items: center; margin-bottom: 8px; } 
+        .fate-num { width: 30px; height: 30px; background: var(--primary); color: white; border-radius: 50%; text-align: center; line-height: 30px; font-weight: bold; margin-right: 10px; flex-shrink: 0; } 
+        .fate-desc { font-size: 14px; font-weight: bold; } 
+        /* 🔥 重點修復：加上 wrap 讓它換行 */
+        .fate-list { display: flex; flex-wrap: wrap; gap: 8px; padding-left: 40px; } 
+        .fate-person { background: var(--card-bg); border: 1px solid var(--border); padding: 6px 12px; border-radius: 20px; font-size: 13px; cursor: pointer; white-space: nowrap; } 
+        .fate-person.is-me { border: 2px solid var(--highlight); background: rgba(255, 213, 79, 0.2); font-weight: bold; }
     </style>
 </head>
 <body>
@@ -220,7 +253,6 @@
         const CITY_ORDER = ["基隆", "台北", "新北", "桃園", "新竹", "苗栗", "台中", "彰化", "南投", "雲林", "嘉義", "台南", "高雄", "屏東", "宜蘭", "花蓮", "台東"];
         let calDate = new Date();
 
-        // 🔴 正確 API 網址 (維持你剛剛給的)
         const API_URL = "https://script.google.com/macros/s/AKfycbyMBHte8bMkDta5ygAU6lS36JZelPni9oQIGbtqZ203jDpcWrcQA33dbTTC4kaAZDGJPw/exec"; 
 
         initFilterOptions();
@@ -230,13 +262,11 @@
             let events = new Set();
             let locs = new Set(); 
 
-            // 1. 年份與檔期
             ALL_EVENTS.forEach(evt => {
                 let match = evt.match(/(\d{4})(.+)/);
                 if (match) { years.add(match[1]); events.add(match[2]); } else { events.add(evt); }
             });
 
-            // 2. 地點蒐集
             staffList.forEach(staff => {
                 if (staff.history) {
                     Object.values(staff.history).forEach(record => {
@@ -398,8 +428,6 @@
         }
 
         function renderList() { const listEl = document.getElementById('list'); listEl.innerHTML = ""; const start = (currentPage - 1) * itemsPerPage; const end = start + itemsPerPage; const pageData = filteredList.slice(start, end); document.getElementById('pageInfo').innerText = `第 ${currentPage} 頁 / 共 ${Math.ceil(filteredList.length / itemsPerPage)} 頁`; pageData.forEach(staff => { let age = getAge(staff.birthday); let school = staff.school || "無"; let phone = staff.phone || ""; const isMeClass = (staff.phone === loggedInPhone) ? "is-me" : ""; const card = document.createElement('div'); card.className = `staff-card ${isMeClass}`; card.onclick = () => showDetail(staff); let avatarHtml = `<div class="avatar-small">${staff.name.slice(-2)}</div>`; if (staff.photo) { const photoUrl = convertDriveLink(staff.photo); avatarHtml = `<img src="${photoUrl}" class="avatar-small" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex'"><div class="avatar-small" style="display:none">${staff.name.slice(-2)}</div>`; } let serviceCount = staff.history ? Object.keys(staff.history).length : 0; let serviceTag = serviceCount > 0 ? `<span class="tag" style="color:var(--highlight)">★${serviceCount}檔</span>` : ""; card.innerHTML = `${avatarHtml}<div class="info"><div class="name">${staff.name} ${staff.alias ? `<small>(${staff.alias})</small>` : ''}</div><div class="sub-info"><span class="tag">${age}歲</span><span class="tag">${school}</span>${serviceTag}</div></div>`; listEl.appendChild(card); }); }
-        
-        // 🔥 更新後的 showDetail：加入自我介紹欄位
         function showDetail(staff) { 
             document.getElementById('d-name').innerText = staff.name; 
             document.getElementById('d-phone').innerText = staff.phone; 
@@ -407,12 +435,10 @@
             document.getElementById('d-school').innerText = staff.school || "-"; 
             document.getElementById('d-id').innerText = staff.id || "-"; 
             
-            // 填入自我介紹
             document.getElementById('d-intro').innerText = staff.intro || "無自我介紹";
 
             let age = getAge(staff.birthday); let bdayText = staff.birthday || "?"; let parts = bdayText.split(/[-/.]/); if(parts.length >= 3) { let y = parseInt(parts[0]); if(y < 1911) y += 1911; bdayText = `${y}.${parts[1]}.${parts[2]}`; } document.getElementById('d-age').innerText = `${bdayText} (${age}歲)`; document.getElementById('d-call-btn').href = `tel:${staff.phone}`; const lineBtn = document.getElementById('d-line-btn'); if(staff.lineId) { lineBtn.href = `https://line.me/ti/p/~${staff.lineId}`; lineBtn.style.display = 'inline-flex'; } else { lineBtn.style.display = 'none'; } const mapBtn = document.getElementById('d-map-btn'); document.getElementById('d-addr').innerText = staff.address || "-"; if(staff.address) { mapBtn.href = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(staff.address)}`; mapBtn.style.display = 'inline-flex'; } else { mapBtn.style.display = 'none'; } const photoEl = document.getElementById('d-photo'); const avatarText = document.getElementById('d-avatar-text'); photoEl.classList.remove('zoomed'); if (staff.photo) { photoEl.src = convertDriveLink(staff.photo); photoEl.style.display = 'block'; avatarText.style.display = 'none'; } else { photoEl.style.display = 'none'; avatarText.innerText = staff.name.slice(-2); avatarText.style.display = 'flex'; } const history = staff.history || {}; const count = Object.keys(history).length; const hours = staff.totalHours || 0; document.getElementById('d-count').innerText = count; document.getElementById('d-hours').innerText = hours; const listEl = document.getElementById('d-history-list'); listEl.innerHTML = ""; let sortedEvents = [...ALL_EVENTS].sort().reverse(); sortedEvents.forEach(eventName => { const isAttended = history[eventName] !== undefined; const record = history[eventName] || {}; const div = document.createElement('div'); if (isAttended) { div.className = 'history-item active'; let rawLoc = record.loc || ""; let niceLoc = rawLoc.replace(/\s*[|｜│]\s*/g, ""); div.innerHTML = `${eventName} <span class="h-tag">${record.hours}h│${niceLoc}</span>`; div.style.cursor = "pointer"; div.onclick = (e) => { e.stopPropagation(); openRosterModal(eventName); }; } else { div.className = 'history-item inactive'; div.innerHTML = `${eventName} (未參加)`; div.style.cursor = "pointer"; div.onclick = (e) => { e.stopPropagation(); openRosterModal(eventName); }; } listEl.appendChild(div); }); document.getElementById('detailModal').style.display = 'flex'; 
         }
-        
         function openRosterModal(eventName) { document.getElementById('r-title').innerText = `${eventName} 人員名單`; const contentEl = document.getElementById('r-content'); contentEl.innerHTML = "載入中..."; let groups = {}; staffList.forEach(s => { if (s.history && s.history[eventName]) { let loc = s.history[eventName].loc || "未知地點"; let cleanLoc = loc.replace(/\s*[|｜│]\s*/g, ""); if (!groups[cleanLoc]) groups[cleanLoc] = []; groups[cleanLoc].push(s); } }); contentEl.innerHTML = ""; if (Object.keys(groups).length === 0) { contentEl.innerHTML = "<div style='text-align:center; color:#888;'>此檔期尚無人員紀錄</div>"; return; } let sortedKeys = Object.keys(groups).sort((a, b) => { let indexA = CITY_ORDER.findIndex(city => a.includes(city)); let indexB = CITY_ORDER.findIndex(city => b.includes(city)); return (indexA === -1 ? 999 : indexA) - (indexB === -1 ? 999 : indexB); }); sortedKeys.forEach(loc => { let section = document.createElement('div'); section.className = 'roster-group'; let header = document.createElement('div'); header.className = 'roster-header'; let title = document.createElement('span'); title.className = 'roster-loc'; title.innerText = `📍 ${loc}`; let copyBtn = document.createElement('button'); copyBtn.className = 'btn-copy-ins'; copyBtn.innerHTML = '📋 複製保險名單'; copyBtn.onclick = () => copyInsuranceList(loc, groups[loc]); header.appendChild(title); header.appendChild(copyBtn); section.appendChild(header); let namesDiv = document.createElement('div'); namesDiv.className = 'roster-names'; groups[loc].forEach(s => { let span = document.createElement('span'); span.className = 'roster-person'; span.innerText = s.name; span.onclick = () => { document.getElementById('rosterModal').style.display = 'none'; showDetail(s); }; namesDiv.appendChild(span); }); section.appendChild(namesDiv); contentEl.appendChild(section); }); document.getElementById('rosterModal').style.display = 'flex'; }
         function copyInsuranceList(locName, staffArray) { let text = `${locName}\n\n`; staffArray.forEach((s, index) => { let bDayStr = s.birthday || ""; let rocBday = "??.??.??"; let parts = bDayStr.split(/[-/.]/); if (parts.length >= 3) { let y = parseInt(parts[0]); let m = parts[1]; let d = parts[2]; if (y > 1911) y -= 1911; rocBday = `${y}.${m}.${d}`; } else if (bDayStr.length >= 6) { rocBday = bDayStr; } text += `${index + 1}.${s.name} / ${rocBday} / ${s.id || "無身分證"} / ${s.phone}\n`; }); navigator.clipboard.writeText(text).then(() => { alert(`✅ 已複製！`); }).catch(err => { alert("❌ 複製失敗"); }); }
         function renderAnalysis() { let gender={ "男":0, "女":0, "未知":0 }, age={ "18以下":0, "19-22":0, "23-25":0, "26以上":0 }, loc={}, school={}; let topHours = [], topCounts = []; staffList.forEach(s => { if(s.id && s.id.length === 10) { let g = s.id[1]; if(g === '1') gender["男"]++; else if(g === '2') gender["女"]++; else gender["未知"]++; } else gender["未知"]++; let a = getAge(s.birthday); if(a!=="?") { if(a<=18) age["18以下"]++; else if(a<=22) age["19-22"]++; else if(a<=25) age["23-25"]++; else age["26以上"]++; } if(s.address) { let l = s.address.substring(0, 3); loc[l] = (loc[l] || 0) + 1; } if(s.school) { let sc = s.school.split('/')[0] || s.school; school[sc] = (school[sc] || 0) + 1; } if(s.totalHours > 0) topHours.push({name: s.name, val: s.totalHours}); let count = s.history ? Object.keys(s.history).length : 0; if(count > 0) topCounts.push({name: s.name, val: count}); }); drawChart('chart-age', age); drawChart('chart-gender', gender); drawChart('chart-loc', loc); drawChart('chart-school', school); topHours.sort((a,b) => b.val - a.val); topCounts.sort((a,b) => b.val - a.val); drawRanking('chart-top-hours', topHours.slice(0, 10), 'hr'); drawRanking('chart-top-count', topCounts.slice(0, 10), '次'); }
