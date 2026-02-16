@@ -159,6 +159,9 @@
             
             <div class="filter-title">📍 點位/地點 (可複選)</div>
             <div id="filter-locs" class="checkbox-group"></div>
+
+            <div class="filter-title">🏠 居住區域 (可複選)</div>
+            <div id="filter-addr" class="checkbox-group"></div>
             
             <button class="btn-filter" onclick="executeFilter()">🚀 開始撈取</button>
             <button id="btn-export" class="btn-export" onclick="exportData()">📊 匯出成 Google Sheet</button>
@@ -253,7 +256,6 @@
         const CITY_ORDER = ["基隆", "台北", "新北", "桃園", "新竹", "苗栗", "台中", "彰化", "南投", "雲林", "嘉義", "台南", "高雄", "屏東", "宜蘭", "花蓮", "台東"];
         let calDate = new Date();
 
-        // 🟢 這裡已經修正為最新的 API 網址 (與 index.html 相同)
         const API_URL = "https://script.google.com/macros/s/AKfycbzjta0MS5xtzE15r9ZoooqxJ8Ypfw1w-DSMT6HVtWbkf9hLtczq13BTNLZTjW1x3nmc3A/exec"; 
 
         initFilterOptions();
@@ -291,6 +293,13 @@
             Array.from(locs).sort().forEach(l => {
                 locContainer.innerHTML += `<div class="checkbox-item" onclick="toggleCheck(this)">${l}<input type="checkbox" value="${l}"></div>`;
             });
+
+            // 🔥 新增：生成居住地按鈕
+            const targetCities = ["台北", "新北", "新竹", "台中", "台南", "高雄"];
+            const addrContainer = document.getElementById('filter-addr');
+            targetCities.forEach(city => {
+                 addrContainer.innerHTML += `<div class="checkbox-item" onclick="toggleCheck(this)">${city}<input type="checkbox" value="${city}"></div>`;
+            });
         }
 
         function toggleCheck(el) {
@@ -303,9 +312,11 @@
             const selectedYears = Array.from(document.querySelectorAll('#filter-years input:checked')).map(cb => cb.value);
             const selectedEvents = Array.from(document.querySelectorAll('#filter-events input:checked')).map(cb => cb.value);
             const selectedLocs = Array.from(document.querySelectorAll('#filter-locs input:checked')).map(cb => cb.value); 
+            // 🔥 新增：取得選取的居住地
+            const selectedAddr = Array.from(document.querySelectorAll('#filter-addr input:checked')).map(cb => cb.value);
 
-            if (selectedYears.length === 0 && selectedEvents.length === 0 && selectedLocs.length === 0) { 
-                alert("請至少選擇一個年份、檔期或地點！"); return; 
+            if (selectedYears.length === 0 && selectedEvents.length === 0 && selectedLocs.length === 0 && selectedAddr.length === 0) { 
+                alert("請至少選擇一個條件！"); return; 
             }
 
             const resultList = document.getElementById('filter-list');
@@ -315,8 +326,20 @@
             staffList.forEach(staff => {
                 if (!staff.history) return;
                 let hasMatch = false;
-                const myHistory = Object.keys(staff.history); 
+                
+                // 🔥 1. 先檢查居住地 (Address) 是否符合
+                let aMatch = (selectedAddr.length === 0); // 沒選就視為符合
+                if (!aMatch && staff.address) {
+                    for (let city of selectedAddr) {
+                        if (staff.address.includes(city)) { aMatch = true; break; }
+                    }
+                }
 
+                // 如果居住地不符，直接跳過這位員工 (加快速度)
+                if (!aMatch) return;
+
+                // 🔥 2. 再檢查檔期紀錄 (History)
+                const myHistory = Object.keys(staff.history); 
                 for (let h of myHistory) {
                     let yMatch = (selectedYears.length === 0);
                     if (!yMatch) { for (let y of selectedYears) { if (h.includes(y)) { yMatch = true; break; } } }
@@ -337,6 +360,7 @@
                     if (yMatch && eMatch && lMatch) { hasMatch = true; break; }
                 }
 
+                // 只有當「居住地」和「歷史紀錄」都符合 (且 aMatch 前面已擋過)
                 if (hasMatch) {
                     currentFilterResults.push(staff);
                     let card = document.createElement('div');
@@ -394,7 +418,11 @@
                     link.href = data.url;
                     linkArea.style.display = "block";
                 } else {
-                    alert("匯出失敗：" + data.msg);
+                    let errorMsg = data.msg;
+                    if (errorMsg.includes("forEach")) {
+                        errorMsg = "後端版本不符，請確認 API 網址是否正確。";
+                    }
+                    alert("匯出失敗：" + errorMsg);
                     btn.innerText = "📊 匯出成 Google Sheet";
                 }
                 btn.disabled = false;
