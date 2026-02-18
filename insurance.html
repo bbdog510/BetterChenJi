@@ -38,13 +38,18 @@
             color: var(--text-main); border-radius: 8px; padding: 8px; font-size: 12px; resize: none;
         }
 
-        /* 抓漏警示區 */
+        /* 選項區 */
+        .options-box {
+            display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 5px; background: rgba(0,0,0,0.2); padding: 8px; border-radius: 8px;
+        }
+        .opt-item { font-size: 13px; display: flex; align-items: center; gap: 5px; cursor: pointer; user-select: none; }
+        .opt-item input { accent-color: var(--primary); }
+
         .missing-box {
             display: none; background: rgba(255, 82, 82, 0.1); border: 1px solid var(--danger);
             border-radius: 8px; padding: 10px; margin-top: 10px; font-size: 13px; color: var(--danger);
         }
 
-        /* 主容器 */
         .container { display: flex; gap: 15px; flex: 1; overflow: hidden; }
         @media (max-width: 768px) { .container { flex-direction: column; } }
 
@@ -70,7 +75,6 @@
         }
         .list-area.drag-over { border-color: var(--highlight); background: rgba(66, 133, 244, 0.1); border-radius: 8px; }
 
-        /* 員工卡片 */
         .staff-item {
             background: rgba(125,125,125,0.1); padding: 8px 12px; border-radius: 8px;
             cursor: pointer; display: flex; justify-content: space-between; align-items: center;
@@ -122,38 +126,41 @@
         </div>
     </div>
 
+    <div class="smart-area" style="border-color:var(--primary);">
+        <div style="font-size:12px; margin-bottom:5px; color:var(--text-sub);">📝 簡易複製的選項 (勾選要的項目)</div>
+        <div class="options-box">
+            <label class="opt-item"><input type="checkbox" id="opt-bday" checked> 生日</label>
+            <label class="opt-item"><input type="checkbox" id="opt-id" checked> 身分證</label>
+            <label class="opt-item"><input type="checkbox" id="opt-phone" checked> 電話</label>
+            <label class="opt-item"><input type="checkbox" id="opt-body" checked> 身高體重</label>
+            <label class="opt-item"><input type="checkbox" id="opt-addr"> 地址</label>
+        </div>
+    </div>
+
     <div class="container">
         <div class="panel">
-            <div class="panel-header">
-                <span class="panel-title">👥 人員庫</span>
-            </div>
+            <div class="panel-header"><span class="panel-title">👥 人員庫</span></div>
             <input type="text" id="searchInput" class="search-box" placeholder="搜尋姓名、電話..." oninput="renderSource()">
             <div id="sourceList" class="list-area"></div>
         </div>
 
         <div class="panel" style="border-color: var(--highlight);">
-            <div class="panel-header">
-                <span class="panel-title" style="color:var(--highlight);">📋 選取名單</span>
-                <span id="countBadge" class="count-badge">0 人</span>
-            </div>
+            <div class="panel-header"><span class="panel-title" style="color:var(--highlight);">📋 選取名單</span><span id="countBadge" class="count-badge">0 人</span></div>
             <div id="targetList" class="list-area">
-                <div style="text-align:center; color:#666; font-size:12px; margin-top:20px;" id="emptyMsg">
-                    請從左側點擊，或使用上方智慧匯入
-                </div>
+                <div style="text-align:center; color:#666; font-size:12px; margin-top:20px;" id="emptyMsg">請從左側點擊，或使用上方智慧匯入</div>
             </div>
         </div>
     </div>
 
     <div class="bottom-bar">
         <a href="dashboard.html" class="btn btn-back">⬅️</a>
-        <button class="btn btn-clear" onclick="clearTarget()">🗑️ 清空</button>
-        <button class="btn btn-simple" onclick="generateSimpleFormat()">📋 複製簡易名單</button>
-        <button class="btn btn-excel" onclick="generateExcelFormat()">📊 複製 Excel 表格</button>
+        <button class="btn btn-clear" onclick="clearTarget()">🗑️</button>
+        <button class="btn btn-simple" onclick="generateSimpleFormat()">📋 簡易複製</button>
+        <button class="btn btn-excel" onclick="generateExcelFormat()">📊 複製到 Excel</button>
     </div>
 
     <script>
         if (localStorage.getItem('theme') === 'light') document.body.classList.add('light-mode');
-
         const cachedDB = localStorage.getItem('STAFF_DB_CACHE');
         if (!cachedDB) { alert('請先登入以同步資料'); window.location.href = 'index.html'; }
         
@@ -161,195 +168,95 @@
         let staffList = Object.values(STAFF_DB);
         staffList.sort((a, b) => new Date(b.entryDate || 0) - new Date(a.entryDate || 0));
 
-        // 核心資料結構：使用 Map 來紀錄選中的人，Key是電話
-        // Value: { start, end, rangeDays, workDays }
         let selectedStaffData = new Map(); 
+        renderSource(); renderTarget();
 
-        renderSource();
-        renderTarget();
+        function toggleSmart() { document.getElementById('smartContent').classList.toggle('show'); }
 
-        function toggleSmart() {
-            document.getElementById('smartContent').classList.toggle('show');
-        }
-
-        // === 🤖 智慧解析核心邏輯 (最強大的部分) ===
         function parseSchedule() {
             const text = document.getElementById('pasteArea').value;
             const year = document.getElementById('parseYear').value || new Date().getFullYear();
             const msgEl = document.getElementById('parseMsg');
             const missingBox = document.getElementById('missingBox');
-            
             if (!text.trim()) { msgEl.innerText = "❌ 請先貼上資料"; return; }
 
-            // 1. 拆解 Excel 貼上的文字 (Tab 分隔)
             const rows = text.split('\n').map(row => row.split('\t'));
-            
-            // 2. 找出日期所在的 Column (欄位)
-            // 邏輯：掃描所有格子，找出符合 MM/DD 格式的
-            let dateMap = {}; // colIndex -> Date Object
-            let foundDateRow = false;
+            let dateMap = {}; let foundDateRow = false;
 
-            // 先掃前 10 行找日期頭
             for(let r=0; r<Math.min(rows.length, 10); r++) {
                 rows[r].forEach((cell, cIdx) => {
                     let match = cell.match(/(\d{1,2})[\/\.](\d{1,2})/);
                     if (match) {
                         let d = new Date(year, parseInt(match[1])-1, parseInt(match[2]));
-                        dateMap[cIdx] = d;
-                        foundDateRow = true;
+                        dateMap[cIdx] = d; foundDateRow = true;
                     }
                 });
                 if(foundDateRow && Object.keys(dateMap).length > 2) break;
             }
 
-            if (!foundDateRow) {
-                msgEl.innerText = "⚠️ 找不到日期格式 (如 2/10)，請確認複製範圍包含日期列。";
-                return;
-            }
+            if (!foundDateRow) { msgEl.innerText = "⚠️ 找不到日期格式 (如 2/10)，請確認複製範圍包含日期列。"; return; }
 
-            // 3. 掃描名字並統計
-            let tempResults = {}; // phone -> { dates: [], name }
-            let missingNames = new Set(); // 記錄沒找到的人
-
+            let tempResults = {}; let missingNames = new Set();
             rows.forEach(row => {
                 row.forEach((cell, cIdx) => {
                     let rawName = cell.trim();
-                    // 過濾掉時間、班別等雜訊，只抓純中文名 (2-4字)
                     if (!rawName || !/^[\u4e00-\u9fa5]{2,4}$/.test(rawName)) return;
                     if (["早班","晚班","全天","進櫃","撤櫃","盤點"].includes(rawName)) return;
-
-                    // 嘗試比對名字
                     let staff = staffList.find(s => s.name === rawName || (s.alias && s.alias === rawName));
-                    
                     if (staff) {
-                        // 如果這格有名字，且這一欄對應一個有效日期
                         if (dateMap[cIdx]) {
-                            if (!tempResults[staff.phone]) {
-                                tempResults[staff.phone] = { 
-                                    name: staff.name, 
-                                    phone: staff.phone,
-                                    dates: [] // 存 Date 物件
-                                };
-                            }
+                            if (!tempResults[staff.phone]) { tempResults[staff.phone] = { name: staff.name, phone: staff.phone, dates: [] }; }
                             tempResults[staff.phone].dates.push(dateMap[cIdx].getTime());
                         }
-                    } else {
-                        // 名字像人名，但資料庫沒這個人 (且這欄有日期，代表他在排班表內)
-                        if (dateMap[cIdx]) {
-                            missingNames.add(rawName);
-                        }
-                    }
+                    } else { if (dateMap[cIdx]) { missingNames.add(rawName); } }
                 });
             });
 
-            // 4. 更新到選取清單
             let count = 0;
             for (let phone in tempResults) {
                 let data = tempResults[phone];
-                // 去重並排序日期
                 let uniqueTimestamps = [...new Set(data.dates)].sort((a,b)=>a-b);
-                
                 if (uniqueTimestamps.length > 0) {
-                    let startTs = uniqueTimestamps[0];
-                    let endTs = uniqueTimestamps[uniqueTimestamps.length - 1];
-                    
-                    // 計算區間天數 (End - Start + 1)
-                    let diffTime = Math.abs(endTs - startTs);
-                    let rangeDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1; 
-                    
-                    // 計算實際工作天數 (Count)
+                    let startTs = uniqueTimestamps[0]; let endTs = uniqueTimestamps[uniqueTimestamps.length - 1];
+                    let rangeDays = Math.ceil(Math.abs(endTs - startTs) / (1000 * 60 * 60 * 24)) + 1; 
                     let workDays = uniqueTimestamps.length;
-
-                    // 格式化日期字串
-                    let sD = new Date(startTs);
-                    let eD = new Date(endTs);
+                    let sD = new Date(startTs); let eD = new Date(endTs);
                     let startStr = `${sD.getFullYear()}-${(sD.getMonth()+1).toString().padStart(2,'0')}-${sD.getDate().toString().padStart(2,'0')}`;
                     let endStr = `${eD.getFullYear()}-${(eD.getMonth()+1).toString().padStart(2,'0')}-${eD.getDate().toString().padStart(2,'0')}`;
-
-                    selectedStaffData.set(phone, { 
-                        start: startStr, 
-                        end: endStr, 
-                        rangeDays: rangeDays, 
-                        workDays: workDays 
-                    });
+                    selectedStaffData.set(phone, { start: startStr, end: endStr, rangeDays: rangeDays, workDays: workDays });
                     count++;
                 }
             }
-
-            // 5. 顯示結果
-            msgEl.innerText = `✅ 成功解析！已帶入 ${count} 位人員的排班資訊。`;
-            msgEl.style.color = "var(--success)";
-
-            // 顯示抓漏名單
-            if (missingNames.size > 0) {
-                missingBox.style.display = 'block';
-                missingBox.innerHTML = `⚠️ <b>注意：以下名字在班表上，但資料庫找不到人 (請檢查錯字或新增員工)：</b><br>${Array.from(missingNames).join("、")}`;
-            } else {
-                missingBox.style.display = 'none';
-            }
-
-            renderSource();
-            renderTarget();
+            msgEl.innerText = `✅ 成功解析！已帶入 ${count} 位人員。`; msgEl.style.color = "var(--success)";
+            if (missingNames.size > 0) { missingBox.style.display = 'block'; missingBox.innerHTML = `⚠️ <b>注意：以下名字在班表上，但資料庫找不到人 (請檢查錯字或新增員工)：</b><br>${Array.from(missingNames).join("、")}`; } else { missingBox.style.display = 'none'; }
+            renderSource(); renderTarget();
         }
 
-        // === 渲染 UI ===
         function renderSource() {
-            const container = document.getElementById('sourceList');
-            const keyword = document.getElementById('searchInput').value.toLowerCase();
-            container.innerHTML = "";
-
+            const container = document.getElementById('sourceList'); const keyword = document.getElementById('searchInput').value.toLowerCase(); container.innerHTML = "";
             staffList.forEach(staff => {
-                if (selectedStaffData.has(staff.phone)) return; // 已選就不顯示
-
+                if (selectedStaffData.has(staff.phone)) return; 
                 if ((staff.name && staff.name.includes(keyword)) || (staff.phone && staff.phone.includes(keyword))) {
-                    const div = document.createElement('div');
-                    div.className = 'staff-item';
-                    div.onclick = () => { 
-                        // 手動加入預設不帶日期
-                        selectedStaffData.set(staff.phone, { start: "", end: "", rangeDays: "", workDays: "" }); 
-                        renderAll(); 
-                    };
-                    div.innerHTML = `
-                        <div class="s-info">
-                            <span class="s-name">${staff.name}</span>
-                            <span class="s-detail">${staff.phone}</span>
-                        </div>
-                        <div class="s-action">➜</div>
-                    `;
+                    const div = document.createElement('div'); div.className = 'staff-item';
+                    div.onclick = () => { selectedStaffData.set(staff.phone, { start: "", end: "", rangeDays: "", workDays: "" }); renderAll(); };
+                    div.innerHTML = `<div class="s-info"><span class="s-name">${staff.name}</span><span class="s-detail">${staff.phone}</span></div><div class="s-action">➜</div>`;
                     container.appendChild(div);
                 }
             });
         }
 
         function renderTarget() {
-            const container = document.getElementById('targetList');
-            const emptyMsg = document.getElementById('emptyMsg');
-            container.innerHTML = "";
-
-            if (selectedStaffData.size === 0) {
-                if(emptyMsg) emptyMsg.style.display = "block";
-                container.appendChild(emptyMsg || createEmptyMsg());
-            } else {
+            const container = document.getElementById('targetList'); const emptyMsg = document.getElementById('emptyMsg'); container.innerHTML = "";
+            if (selectedStaffData.size === 0) { if(emptyMsg) emptyMsg.style.display = "block"; container.appendChild(emptyMsg || createEmptyMsg()); } else {
                 if(emptyMsg) emptyMsg.style.display = "none";
                 selectedStaffData.forEach((val, phone) => {
                     const staff = staffList.find(s => s.phone === phone);
                     if (staff) {
-                        const div = document.createElement('div');
-                        div.className = 'staff-item selected-item';
+                        const div = document.createElement('div'); div.className = 'staff-item selected-item';
                         div.onclick = () => { selectedStaffData.delete(phone); renderAll(); };
-                        
                         let infoHtml = `<span class="s-name">${staff.name}</span>`;
-                        // 如果有智慧解析的時間資料，顯示出來
-                        if (val.start) {
-                            infoHtml += `<div class="date-tag">${val.start.slice(5)} ~ ${val.end.slice(5)} (共${val.rangeDays}天 / 做${val.workDays}天)</div>`;
-                        } else {
-                            infoHtml += `<span class="s-detail">${staff.phone}</span>`;
-                        }
-
-                        div.innerHTML = `
-                            <div class="s-info">${infoHtml}</div>
-                            <div class="s-action" style="color:#FF5252;">✕</div>
-                        `;
+                        if (val.start) { infoHtml += `<div class="date-tag">${val.start.slice(5)} ~ ${val.end.slice(5)} (共${val.rangeDays}天 / 做${val.workDays}天)</div>`; } else { infoHtml += `<span class="s-detail">${staff.phone}</span>`; }
+                        div.innerHTML = `<div class="s-info">${infoHtml}</div><div class="s-action" style="color:#FF5252;">✕</div>`;
                         container.appendChild(div);
                     }
                 });
@@ -357,88 +264,64 @@
             document.getElementById('countBadge').innerText = `${selectedStaffData.size} 人`;
         }
 
-        function createEmptyMsg() {
-            const div = document.createElement('div');
-            div.id = 'emptyMsg';
-            div.style.textAlign = 'center'; div.style.color = '#666'; div.style.fontSize = '12px'; div.style.marginTop = '20px';
-            div.innerText = '請從左側點擊，或使用上方智慧匯入';
-            return div;
-        }
-
+        function createEmptyMsg() { const div = document.createElement('div'); div.id = 'emptyMsg'; div.style.textAlign = 'center'; div.style.color = '#666'; div.style.fontSize = '12px'; div.style.marginTop = '20px'; div.innerText = '請從左側點擊，或使用上方智慧匯入'; return div; }
         function renderAll() { renderSource(); renderTarget(); }
+        function clearTarget() { if(confirm("確定要清空名單嗎？")) { selectedStaffData.clear(); renderAll(); document.getElementById('pasteArea').value = ""; document.getElementById('parseMsg').innerText = ""; document.getElementById('missingBox').style.display = 'none'; } }
 
-        function clearTarget() {
-            if(confirm("確定要清空名單嗎？")) {
-                selectedStaffData.clear();
-                renderAll();
-                document.getElementById('pasteArea').value = "";
-                document.getElementById('parseMsg').innerText = "";
-                document.getElementById('missingBox').style.display = 'none';
-            }
-        }
-
-        // === 📋 功能 1：簡易名單 (保險業務員用) ===
+        // === 📋 功能 1：簡易名單 (根據勾選) ===
         function generateSimpleFormat() {
             if (selectedStaffData.size === 0) { alert("名單是空的！"); return; }
-            let text = "";
-            let index = 1;
+            let text = ""; let index = 1;
+            
+            // 讀取勾選狀態
+            const needBday = document.getElementById('opt-bday').checked;
+            const needId = document.getElementById('opt-id').checked;
+            const needPhone = document.getElementById('opt-phone').checked;
+            const needBody = document.getElementById('opt-body').checked;
+            const needAddr = document.getElementById('opt-addr').checked;
+
             selectedStaffData.forEach((data, phone) => {
                 const s = staffList.find(st => st.phone === phone);
                 if (s) {
-                    let bDayStr = formatRocDate(s.birthday, ".");
-                    text += `${index}.${s.name} / ${bDayStr} / ${s.id || "無身分證"} / ${s.phone}\n`;
+                    let parts = [];
+                    // 永遠顯示名字
+                    parts.push(`${index}.${s.name}`);
+                    
+                    if(needBday) { let bDayStr = formatRocDate(s.birthday, "."); parts.push(bDayStr); }
+                    if(needId) parts.push(s.id || "無身分證");
+                    if(needBody) parts.push(s.bodyInfo || "體型未知");
+                    if(needPhone) parts.push(s.phone);
+                    if(needAddr) parts.push(s.address || "");
+
+                    text += parts.join(" / ") + "\n";
                     index++;
                 }
             });
             copyToClipboard(text);
         }
 
-        // === 📊 功能 2：Excel 表格 (貼回 Google Sheet) ===
+        // === 📊 功能 2：Excel 表格 (不要電話) ===
         function generateExcelFormat() {
             if (selectedStaffData.size === 0) { alert("名單是空的！"); return; }
             
-            // 順序：起始日 | 結束日 | 區間天數 | 實際天數 | 編號 | 姓名 | 生日 | 身分證 | 電話
-            let text = "";
-            let index = 1;
+            // 順序：起始日 | 結束日 | 區間天數 | 編號 | 姓名 | 生日 | 身分證
+            let text = ""; let index = 1;
 
             selectedStaffData.forEach((data, phone) => {
                 const s = staffList.find(st => st.phone === phone);
                 if (s) {
                     let rocBday = formatRocDate(s.birthday, "/");
-                    let start = data.start || "";
-                    let end = data.end || "";
-                    let rDays = data.rangeDays || "";
-                    let wDays = data.workDays || "";
-
-                    text += `${start}\t${end}\t${rDays}\t${wDays}\t${index}\t${s.name}\t${rocBday}\t${s.id || ""}\t${s.phone}\n`;
+                    let start = data.start || ""; let end = data.end || ""; let rDays = data.rangeDays || "";
+                    // Tab分隔，電話欄位移除
+                    text += `${start}\t${end}\t${rDays}\t${index}\t${s.name}\t${rocBday}\t${s.id || ""}\n`;
                     index++;
                 }
             });
             copyToClipboard(text);
         }
 
-        // 輔助：轉民國年
-        function formatRocDate(dateStr, separator) {
-            if (!dateStr) return "??.??.??";
-            let parts = String(dateStr).split(/[-/.]/);
-            if (parts.length >= 3) {
-                let y = parseInt(parts[0]);
-                let m = parts[1];
-                let d = parts[2];
-                if (y > 1911) y -= 1911;
-                return `${y}${separator}${m}${separator}${d}`;
-            }
-            return dateStr;
-        }
-
-        function copyToClipboard(text) {
-            navigator.clipboard.writeText(text).then(() => {
-                alert(`✅ 複製成功！\n\n內容預覽：\n${text.substring(0, 100)}...`);
-            }).catch(err => {
-                alert("❌ 複製失敗，請手動複製");
-            });
-        }
-
+        function formatRocDate(dateStr, separator) { if (!dateStr) return "??.??.??"; let parts = String(dateStr).split(/[-/.]/); if (parts.length >= 3) { let y = parseInt(parts[0]); let m = parts[1]; let d = parts[2]; if (y > 1911) y -= 1911; return `${y}${separator}${m}${separator}${d}`; } return dateStr; }
+        function copyToClipboard(text) { navigator.clipboard.writeText(text).then(() => { alert(`✅ 複製成功！\n\n內容預覽：\n${text.substring(0, 100)}...`); }).catch(err => { alert("❌ 複製失敗，請手動複製"); }); }
     </script>
 </body>
 </html>
