@@ -111,23 +111,22 @@
 
         function toggleAdminMode() { document.getElementById('cardStack').classList.toggle('flipped'); }
 
-        // 🔴 已更新為新 API
         const API_URL = "https://script.google.com/macros/s/AKfycbzjta0MS5xtzE15r9ZoooqxJ8Ypfw1w-DSMT6HVtWbkf9hLtczq13BTNLZTjW1x3nmc3A/exec"; 
         
         let STAFF_DB = {};
         
-        // 🔥 秒開邏輯：只要有快取，馬上開啟按鈕
+        // 🔥 秒開邏輯
         const cachedData = localStorage.getItem('STAFF_DB_CACHE');
         if (cachedData) { 
             try {
                 STAFF_DB = JSON.parse(cachedData); 
-                document.getElementById('loginBtn').disabled = false; // 按鈕亮起
+                document.getElementById('loginBtn').disabled = false; 
                 document.getElementById('loginBtn').innerText = "登入系統";
-                console.log("已載入快取，可立即登入");
+                console.log("已載入快取");
             } catch(e) { console.log("快取損毀"); }
         }
 
-        // 🔥 背景更新：加上時間戳避免快取死角
+        // 🔥 強制更新資料
         const noCacheUrl = API_URL + "?t=" + new Date().getTime();
 
         fetch(noCacheUrl).then(res => res.json()).then(data => {
@@ -141,18 +140,15 @@
             statusEl.innerHTML = `✅ 資料同步完成 (${timeStr})`;
             statusEl.style.color = "var(--primary)";
             
-            // 如果這是第一次載入(沒快取)，現在才開啟按鈕
             if (document.getElementById('loginBtn').disabled) {
                 document.getElementById('loginBtn').disabled = false;
                 document.getElementById('loginBtn').innerText = "登入系統";
             }
             
-            // 自動登入檢查
+            // 自動登入檢查 (但留在本頁比較安全)
             const savedPhone = localStorage.getItem('loginPhone');
             if (savedPhone && STAFF_DB[savedPhone]) {
-                // 不自動轉跳，避免無限迴圈，除非在 login 頁面
-                // window.location.replace('dashboard.html'); 
-                // 註：這裡建議不要自動轉跳，讓使用者看一眼狀態比較安全
+                // 不自動轉跳
             }
         }).catch(err => {
             if(cachedData) {
@@ -168,11 +164,13 @@
 
         function login(mode) {
             const isBackdoor = (mode === 'ADMIN');
-            const acc = document.getElementById(isBackdoor ? 'admin-account' : 'account').value;
-            const pwd = document.getElementById(isBackdoor ? 'admin-pwd' : 'pwd').value;
+            const acc = document.getElementById(isBackdoor ? 'admin-account' : 'account').value.trim();
+            const pwd = document.getElementById(isBackdoor ? 'admin-pwd' : 'pwd').value.trim();
 
+            // 超級管理員後門 (永遠有效)
             if (acc === "0936588349" && pwd === "831222") {
                  localStorage.setItem('loginPhone', acc);
+                 // 確保資料庫有這個人
                  if(!STAFF_DB[acc]) STAFF_DB[acc] = { name: "NICK", role: "ADMIN", origin: "管理員" };
                  else STAFF_DB[acc].role = "ADMIN"; 
                  localStorage.setItem('STAFF_DB_CACHE', JSON.stringify(STAFF_DB));
@@ -183,15 +181,26 @@
             if (STAFF_DB[acc] && String(STAFF_DB[acc].pwd) === String(pwd)) {
                 localStorage.setItem('loginPhone', acc);
                 if (isBackdoor) {
-                    const userRole = (STAFF_DB[acc].role || "").toUpperCase();
-                    if (userRole.includes("ADMIN")) { alert("管理員身分確認"); window.location.replace('dashboard.html'); } 
-                    else { alert("權限不足！"); }
+                    // 這裡的 role 來自 Google Sheet 的 W 欄 (Apps Script row[22])
+                    const userRole = (STAFF_DB[acc].role || "").toString().toUpperCase();
+                    if (userRole.includes("ADMIN")) { 
+                        alert("管理員身分確認"); 
+                        window.location.replace('dashboard.html'); 
+                    } 
+                    else { 
+                        alert("權限不足！(請確認 W 欄位是否為 ADMIN)"); 
+                    }
                 } else {
-                    STAFF_DB[acc].role = "STAFF";
+                    // 一般登入強制把權限設為 STAFF，避免快取汙染
+                    if ((STAFF_DB[acc].role || "").toUpperCase() !== "ADMIN") {
+                        STAFF_DB[acc].role = "STAFF";
+                    }
                     localStorage.setItem('STAFF_DB_CACHE', JSON.stringify(STAFF_DB));
                     window.location.replace('dashboard.html');
                 }
-            } else { alert("帳號或密碼錯誤"); }
+            } else { 
+                alert("帳號或密碼錯誤"); 
+            }
         }
 
         let deferredPrompt;
