@@ -44,17 +44,27 @@
         
         .avatar-small { width: 50px; height: 50px; border-radius: 50%; background: var(--primary); color: #fff; display: flex; justify-content: center; align-items: center; font-weight: bold; font-size: 18px; object-fit: cover; flex-shrink: 0; }
         .info { flex: 1; min-width: 0; }
-        .name { font-size: 17px; font-weight: bold; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: flex; justify-content: space-between; align-items: center;}
+        
+        /* 🔥 修正：讓名字和暱稱靠左對齊，用 gap 分開 */
+        .name { 
+            font-size: 17px; font-weight: bold; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; 
+            display: flex; align-items: center; gap: 8px; 
+        }
+        
         .sub-info { font-size: 12px; color: var(--text-sub); margin-top: 6px; display: flex; flex-wrap: wrap; gap: 4px; }
         .tag { background: rgba(125,125,125,0.1); padding: 2px 6px; border-radius: 4px; white-space: nowrap; }
         
-        /* 複製按鈕 */
-        .btn-copy-card { background: var(--highlight); color: #000; border: none; border-radius: 20px; padding: 4px 10px; font-size: 12px; font-weight: bold; cursor: pointer; z-index: 5; margin-left: 10px;}
+        /* 複製按鈕：推到最右邊 */
+        .btn-copy-card { 
+            background: var(--highlight); color: #000; border: none; border-radius: 20px; 
+            padding: 4px 10px; font-size: 12px; font-weight: bold; cursor: pointer; 
+            margin-left: auto; /* 🔥 關鍵：把按鈕推到最右 */
+        }
 
         .pagination { display: flex; justify-content: space-between; margin: 20px 0; }
         .page-btn { padding: 8px 16px; background: var(--card-bg); border-radius: 12px; cursor: pointer; border: 1px solid var(--border); color: var(--text-main); }
 
-        /* Modal & Others (保留原本的) */
+        /* Modal & Others (維持不變，省略CSS) */
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); display: none; justify-content: center; align-items: center; z-index: 100; backdrop-filter: blur(5px); }
         .modal { background: var(--card-bg); width: 90%; max-width: 400px; max-height: 85vh; border-radius: 24px; padding: 25px; overflow-y: auto; position: relative; display: flex; flex-direction: column; }
         .modal-close { position: absolute; top: 15px; right: 15px; font-size: 24px; cursor: pointer; z-index: 10; background: rgba(0,0,0,0.5); width: 30px; height: 30px; text-align: center; line-height: 30px; border-radius: 50%; color: white; }
@@ -254,8 +264,18 @@
                     let avatarHtml = `<div class="avatar-small">${staff.name.slice(-2)}</div>`;
                     if (staff.photo) { const photoUrl = convertDriveLink(staff.photo); avatarHtml = `<img src="${photoUrl}" class="avatar-small" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex'"><div class="avatar-small" style="display:none">${staff.name.slice(-2)}</div>`; }
                     let serviceTag = `<span class="tag" style="color:var(--highlight)">${Object.keys(staff.history).length}檔</span>`;
-                    // 🔥 新增快速複製按鈕
-                    card.innerHTML = `${avatarHtml}<div class="info"><div class="name">${staff.name} <button class="btn-copy-card" onclick="shareStaff(event, '${staff.phone}')">📋 複製資訊</button></div><div class="sub-info"><span class="tag">${staff.phone}</span> ${serviceTag}</div></div>`;
+                    
+                    // 🔥 修正：名字和暱稱放一起，按鈕放最右
+                    card.innerHTML = `${avatarHtml}
+                    <div class="info">
+                        <div class="name">
+                            ${staff.name} ${staff.alias ? `<small>(${staff.alias})</small>` : ''}
+                            <button class="btn-copy-card" onclick="shareStaff(event, '${staff.phone}')">📋</button>
+                        </div>
+                        <div class="sub-info">
+                            <span class="tag">${staff.phone}</span> ${serviceTag}
+                        </div>
+                    </div>`;
                     resultList.appendChild(card);
                 }
             });
@@ -263,14 +283,14 @@
             const btnExport = document.getElementById('btn-export'); const linkArea = document.getElementById('export-link-area'); btnExport.style.display = currentFilterResults.length > 0 ? "block" : "none"; linkArea.style.display = "none";
         }
 
-        // 🔥 新增：分享功能
+        // 🔥 更新：分享功能格式
         function shareStaff(e, phone) {
             e.stopPropagation();
             const s = staffList.find(x => x.phone === phone);
             if(s) {
-                let serviceCount = s.history ? Object.keys(s.history).length : 0;
-                let text = `${s.name} / ${s.phone} / ${s.bodyInfo||"身高體重未知"} / ${serviceCount}檔經歷`;
-                navigator.clipboard.writeText(text).then(() => { alert("已複製！可直接傳給老闆：\n" + text); });
+                // 格式：王宥勛 . 0966917028 . 182/74 .
+                let text = `${s.name} . ${s.phone} . ${s.bodyInfo||"?"} .`;
+                navigator.clipboard.writeText(text).then(() => { alert("已複製：\n" + text); });
             }
         }
 
@@ -308,8 +328,18 @@
                 let avatarHtml = `<div class="avatar-small">${staff.name.slice(-2)}</div>`; if (staff.photo) { const photoUrl = convertDriveLink(staff.photo); avatarHtml = `<img src="${photoUrl}" class="avatar-small" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex'"><div class="avatar-small" style="display:none">${staff.name.slice(-2)}</div>`; } 
                 let serviceCount = staff.history ? Object.keys(staff.history).length : 0; let serviceTag = serviceCount > 0 ? `<span class="tag" style="color:var(--highlight)">★${serviceCount}檔</span>` : ""; 
                 let city = staff.address ? staff.address.substring(0,3) : "未知";
-                // 🔥 卡片資訊更新
-                card.innerHTML = `${avatarHtml}<div class="info"><div class="name">${staff.name} ${staff.alias ? `<small>(${staff.alias})</small>` : ''} <button class="btn-copy-card" onclick="shareStaff(event, '${staff.phone}')">📋</button></div><div class="sub-info"><span class="tag">${age}歲</span><span class="tag">${city}</span><span class="tag">${staff.bodyInfo||"-"}</span>${serviceTag}</div></div>`; 
+                
+                // 🔥 修正：名字和暱稱放一起，按鈕放最右
+                card.innerHTML = `${avatarHtml}
+                <div class="info">
+                    <div class="name">
+                        ${staff.name} ${staff.alias ? `<small>(${staff.alias})</small>` : ''}
+                        <button class="btn-copy-card" onclick="shareStaff(event, '${staff.phone}')">📋</button>
+                    </div>
+                    <div class="sub-info">
+                        <span class="tag">${age}歲</span><span class="tag">${city}</span><span class="tag">${staff.bodyInfo||"-"}</span>${serviceTag}
+                    </div>
+                </div>`; 
                 listEl.appendChild(card); 
             }); 
         }
