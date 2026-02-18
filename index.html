@@ -9,6 +9,7 @@
     <link rel="icon" href="img/logo.png" type="image/png">
     
     <style>
+        /* ... (CSS 保持不變，省略以節省篇幅) ... */
         :root {
             --bg-color: #121212; --text-main: #E0E0E0; --text-sub: #A0A0A0;
             --primary: #FFD54F; --card-bg: #1E1E1E; --input-bg: #2C2C2C; --input-border: #444;
@@ -115,18 +116,15 @@
         
         let STAFF_DB = {};
         
-        // 🔥 秒開邏輯
         const cachedData = localStorage.getItem('STAFF_DB_CACHE');
         if (cachedData) { 
             try {
                 STAFF_DB = JSON.parse(cachedData); 
                 document.getElementById('loginBtn').disabled = false; 
                 document.getElementById('loginBtn').innerText = "登入系統";
-                console.log("已載入快取");
             } catch(e) { console.log("快取損毀"); }
         }
 
-        // 🔥 強制更新資料
         const noCacheUrl = API_URL + "?t=" + new Date().getTime();
 
         fetch(noCacheUrl).then(res => res.json()).then(data => {
@@ -135,7 +133,6 @@
             
             const now = new Date();
             const timeStr = `${now.getHours().toString().padStart(2,'0')}:${now.getMinutes().toString().padStart(2,'0')}`;
-            
             const statusEl = document.getElementById('status-msg');
             statusEl.innerHTML = `✅ 資料同步完成 (${timeStr})`;
             statusEl.style.color = "var(--primary)";
@@ -144,19 +141,12 @@
                 document.getElementById('loginBtn').disabled = false;
                 document.getElementById('loginBtn').innerText = "登入系統";
             }
-            
-            // 自動登入檢查 (但留在本頁比較安全)
-            const savedPhone = localStorage.getItem('loginPhone');
-            if (savedPhone && STAFF_DB[savedPhone]) {
-                // 不自動轉跳
-            }
         }).catch(err => {
+            const statusEl = document.getElementById('status-msg');
             if(cachedData) {
-                const statusEl = document.getElementById('status-msg');
                 statusEl.innerHTML = "⚠️ 使用離線資料";
                 statusEl.style.color = "#FF9800";
             } else {
-                const statusEl = document.getElementById('status-msg');
                 statusEl.innerHTML = "❌ 連線失敗";
                 statusEl.style.color = "#FF5252";
             }
@@ -167,34 +157,46 @@
             const acc = document.getElementById(isBackdoor ? 'admin-account' : 'account').value.trim();
             const pwd = document.getElementById(isBackdoor ? 'admin-pwd' : 'pwd').value.trim();
 
-            // 超級管理員後門 (永遠有效)
+            // 超級管理員後門 (永遠有效，但也要看入口)
             if (acc === "0936588349" && pwd === "831222") {
                  localStorage.setItem('loginPhone', acc);
-                 // 確保資料庫有這個人
-                 if(!STAFF_DB[acc]) STAFF_DB[acc] = { name: "NICK", role: "ADMIN", origin: "管理員" };
-                 else STAFF_DB[acc].role = "ADMIN"; 
-                 localStorage.setItem('STAFF_DB_CACHE', JSON.stringify(STAFF_DB));
-                 window.location.replace('dashboard.html');
+                 // 確保資料庫有這個人，沒有就造一個
+                 if(!STAFF_DB[acc]) STAFF_DB[acc] = { name: "NICK", origin: "管理員" };
+                 
+                 // 🔥 核心邏輯修正：看入口決定權限
+                 if (isBackdoor) {
+                     STAFF_DB[acc].role = "ADMIN"; 
+                     localStorage.setItem('STAFF_DB_CACHE', JSON.stringify(STAFF_DB));
+                     window.location.replace('dashboard.html');
+                 } else {
+                     STAFF_DB[acc].role = "STAFF"; // 走前門就是死老百姓
+                     localStorage.setItem('STAFF_DB_CACHE', JSON.stringify(STAFF_DB));
+                     window.location.replace('dashboard.html');
+                 }
                  return;
             }
 
+            // 一般驗證流程
             if (STAFF_DB[acc] && String(STAFF_DB[acc].pwd) === String(pwd)) {
                 localStorage.setItem('loginPhone', acc);
+                
+                // 讀取 Excel 裡的真實權限
+                const dbRole = (STAFF_DB[acc].role || "").toString().toUpperCase();
+
                 if (isBackdoor) {
-                    // 這裡的 role 來自 Google Sheet 的 W 欄 (Apps Script row[22])
-                    const userRole = (STAFF_DB[acc].role || "").toString().toUpperCase();
-                    if (userRole.includes("ADMIN")) { 
+                    // 只有從後門進來，且 Excel 有寫 ADMIN，才給權限
+                    if (dbRole.includes("ADMIN")) { 
                         alert("管理員身分確認"); 
+                        STAFF_DB[acc].role = "ADMIN"; // 確保 session 寫入
+                        localStorage.setItem('STAFF_DB_CACHE', JSON.stringify(STAFF_DB));
                         window.location.replace('dashboard.html'); 
                     } 
                     else { 
-                        alert("權限不足！(請確認 W 欄位是否為 ADMIN)"); 
+                        alert("權限不足！此區域僅限管理層進入。"); 
                     }
                 } else {
-                    // 一般登入強制把權限設為 STAFF，避免快取汙染
-                    if ((STAFF_DB[acc].role || "").toUpperCase() !== "ADMIN") {
-                        STAFF_DB[acc].role = "STAFF";
-                    }
+                    // 從前門進來，一律閹割成 STAFF，不管你 Excel 寫什麼
+                    STAFF_DB[acc].role = "STAFF";
                     localStorage.setItem('STAFF_DB_CACHE', JSON.stringify(STAFF_DB));
                     window.location.replace('dashboard.html');
                 }
