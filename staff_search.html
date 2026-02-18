@@ -17,7 +17,7 @@
             --border-line: #E0E0E0;
         }
         
-        * { box-sizing: border-box; } /* 防止寬度計算錯誤 */
+        * { box-sizing: border-box; } 
 
         body { 
             font-family: 'MiSans', sans-serif; background: var(--bg-color); color: var(--text-main); 
@@ -43,15 +43,18 @@
         body.light-mode .staff-card { box-shadow: 0 2px 5px rgba(0,0,0,0.02); }
         
         .avatar-small { width: 50px; height: 50px; border-radius: 50%; background: var(--primary); color: #fff; display: flex; justify-content: center; align-items: center; font-weight: bold; font-size: 18px; object-fit: cover; flex-shrink: 0; }
-        .info { flex: 1; min-width: 0; /* 防止文字撐爆 */ }
-        .name { font-size: 17px; font-weight: bold; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        .sub-info { font-size: 12px; color: var(--text-sub); margin-top: 4px; display: flex; flex-wrap: wrap; gap: 6px; }
+        .info { flex: 1; min-width: 0; }
+        .name { font-size: 17px; font-weight: bold; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: flex; justify-content: space-between; align-items: center;}
+        .sub-info { font-size: 12px; color: var(--text-sub); margin-top: 6px; display: flex; flex-wrap: wrap; gap: 4px; }
         .tag { background: rgba(125,125,125,0.1); padding: 2px 6px; border-radius: 4px; white-space: nowrap; }
+        
+        /* 複製按鈕 */
+        .btn-copy-card { background: var(--highlight); color: #000; border: none; border-radius: 20px; padding: 4px 10px; font-size: 12px; font-weight: bold; cursor: pointer; z-index: 5; margin-left: 10px;}
 
         .pagination { display: flex; justify-content: space-between; margin: 20px 0; }
         .page-btn { padding: 8px 16px; background: var(--card-bg); border-radius: 12px; cursor: pointer; border: 1px solid var(--border); color: var(--text-main); }
 
-        /* Modal */
+        /* Modal & Others (保留原本的) */
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); display: none; justify-content: center; align-items: center; z-index: 100; backdrop-filter: blur(5px); }
         .modal { background: var(--card-bg); width: 90%; max-width: 400px; max-height: 85vh; border-radius: 24px; padding: 25px; overflow-y: auto; position: relative; display: flex; flex-direction: column; }
         .modal-close { position: absolute; top: 15px; right: 15px; font-size: 24px; cursor: pointer; z-index: 10; background: rgba(0,0,0,0.5); width: 30px; height: 30px; text-align: center; line-height: 30px; border-radius: 50%; color: white; }
@@ -72,7 +75,6 @@
         .history-item.active { font-weight: bold; }
         .history-item.active .h-tag { color: var(--tag-active); font-weight: bold; font-size: 12px; }
         .history-item.inactive { color: var(--text-sub); opacity: 0.7; }
-        .history-item.inactive .h-tag { display: none; }
         
         .roster-group { margin-bottom: 20px; background: rgba(255,255,255,0.03); padding: 10px; border-radius: 12px; }
         .roster-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; border-bottom: 1px dashed #555; padding-bottom: 5px; }
@@ -81,7 +83,6 @@
         .roster-person { background: var(--card-bg); border: 1px solid #555; padding: 4px 10px; border-radius: 12px; font-size: 13px; cursor: pointer; margin-bottom: 5px;}
         .btn-copy-ins { background: #4285F4; color: white; border: none; border-radius: 20px; padding: 4px 10px; font-size: 11px; cursor: pointer; display: flex; align-items: center; gap: 4px; }
 
-        /* 撈資料樣式 */
         .filter-container { background: var(--card-bg); padding: 15px; border-radius: 16px; margin-bottom: 15px; border: 1px solid var(--border); }
         .filter-title { font-size: 14px; color: var(--primary); margin-bottom: 10px; font-weight: bold; margin-top: 15px; }
         .filter-title:first-child { margin-top: 0; }
@@ -92,12 +93,10 @@
         
         .btn-filter { width: 100%; padding: 12px; background: var(--highlight); color: #000; font-weight: bold; border: none; border-radius: 12px; cursor: pointer; font-size: 16px; margin-bottom: 10px;}
         .btn-export { width: 100%; padding: 12px; background: #4CAF50; color: #fff; font-weight: bold; border: none; border-radius: 12px; cursor: pointer; font-size: 16px; display: none; } 
-        .btn-export:active { transform: scale(0.98); }
         .download-link { display: none; text-align: center; margin-top: 10px; }
         .download-link a { color: #4CAF50; font-weight: bold; text-decoration: underline; font-size: 16px; }
         .filter-result-count { text-align: center; margin: 10px 0; font-size: 12px; color: var(--text-sub); }
 
-        /* 圖表與分析 */
         .chart-card { background: var(--card-bg); padding: 20px; border-radius: 16px; margin-bottom: 15px; } 
         .chart-title { font-weight: bold; margin-bottom: 15px; color: var(--primary); } 
         .bar-row { display: flex; align-items: center; margin-bottom: 8px; font-size: 12px; } 
@@ -106,7 +105,6 @@
         .bar-fill { height: 100%; background: var(--primary); border-radius: 5px; } 
         .bar-val { width: 35px; margin-left: 8px; color: var(--text-main); font-size: 11px;} 
         
-        /* 📅 日曆樣式 (手機優化) */
         .calendar-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; background: var(--card-bg); padding: 10px; border-radius: 12px; } 
         .cal-btn { background: none; border: none; font-size: 20px; color: var(--primary); cursor: pointer; padding: 0 15px; } 
         .cal-month { font-size: 18px; font-weight: bold; } 
@@ -118,12 +116,10 @@
         .cal-person { background: var(--primary); color: #fff; font-size: 10px; border-radius: 4px; padding: 2px 2px; margin-top: 1px; cursor: pointer; width: 100%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; } 
         .cal-person.is-me { background: var(--highlight); color: #000; border: 1px solid #fff; } 
         
-        /* 🔮 靈數樣式 (修復版) */
         .fate-group { margin-bottom: 20px; } 
         .fate-header { display: flex; align-items: center; margin-bottom: 8px; } 
         .fate-num { width: 30px; height: 30px; background: var(--primary); color: white; border-radius: 50%; text-align: center; line-height: 30px; font-weight: bold; margin-right: 10px; flex-shrink: 0; } 
         .fate-desc { font-size: 14px; font-weight: bold; } 
-        /* 🔥 重點修復：加上 wrap 讓它換行 */
         .fate-list { display: flex; flex-wrap: wrap; gap: 8px; padding-left: 40px; } 
         .fate-person { background: var(--card-bg); border: 1px solid var(--border); padding: 6px 12px; border-radius: 20px; font-size: 13px; cursor: pointer; white-space: nowrap; } 
         .fate-person.is-me { border: 2px solid var(--highlight); background: rgba(255, 213, 79, 0.2); font-weight: bold; }
@@ -153,43 +149,25 @@
         <div class="filter-container">
             <div class="filter-title">📅 年份選擇 (可複選)</div>
             <div id="filter-years" class="checkbox-group"></div>
-            
             <div class="filter-title">🏮 檔期類型 (可複選)</div>
             <div id="filter-events" class="checkbox-group"></div>
-            
             <div class="filter-title">📍 點位/地點 (可複選)</div>
             <div id="filter-locs" class="checkbox-group"></div>
-
             <div class="filter-title">🏠 居住區域 (可複選)</div>
             <div id="filter-addr" class="checkbox-group"></div>
             
             <button class="btn-filter" onclick="executeFilter()">🚀 開始撈取</button>
             <button id="btn-export" class="btn-export" onclick="exportData()">📊 匯出成 Google Sheet</button>
-            
             <div id="export-link-area" class="download-link">
                 <a id="export-link" href="#" target="_blank">📂 點我開啟剛生成的表格</a>
             </div>
         </div>
-        
         <div id="filter-result-info" class="filter-result-count">請勾選條件並按按鈕</div>
         <div id="filter-list"></div>
     </div>
 
-    <div id="analysis-section" class="section">
-        <div class="chart-card"><div class="chart-title">🏆 服務總時數 TOP 10</div><div id="chart-top-hours"></div></div>
-        <div class="chart-card"><div class="chart-title">⭐ 服務總次數 TOP 10</div><div id="chart-top-count"></div></div>
-        <div class="chart-card"><div class="chart-title">🎂 年齡層分布</div><div id="chart-age"></div></div>
-        <div class="chart-card"><div class="chart-title">👫 性別分布</div><div id="chart-gender"></div></div>
-        <div class="chart-card"><div class="chart-title">📍 居住地 (縣市)</div><div id="chart-loc"></div></div>
-        <div class="chart-card"><div class="chart-title">🎓 學校/科系</div><div id="chart-school"></div></div>
-    </div>
-    
-    <div id="birthday-section" class="section">
-        <div class="calendar-header"><button class="cal-btn" onclick="changeMonth(-1)">◀</button><div class="cal-month" id="calMonth">...</div><button class="cal-btn" onclick="changeMonth(1)">▶</button></div>
-        <div class="calendar-grid"><div class="cal-day-header">日</div><div class="cal-day-header">一</div><div class="cal-day-header">二</div><div class="cal-day-header">三</div><div class="cal-day-header">四</div><div class="cal-day-header">五</div><div class="cal-day-header">六</div></div>
-        <div id="cal-body" class="calendar-grid"></div>
-    </div>
-    
+    <div id="analysis-section" class="section"><div class="chart-card"><div class="chart-title">🏆 服務總時數 TOP 10</div><div id="chart-top-hours"></div></div><div class="chart-card"><div class="chart-title">⭐ 服務總次數 TOP 10</div><div id="chart-top-count"></div></div><div class="chart-card"><div class="chart-title">🎂 年齡層分布</div><div id="chart-age"></div></div><div class="chart-card"><div class="chart-title">👫 性別分布</div><div id="chart-gender"></div></div><div class="chart-card"><div class="chart-title">📍 居住地 (縣市)</div><div id="chart-loc"></div></div><div class="chart-card"><div class="chart-title">🎓 學校/科系</div><div id="chart-school"></div></div></div>
+    <div id="birthday-section" class="section"><div class="calendar-header"><button class="cal-btn" onclick="changeMonth(-1)">◀</button><div class="cal-month" id="calMonth">...</div><button class="cal-btn" onclick="changeMonth(1)">▶</button></div><div class="calendar-grid"><div class="cal-day-header">日</div><div class="cal-day-header">一</div><div class="cal-day-header">二</div><div class="cal-day-header">三</div><div class="cal-day-header">四</div><div class="cal-day-header">五</div><div class="cal-day-header">六</div></div><div id="cal-body" class="calendar-grid"></div></div>
     <div id="fate-section" class="section"><div class="chart-card"><div class="chart-title">🔢 生命靈數分析</div><div id="fate-container"></div></div></div>
 
     <a href="dashboard.html" class="btn-back">⬅️ 返回</a>
@@ -207,43 +185,24 @@
             <div class="detail-row"><div class="detail-label">電話 / LINE</div><div class="detail-val inline-content"><span id="d-phone"></span><a id="d-call-btn" href="#" class="icon-btn">📞</a><a id="d-line-btn" href="#" target="_blank" class="icon-btn">💬</a></div></div>
             <div class="detail-row"><div class="detail-label">地址</div><div class="detail-val inline-content"><span id="d-addr" style="flex:1;"></span><a id="d-map-btn" href="#" target="_blank" class="icon-btn">🗺️</a></div></div>
             <div class="detail-row"><div class="detail-label">學校/系級</div><div class="detail-val" id="d-school"></div></div>
+            <div class="detail-row"><div class="detail-label">身高/體重</div><div class="detail-val" id="d-body"></div></div>
             <div class="detail-row"><div class="detail-label">身分證</div><div class="detail-val" id="d-id"></div></div>
-            
-            <div class="detail-row">
-                <div class="detail-label">自我介紹</div>
-                <div class="detail-val" id="d-intro" style="white-space: pre-wrap; line-height: 1.5; color: #ddd; background: rgba(255,255,255,0.05); padding: 10px; border-radius: 8px;"></div>
-            </div>
-
-            <div class="detail-row">
-                <div class="detail-label">服務紀錄與履歷</div>
-                <div class="detail-val" style="color:var(--highlight); font-weight:bold; margin-bottom:10px;">
-                    共 <span id="d-count">0</span> 次檔期 (累積 <span id="d-hours">0</span> 小時)
-                </div>
-                <div id="d-history-list" class="history-list"></div>
-            </div>
+            <div class="detail-row"><div class="detail-label">自我介紹</div><div class="detail-val" id="d-intro" style="white-space: pre-wrap; line-height: 1.5; color: #ddd; background: rgba(255,255,255,0.05); padding: 10px; border-radius: 8px;"></div></div>
+            <div class="detail-row"><div class="detail-label">服務紀錄與履歷</div><div class="detail-val" style="color:var(--highlight); font-weight:bold; margin-bottom:10px;">共 <span id="d-count">0</span> 次檔期 (累積 <span id="d-hours">0</span> 小時)</div><div id="d-history-list" class="history-list"></div></div>
         </div>
     </div>
 
-    <div id="rosterModal" class="modal-overlay" onclick="closeRosterModal(event)">
-        <div class="modal" style="max-height: 80vh;">
-            <span class="modal-close" onclick="document.getElementById('rosterModal').style.display='none'">×</span>
-            <h2 id="r-title" style="margin-top:0; color:var(--highlight); text-align:center;">檔期名單</h2>
-            <div id="r-content" style="margin-top:15px;"></div>
-        </div>
-    </div>
+    <div id="rosterModal" class="modal-overlay" onclick="closeRosterModal(event)"><div class="modal" style="max-height: 80vh;"><span class="modal-close" onclick="document.getElementById('rosterModal').style.display='none'">×</span><h2 id="r-title" style="margin-top:0; color:var(--highlight); text-align:center;">檔期名單</h2><div id="r-content" style="margin-top:15px;"></div></div></div>
 
     <script>
         if (localStorage.getItem('theme') === 'light') document.body.classList.add('light-mode');
-
         const cachedDB = localStorage.getItem('STAFF_DB_CACHE');
         const loggedInPhone = localStorage.getItem('loginPhone');
-        
         if (!cachedDB) { alert('請先登入以同步資料'); window.location.href = 'index.html'; }
         
         const STAFF_DB = JSON.parse(cachedDB);
         const ALL_EVENTS = STAFF_DB["_ALL_EVENTS_"] || [];
-        delete STAFF_DB["_ALL_EVENTS_"];
-        delete STAFF_DB["_ERROR_"];
+        delete STAFF_DB["_ALL_EVENTS_"]; delete STAFF_DB["_ERROR_"];
 
         let staffList = Object.values(STAFF_DB);
         staffList.sort((a, b) => new Date(b.entryDate || 0) - new Date(a.entryDate || 0));
@@ -252,220 +211,111 @@
         const itemsPerPage = 20;
         let filteredList = staffList;
         let currentFilterResults = []; 
-
         const CITY_ORDER = ["基隆", "台北", "新北", "桃園", "新竹", "苗栗", "台中", "彰化", "南投", "雲林", "嘉義", "台南", "高雄", "屏東", "宜蘭", "花蓮", "台東"];
         let calDate = new Date();
-
         const API_URL = "https://script.google.com/macros/s/AKfycbzjta0MS5xtzE15r9ZoooqxJ8Ypfw1w-DSMT6HVtWbkf9hLtczq13BTNLZTjW1x3nmc3A/exec"; 
 
         initFilterOptions();
 
         function initFilterOptions() {
-            let years = new Set();
-            let events = new Set();
-            let locs = new Set(); 
-
-            ALL_EVENTS.forEach(evt => {
-                let match = evt.match(/(\d{4})(.+)/);
-                if (match) { years.add(match[1]); events.add(match[2]); } else { events.add(evt); }
-            });
-
-            staffList.forEach(staff => {
-                if (staff.history) {
-                    Object.values(staff.history).forEach(record => {
-                        if (record.loc) {
-                            let cleanLoc = record.loc.replace(/[|📍]/g, "").trim();
-                            if(cleanLoc) locs.add(cleanLoc);
-                        }
-                    });
-                }
-            });
-
-            const yearContainer = document.getElementById('filter-years');
-            Array.from(years).sort().reverse().forEach(y => {
-                yearContainer.innerHTML += `<div class="checkbox-item" onclick="toggleCheck(this)">${y}<input type="checkbox" value="${y}"></div>`;
-            });
-            const eventContainer = document.getElementById('filter-events');
-            Array.from(events).sort().forEach(e => {
-                eventContainer.innerHTML += `<div class="checkbox-item" onclick="toggleCheck(this)">${e}<input type="checkbox" value="${e}"></div>`;
-            });
-            const locContainer = document.getElementById('filter-locs');
-            Array.from(locs).sort().forEach(l => {
-                locContainer.innerHTML += `<div class="checkbox-item" onclick="toggleCheck(this)">${l}<input type="checkbox" value="${l}"></div>`;
-            });
-
-            // 🔥 新增：生成居住地按鈕
+            let years = new Set(); let events = new Set(); let locs = new Set(); 
+            ALL_EVENTS.forEach(evt => { let match = evt.match(/(\d{4})(.+)/); if (match) { years.add(match[1]); events.add(match[2]); } else { events.add(evt); } });
+            staffList.forEach(staff => { if (staff.history) { Object.values(staff.history).forEach(record => { if (record.loc) { let cleanLoc = record.loc.replace(/[|📍]/g, "").trim(); if(cleanLoc) locs.add(cleanLoc); } }); } });
+            const yearContainer = document.getElementById('filter-years'); Array.from(years).sort().reverse().forEach(y => { yearContainer.innerHTML += `<div class="checkbox-item" onclick="toggleCheck(this)">${y}<input type="checkbox" value="${y}"></div>`; });
+            const eventContainer = document.getElementById('filter-events'); Array.from(events).sort().forEach(e => { eventContainer.innerHTML += `<div class="checkbox-item" onclick="toggleCheck(this)">${e}<input type="checkbox" value="${e}"></div>`; });
+            const locContainer = document.getElementById('filter-locs'); Array.from(locs).sort().forEach(l => { locContainer.innerHTML += `<div class="checkbox-item" onclick="toggleCheck(this)">${l}<input type="checkbox" value="${l}"></div>`; });
             const targetCities = ["台北", "新北", "新竹", "台中", "台南", "高雄"];
-            const addrContainer = document.getElementById('filter-addr');
-            targetCities.forEach(city => {
-                 addrContainer.innerHTML += `<div class="checkbox-item" onclick="toggleCheck(this)">${city}<input type="checkbox" value="${city}"></div>`;
-            });
+            const addrContainer = document.getElementById('filter-addr'); targetCities.forEach(city => { addrContainer.innerHTML += `<div class="checkbox-item" onclick="toggleCheck(this)">${city}<input type="checkbox" value="${city}"></div>`; });
         }
 
-        function toggleCheck(el) {
-            el.classList.toggle('checked');
-            const checkbox = el.querySelector('input');
-            checkbox.checked = !checkbox.checked;
-        }
+        function toggleCheck(el) { el.classList.toggle('checked'); const checkbox = el.querySelector('input'); checkbox.checked = !checkbox.checked; }
 
         function executeFilter() {
             const selectedYears = Array.from(document.querySelectorAll('#filter-years input:checked')).map(cb => cb.value);
             const selectedEvents = Array.from(document.querySelectorAll('#filter-events input:checked')).map(cb => cb.value);
             const selectedLocs = Array.from(document.querySelectorAll('#filter-locs input:checked')).map(cb => cb.value); 
-            // 🔥 新增：取得選取的居住地
             const selectedAddr = Array.from(document.querySelectorAll('#filter-addr input:checked')).map(cb => cb.value);
-
-            if (selectedYears.length === 0 && selectedEvents.length === 0 && selectedLocs.length === 0 && selectedAddr.length === 0) { 
-                alert("請至少選擇一個條件！"); return; 
-            }
-
-            const resultList = document.getElementById('filter-list');
-            resultList.innerHTML = "";
-            currentFilterResults = []; 
-
+            if (selectedYears.length === 0 && selectedEvents.length === 0 && selectedLocs.length === 0 && selectedAddr.length === 0) { alert("請至少選擇一個條件！"); return; }
+            const resultList = document.getElementById('filter-list'); resultList.innerHTML = ""; currentFilterResults = []; 
             staffList.forEach(staff => {
                 if (!staff.history) return;
                 let hasMatch = false;
-                
-                // 🔥 1. 先檢查居住地 (Address) 是否符合
-                let aMatch = (selectedAddr.length === 0); // 沒選就視為符合
-                if (!aMatch && staff.address) {
-                    for (let city of selectedAddr) {
-                        if (staff.address.includes(city)) { aMatch = true; break; }
-                    }
-                }
-
-                // 如果居住地不符，直接跳過這位員工 (加快速度)
-                if (!aMatch) return;
-
-                // 🔥 2. 再檢查檔期紀錄 (History)
+                let aMatch = (selectedAddr.length === 0); if (!aMatch && staff.address) { for (let city of selectedAddr) { if (staff.address.includes(city)) { aMatch = true; break; } } } if (!aMatch) return;
                 const myHistory = Object.keys(staff.history); 
                 for (let h of myHistory) {
-                    let yMatch = (selectedYears.length === 0);
-                    if (!yMatch) { for (let y of selectedYears) { if (h.includes(y)) { yMatch = true; break; } } }
-
-                    let eMatch = (selectedEvents.length === 0);
-                    if (!eMatch) { for (let e of selectedEvents) { if (h.includes(e)) { eMatch = true; break; } } }
-
-                    let lMatch = (selectedLocs.length === 0);
-                    if (!lMatch) {
-                        let record = staff.history[h];
-                        if (record && record.loc) {
-                            for (let l of selectedLocs) { 
-                                if (record.loc.includes(l)) { lMatch = true; break; } 
-                            }
-                        }
-                    }
-
+                    let yMatch = (selectedYears.length === 0); if (!yMatch) { for (let y of selectedYears) { if (h.includes(y)) { yMatch = true; break; } } }
+                    let eMatch = (selectedEvents.length === 0); if (!eMatch) { for (let e of selectedEvents) { if (h.includes(e)) { eMatch = true; break; } } }
+                    let lMatch = (selectedLocs.length === 0); if (!lMatch) { let record = staff.history[h]; if (record && record.loc) { for (let l of selectedLocs) { if (record.loc.includes(l)) { lMatch = true; break; } } } }
                     if (yMatch && eMatch && lMatch) { hasMatch = true; break; }
                 }
-
-                // 只有當「居住地」和「歷史紀錄」都符合 (且 aMatch 前面已擋過)
                 if (hasMatch) {
                     currentFilterResults.push(staff);
-                    let card = document.createElement('div');
-                    card.className = "staff-card";
-                    card.onclick = () => showDetail(staff);
+                    let card = document.createElement('div'); card.className = "staff-card"; card.onclick = () => showDetail(staff);
                     let avatarHtml = `<div class="avatar-small">${staff.name.slice(-2)}</div>`;
-                    if (staff.photo) {
-                        const photoUrl = convertDriveLink(staff.photo);
-                        avatarHtml = `<img src="${photoUrl}" class="avatar-small" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex'"><div class="avatar-small" style="display:none">${staff.name.slice(-2)}</div>`;
-                    }
+                    if (staff.photo) { const photoUrl = convertDriveLink(staff.photo); avatarHtml = `<img src="${photoUrl}" class="avatar-small" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex'"><div class="avatar-small" style="display:none">${staff.name.slice(-2)}</div>`; }
                     let serviceTag = `<span class="tag" style="color:var(--highlight)">${Object.keys(staff.history).length}檔</span>`;
-                    card.innerHTML = `${avatarHtml}<div class="info"><div class="name">${staff.name}</div><div class="sub-info"><span class="tag">${staff.phone}</span> ${serviceTag}</div></div>`;
+                    // 🔥 新增快速複製按鈕
+                    card.innerHTML = `${avatarHtml}<div class="info"><div class="name">${staff.name} <button class="btn-copy-card" onclick="shareStaff(event, '${staff.phone}')">📋 複製資訊</button></div><div class="sub-info"><span class="tag">${staff.phone}</span> ${serviceTag}</div></div>`;
                     resultList.appendChild(card);
                 }
             });
-
             document.getElementById('filter-result-info').innerText = `共找到 ${currentFilterResults.length} 位符合條件的夥伴`;
-            const btnExport = document.getElementById('btn-export');
-            const linkArea = document.getElementById('export-link-area');
-            btnExport.style.display = currentFilterResults.length > 0 ? "block" : "none";
-            linkArea.style.display = "none";
+            const btnExport = document.getElementById('btn-export'); const linkArea = document.getElementById('export-link-area'); btnExport.style.display = currentFilterResults.length > 0 ? "block" : "none"; linkArea.style.display = "none";
+        }
+
+        // 🔥 新增：分享功能
+        function shareStaff(e, phone) {
+            e.stopPropagation();
+            const s = staffList.find(x => x.phone === phone);
+            if(s) {
+                let serviceCount = s.history ? Object.keys(s.history).length : 0;
+                let text = `${s.name} / ${s.phone} / ${s.bodyInfo||"身高體重未知"} / ${serviceCount}檔經歷`;
+                navigator.clipboard.writeText(text).then(() => { alert("已複製！可直接傳給老闆：\n" + text); });
+            }
         }
 
         function exportData() {
             if (currentFilterResults.length === 0) return;
-            const btn = document.getElementById('btn-export');
-            const linkArea = document.getElementById('export-link-area');
-            const link = document.getElementById('export-link');
-            
-            btn.innerText = "⏳ 正在建立試算表...";
-            btn.disabled = true;
-
+            const btn = document.getElementById('btn-export'); const linkArea = document.getElementById('export-link-area'); const link = document.getElementById('export-link');
+            btn.innerText = "⏳ 正在建立試算表..."; btn.disabled = true;
             let dataToSend = currentFilterResults.map(s => {
                 let historyKeys = s.history ? Object.keys(s.history).sort().reverse() : [];
                 let lastEvent = historyKeys.length > 0 ? historyKeys[0] : "-";
-                let lastLoc = (lastEvent !== "-" && s.history[lastEvent]) ? s.history[lastEvent].loc : "-";
-                lastLoc = lastLoc.replace(/\|/g, ""); 
-
-                return [
-                    s.name, s.birthday || "", "'"+s.phone, s.address || "", 
-                    historyKeys.length, lastEvent, lastLoc
-                ];
+                let lastLoc = (lastEvent !== "-" && s.history[lastEvent]) ? s.history[lastEvent].loc : "-"; lastLoc = lastLoc.replace(/\|/g, ""); 
+                return [ s.name, s.birthday || "", "'"+s.phone, s.address || "", historyKeys.length, lastEvent, lastLoc ];
             });
-
-            fetch(API_URL, {
-                method: "POST",
-                headers: { "Content-Type": "text/plain;charset=utf-8" },
-                body: JSON.stringify({ action: "export_staff", data: dataToSend })
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    btn.innerText = "✅ 匯出成功！";
-                    window.open(data.url, '_blank');
-                    link.href = data.url;
-                    linkArea.style.display = "block";
-                } else {
-                    let errorMsg = data.msg;
-                    if (errorMsg.includes("forEach")) {
-                        errorMsg = "後端版本不符，請確認 API 網址是否正確。";
-                    }
-                    alert("匯出失敗：" + errorMsg);
-                    btn.innerText = "📊 匯出成 Google Sheet";
-                }
-                btn.disabled = false;
-            }).catch(e => {
-                alert("⚠️ 錯誤：" + e);
-                btn.innerText = "📊 匯出成 Google Sheet";
-                btn.disabled = false;
-            });
+            fetch(API_URL, { method: "POST", headers: { "Content-Type": "text/plain;charset=utf-8" }, body: JSON.stringify({ action: "export_staff", data: dataToSend }) })
+            .then(response => response.json()).then(data => { if (data.success) { btn.innerText = "✅ 匯出成功！"; window.open(data.url, '_blank'); link.href = data.url; linkArea.style.display = "block"; } else { let errorMsg = data.msg; if (errorMsg.includes("forEach")) { errorMsg = "後端版本不符，請確認 API 網址是否正確。"; } alert("匯出失敗：" + errorMsg); btn.innerText = "📊 匯出成 Google Sheet"; } btn.disabled = false; }).catch(e => { alert("⚠️ 錯誤：" + e); btn.innerText = "📊 匯出成 Google Sheet"; btn.disabled = false; });
         }
 
         function searchStaff() {
             const k = document.getElementById('searchInput').value.toLowerCase();
             filteredList = staffList.filter(s => {
-                let basicMatch = (s.name && s.name.includes(k)) || 
-                                 (s.phone && s.phone.includes(k)) || 
-                                 (s.school && s.school.includes(k));
-                
-                let historyMatch = false;
-                let locationMatch = false;
-
-                if (s.history) {
-                    for (let event in s.history) {
-                        if (event.includes(k)) { historyMatch = true; }
-                        let record = s.history[event];
-                        if (record && record.loc && record.loc.includes(k)) { locationMatch = true; }
-                        if (historyMatch || locationMatch) break;
-                    }
-                }
+                let basicMatch = (s.name && s.name.includes(k)) || (s.phone && s.phone.includes(k)) || (s.school && s.school.includes(k));
+                let historyMatch = false; let locationMatch = false;
+                if (s.history) { for (let event in s.history) { if (event.includes(k)) { historyMatch = true; } let record = s.history[event]; if (record && record.loc && record.loc.includes(k)) { locationMatch = true; } if (historyMatch || locationMatch) break; } }
                 return basicMatch || historyMatch || locationMatch;
             });
             currentPage = 1; switchTab('list'); renderList();
         }
 
-        function renderList() { const listEl = document.getElementById('list'); listEl.innerHTML = ""; const start = (currentPage - 1) * itemsPerPage; const end = start + itemsPerPage; const pageData = filteredList.slice(start, end); document.getElementById('pageInfo').innerText = `第 ${currentPage} 頁 / 共 ${Math.ceil(filteredList.length / itemsPerPage)} 頁`; pageData.forEach(staff => { let age = getAge(staff.birthday); let school = staff.school || "無"; let phone = staff.phone || ""; const isMeClass = (staff.phone === loggedInPhone) ? "is-me" : ""; const card = document.createElement('div'); card.className = `staff-card ${isMeClass}`; card.onclick = () => showDetail(staff); let avatarHtml = `<div class="avatar-small">${staff.name.slice(-2)}</div>`; if (staff.photo) { const photoUrl = convertDriveLink(staff.photo); avatarHtml = `<img src="${photoUrl}" class="avatar-small" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex'"><div class="avatar-small" style="display:none">${staff.name.slice(-2)}</div>`; } let serviceCount = staff.history ? Object.keys(staff.history).length : 0; let serviceTag = serviceCount > 0 ? `<span class="tag" style="color:var(--highlight)">★${serviceCount}檔</span>` : ""; card.innerHTML = `${avatarHtml}<div class="info"><div class="name">${staff.name} ${staff.alias ? `<small>(${staff.alias})</small>` : ''}</div><div class="sub-info"><span class="tag">${age}歲</span><span class="tag">${school}</span>${serviceTag}</div></div>`; listEl.appendChild(card); }); }
+        function renderList() { 
+            const listEl = document.getElementById('list'); listEl.innerHTML = ""; const start = (currentPage - 1) * itemsPerPage; const end = start + itemsPerPage; const pageData = filteredList.slice(start, end); document.getElementById('pageInfo').innerText = `第 ${currentPage} 頁 / 共 ${Math.ceil(filteredList.length / itemsPerPage)} 頁`; 
+            pageData.forEach(staff => { 
+                let age = getAge(staff.birthday); let school = staff.school || "無"; let phone = staff.phone || ""; 
+                const isMeClass = (staff.phone === loggedInPhone) ? "is-me" : ""; 
+                const card = document.createElement('div'); card.className = `staff-card ${isMeClass}`; card.onclick = () => showDetail(staff); 
+                let avatarHtml = `<div class="avatar-small">${staff.name.slice(-2)}</div>`; if (staff.photo) { const photoUrl = convertDriveLink(staff.photo); avatarHtml = `<img src="${photoUrl}" class="avatar-small" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex'"><div class="avatar-small" style="display:none">${staff.name.slice(-2)}</div>`; } 
+                let serviceCount = staff.history ? Object.keys(staff.history).length : 0; let serviceTag = serviceCount > 0 ? `<span class="tag" style="color:var(--highlight)">★${serviceCount}檔</span>` : ""; 
+                let city = staff.address ? staff.address.substring(0,3) : "未知";
+                // 🔥 卡片資訊更新
+                card.innerHTML = `${avatarHtml}<div class="info"><div class="name">${staff.name} ${staff.alias ? `<small>(${staff.alias})</small>` : ''} <button class="btn-copy-card" onclick="shareStaff(event, '${staff.phone}')">📋</button></div><div class="sub-info"><span class="tag">${age}歲</span><span class="tag">${city}</span><span class="tag">${staff.bodyInfo||"-"}</span>${serviceTag}</div></div>`; 
+                listEl.appendChild(card); 
+            }); 
+        }
+        
         function showDetail(staff) { 
-            document.getElementById('d-name').innerText = staff.name; 
-            document.getElementById('d-phone').innerText = staff.phone; 
-            document.getElementById('d-entry').innerText = getEntryDate(staff.entryDate); 
-            document.getElementById('d-school').innerText = staff.school || "-"; 
-            document.getElementById('d-id').innerText = staff.id || "-"; 
-            
-            document.getElementById('d-intro').innerText = staff.intro || "無自我介紹";
-
+            document.getElementById('d-name').innerText = staff.name; document.getElementById('d-phone').innerText = staff.phone; document.getElementById('d-entry').innerText = getEntryDate(staff.entryDate); document.getElementById('d-school').innerText = staff.school || "-"; document.getElementById('d-id').innerText = staff.id || "-"; document.getElementById('d-body').innerText = staff.bodyInfo || "未登記"; document.getElementById('d-intro').innerText = staff.intro || "無自我介紹";
             let age = getAge(staff.birthday); let bdayText = staff.birthday || "?"; let parts = bdayText.split(/[-/.]/); if(parts.length >= 3) { let y = parseInt(parts[0]); if(y < 1911) y += 1911; bdayText = `${y}.${parts[1]}.${parts[2]}`; } document.getElementById('d-age').innerText = `${bdayText} (${age}歲)`; document.getElementById('d-call-btn').href = `tel:${staff.phone}`; const lineBtn = document.getElementById('d-line-btn'); if(staff.lineId) { lineBtn.href = `https://line.me/ti/p/~${staff.lineId}`; lineBtn.style.display = 'inline-flex'; } else { lineBtn.style.display = 'none'; } const mapBtn = document.getElementById('d-map-btn'); document.getElementById('d-addr').innerText = staff.address || "-"; if(staff.address) { mapBtn.href = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(staff.address)}`; mapBtn.style.display = 'inline-flex'; } else { mapBtn.style.display = 'none'; } const photoEl = document.getElementById('d-photo'); const avatarText = document.getElementById('d-avatar-text'); photoEl.classList.remove('zoomed'); if (staff.photo) { photoEl.src = convertDriveLink(staff.photo); photoEl.style.display = 'block'; avatarText.style.display = 'none'; } else { photoEl.style.display = 'none'; avatarText.innerText = staff.name.slice(-2); avatarText.style.display = 'flex'; } const history = staff.history || {}; const count = Object.keys(history).length; const hours = staff.totalHours || 0; document.getElementById('d-count').innerText = count; document.getElementById('d-hours').innerText = hours; const listEl = document.getElementById('d-history-list'); listEl.innerHTML = ""; let sortedEvents = [...ALL_EVENTS].sort().reverse(); sortedEvents.forEach(eventName => { const isAttended = history[eventName] !== undefined; const record = history[eventName] || {}; const div = document.createElement('div'); if (isAttended) { div.className = 'history-item active'; let rawLoc = record.loc || ""; let niceLoc = rawLoc.replace(/\s*[|｜│]\s*/g, ""); div.innerHTML = `${eventName} <span class="h-tag">${record.hours}h│${niceLoc}</span>`; div.style.cursor = "pointer"; div.onclick = (e) => { e.stopPropagation(); openRosterModal(eventName); }; } else { div.className = 'history-item inactive'; div.innerHTML = `${eventName} (未參加)`; div.style.cursor = "pointer"; div.onclick = (e) => { e.stopPropagation(); openRosterModal(eventName); }; } listEl.appendChild(div); }); document.getElementById('detailModal').style.display = 'flex'; 
         }
         function openRosterModal(eventName) { document.getElementById('r-title').innerText = `${eventName} 人員名單`; const contentEl = document.getElementById('r-content'); contentEl.innerHTML = "載入中..."; let groups = {}; staffList.forEach(s => { if (s.history && s.history[eventName]) { let loc = s.history[eventName].loc || "未知地點"; let cleanLoc = loc.replace(/\s*[|｜│]\s*/g, ""); if (!groups[cleanLoc]) groups[cleanLoc] = []; groups[cleanLoc].push(s); } }); contentEl.innerHTML = ""; if (Object.keys(groups).length === 0) { contentEl.innerHTML = "<div style='text-align:center; color:#888;'>此檔期尚無人員紀錄</div>"; return; } let sortedKeys = Object.keys(groups).sort((a, b) => { let indexA = CITY_ORDER.findIndex(city => a.includes(city)); let indexB = CITY_ORDER.findIndex(city => b.includes(city)); return (indexA === -1 ? 999 : indexA) - (indexB === -1 ? 999 : indexB); }); sortedKeys.forEach(loc => { let section = document.createElement('div'); section.className = 'roster-group'; let header = document.createElement('div'); header.className = 'roster-header'; let title = document.createElement('span'); title.className = 'roster-loc'; title.innerText = `📍 ${loc}`; let copyBtn = document.createElement('button'); copyBtn.className = 'btn-copy-ins'; copyBtn.innerHTML = '📋 複製保險名單'; copyBtn.onclick = () => copyInsuranceList(loc, groups[loc]); header.appendChild(title); header.appendChild(copyBtn); section.appendChild(header); let namesDiv = document.createElement('div'); namesDiv.className = 'roster-names'; groups[loc].forEach(s => { let span = document.createElement('span'); span.className = 'roster-person'; span.innerText = s.name; span.onclick = () => { document.getElementById('rosterModal').style.display = 'none'; showDetail(s); }; namesDiv.appendChild(span); }); section.appendChild(namesDiv); contentEl.appendChild(section); }); document.getElementById('rosterModal').style.display = 'flex'; }
