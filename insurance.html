@@ -289,8 +289,8 @@
                     
                     if(needBday) { let bDayStr = formatRocDate(s.birthday, "."); parts.push(bDayStr); }
                     if(needId) parts.push(s.id || "無身分證");
-                    if(needBody) parts.push(s.bodyInfo || "體型未知");
                     if(needPhone) parts.push(s.phone);
+                    if(needBody) parts.push(s.bodyInfo || "體型未知");
                     if(needAddr) parts.push(s.address || "");
 
                     text += parts.join(" / ") + "\n";
@@ -300,28 +300,45 @@
             copyToClipboard(text);
         }
 
-        // === 📊 功能 2：Excel 表格 (不要電話) ===
+        // === 📊 功能 2：Excel 表格 (符合保險表格格式) ===
         function generateExcelFormat() {
             if (selectedStaffData.size === 0) { alert("名單是空的！"); return; }
             
-            // 順序：起始日 | 結束日 | 區間天數 | 編號 | 姓名 | 生日 | 身分證
-            let text = ""; let index = 1;
+            // 格式：被保險人姓名 | 護照號碼 | 同護照之英文名稱 | 出生民國年 | 出生月 | 出生日 | 身分證字號 | 手機號碼 | 電子信箱
+            let text = ""; 
 
             selectedStaffData.forEach((data, phone) => {
                 const s = staffList.find(st => st.phone === phone);
                 if (s) {
-                    let rocBday = formatRocDate(s.birthday, "/");
-                    let start = data.start || ""; let end = data.end || ""; let rDays = data.rangeDays || "";
-                    // Tab分隔，電話欄位移除
-                    text += `${start}\t${end}\t${rDays}\t${index}\t${s.name}\t${rocBday}\t${s.id || ""}\n`;
-                    index++;
+                    let bDayStr = s.birthday || "";
+                    let y = "", m = "", d = "";
+                    let parts = String(bDayStr).split(/[-/.]/);
+                    if (parts.length >= 3) {
+                        y = parseInt(parts[0]);
+                        if (y > 1911) y -= 1911; // 轉民國年
+                        m = parseInt(parts[1]);
+                        d = parseInt(parts[2]);
+                    }
+
+                    let email = s.email || ""; // 假設 STAFF_DB 裡有 email 欄位
+                    let id = s.id || "";
+
+                    // Tab 分隔，對應空白欄位
+                    text += `${s.name}\t\t\t${y}\t${m}\t${d}\t${id}\t'${s.phone}\t${email}\n`;
                 }
             });
             copyToClipboard(text);
         }
 
         function formatRocDate(dateStr, separator) { if (!dateStr) return "??.??.??"; let parts = String(dateStr).split(/[-/.]/); if (parts.length >= 3) { let y = parseInt(parts[0]); let m = parts[1]; let d = parts[2]; if (y > 1911) y -= 1911; return `${y}${separator}${m}${separator}${d}`; } return dateStr; }
-        function copyToClipboard(text) { navigator.clipboard.writeText(text).then(() => { alert(`✅ 複製成功！\n\n內容預覽：\n${text.substring(0, 100)}...`); }).catch(err => { alert("❌ 複製失敗，請手動複製"); }); }
+        
+        function copyToClipboard(text) { 
+            navigator.clipboard.writeText(text).then(() => { 
+                alert(`✅ 複製成功！\n\n內容預覽：\n${text.substring(0, 100)}...`); 
+            }).catch(err => { 
+                alert("❌ 複製失敗，請手動複製"); 
+            }); 
+        }
     </script>
 </body>
 </html>
