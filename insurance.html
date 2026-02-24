@@ -91,17 +91,18 @@
         .selected-item { border-left: 4px solid var(--highlight); background: rgba(66, 133, 244, 0.1); }
         .date-tag { font-size: 10px; color: var(--highlight); background: rgba(66, 133, 244, 0.2); padding: 2px 5px; border-radius: 4px; margin-top: 2px;}
 
-        .bottom-bar { margin-top: 15px; display: flex; flex-wrap: wrap; gap: 10px; }
+        .bottom-bar { margin-top: 15px; display: flex; flex-wrap: wrap; gap: 8px; justify-content: space-between; }
         .btn {
-            flex: 1; padding: 12px; border: none; border-radius: 50px; min-width: 120px;
-            font-weight: bold; cursor: pointer; font-size: 14px;
+            flex: 1; padding: 10px 5px; border: none; border-radius: 12px; min-width: 80px;
+            font-weight: bold; cursor: pointer; font-size: 13px;
             display: flex; justify-content: center; align-items: center; gap: 5px;
         }
-        .btn-simple { background: var(--primary); color: #000; flex: 1.5; }
-        .btn-excel { background: #217346; color: #fff; flex: 1.5; }
+        .btn-simple { background: var(--primary); color: #000; }
+        .btn-excel1 { background: #217346; color: #fff; }
+        .btn-excel2 { background: #0b5394; color: #fff; }
         .btn-parse { background: var(--success); color: #fff; width: 100%; margin-top: 5px; padding: 8px; border-radius: 8px; font-size: 14px;}
-        .btn-clear { background: #444; color: #fff; flex: 0.5; }
-        .btn-back { background: transparent; border: 1px solid var(--text-sub); color: var(--text-sub); flex: 0.4; text-decoration: none;}
+        .btn-clear { background: #444; color: #fff; flex: 0.3; }
+        .btn-back { background: transparent; border: 1px solid var(--text-sub); color: var(--text-sub); flex: 0.2; text-decoration: none;}
 
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
     </style>
@@ -127,7 +128,7 @@
     </div>
 
     <div class="smart-area" style="border-color:var(--primary);">
-        <div style="font-size:12px; margin-bottom:5px; color:var(--text-sub);">📝 簡易複製的選項 (勾選要的項目)</div>
+        <div style="font-size:12px; margin-bottom:5px; color:var(--text-sub);">📝 簡易複製的選項 (僅影響"簡易複製"按鈕)</div>
         <div class="options-box">
             <label class="opt-item"><input type="checkbox" id="opt-bday" checked> 生日</label>
             <label class="opt-item"><input type="checkbox" id="opt-id" checked> 身分證</label>
@@ -156,7 +157,8 @@
         <a href="dashboard.html" class="btn btn-back">⬅️</a>
         <button class="btn btn-clear" onclick="clearTarget()">🗑️</button>
         <button class="btn btn-simple" onclick="generateSimpleFormat()">📋 簡易複製</button>
-        <button class="btn btn-excel" onclick="generateExcelFormat()">📊 複製到 Excel</button>
+        <button class="btn btn-excel1" onclick="generateExcelFormatWithDate()">📊 Excel (含日期天數)</button>
+        <button class="btn btn-excel2" onclick="generateExcelFormatForInsurance()">🛡️ Excel (保險上傳)</button>
     </div>
 
     <script>
@@ -273,7 +275,6 @@
             if (selectedStaffData.size === 0) { alert("名單是空的！"); return; }
             let text = ""; let index = 1;
             
-            // 讀取勾選狀態
             const needBday = document.getElementById('opt-bday').checked;
             const needId = document.getElementById('opt-id').checked;
             const needPhone = document.getElementById('opt-phone').checked;
@@ -284,9 +285,7 @@
                 const s = staffList.find(st => st.phone === phone);
                 if (s) {
                     let parts = [];
-                    // 永遠顯示名字
                     parts.push(`${index}.${s.name}`);
-                    
                     if(needBday) { let bDayStr = formatRocDate(s.birthday, "."); parts.push(bDayStr); }
                     if(needId) parts.push(s.id || "無身分證");
                     if(needPhone) parts.push(s.phone);
@@ -300,8 +299,29 @@
             copyToClipboard(text);
         }
 
-        // === 📊 功能 2：Excel 表格 (符合保險表格格式) ===
-        function generateExcelFormat() {
+        // === 📊 功能 2：Excel 表格 (含日期天數，如圖四) ===
+        function generateExcelFormatWithDate() {
+            if (selectedStaffData.size === 0) { alert("名單是空的！"); return; }
+            
+            // 順序：起始日 | 結束日 | 天數 | 編號 | 姓名 | 生日 | 身分證
+            let text = ""; let index = 1;
+
+            selectedStaffData.forEach((data, phone) => {
+                const s = staffList.find(st => st.phone === phone);
+                if (s) {
+                    let rocBday = formatRocDate(s.birthday, "/");
+                    let start = data.start || ""; let end = data.end || ""; let rDays = data.rangeDays || "";
+                    
+                    // Tab分隔，對應圖四的格式
+                    text += `${start}\t${end}\t${rDays}\t${index}\t${s.name}\t${rocBday}\t${s.id || ""}\n`;
+                    index++;
+                }
+            });
+            copyToClipboard(text);
+        }
+
+        // === 🛡️ 功能 3：Excel 表格 (保險上傳專用，如圖五) ===
+        function generateExcelFormatForInsurance() {
             if (selectedStaffData.size === 0) { alert("名單是空的！"); return; }
             
             // 格式：被保險人姓名 | 護照號碼 | 同護照之英文名稱 | 出生民國年 | 出生月 | 出生日 | 身分證字號 | 手機號碼 | 電子信箱
@@ -320,7 +340,7 @@
                         d = parseInt(parts[2]);
                     }
 
-                    let email = s.email || ""; // 假設 STAFF_DB 裡有 email 欄位
+                    let email = s.email || ""; // 假設有這欄位
                     let id = s.id || "";
 
                     // Tab 分隔，對應空白欄位
