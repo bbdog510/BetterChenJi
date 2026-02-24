@@ -47,7 +47,7 @@
 
         .missing-box {
             display: none; background: rgba(255, 82, 82, 0.1); border: 1px solid var(--danger);
-            border-radius: 8px; padding: 10px; margin-top: 10px; font-size: 13px; color: var(--danger);
+            border-radius: 8px; padding: 10px; margin-top: 10px; font-size: 13px; color: var(--danger); line-height: 1.5;
         }
 
         .container { display: flex; gap: 15px; flex: 1; overflow: hidden; }
@@ -95,11 +95,12 @@
         .btn {
             flex: 1; padding: 10px 5px; border: none; border-radius: 12px; min-width: 80px;
             font-weight: bold; cursor: pointer; font-size: 13px;
-            display: flex; justify-content: center; align-items: center; gap: 5px;
+            display: flex; justify-content: center; align-items: center; gap: 5px; transition: 0.2s;
         }
+        .btn:active { transform: scale(0.95); opacity: 0.8; }
         .btn-simple { background: var(--primary); color: #000; }
-        .btn-excel1 { background: #217346; color: #fff; }
-        .btn-excel2 { background: #0b5394; color: #fff; }
+        .btn-excel1 { background: #0b5394; color: #fff; }
+        .btn-excel2 { background: #217346; color: #fff; }
         .btn-parse { background: var(--success); color: #fff; width: 100%; margin-top: 5px; padding: 8px; border-radius: 8px; font-size: 14px;}
         .btn-clear { background: #444; color: #fff; flex: 0.3; }
         .btn-back { background: transparent; border: 1px solid var(--text-sub); color: var(--text-sub); flex: 0.2; text-decoration: none;}
@@ -113,14 +114,14 @@
 
     <div class="smart-area">
         <div class="smart-header" onclick="toggleSmart()">
-            <div class="smart-title">🤖 班表智慧匯入 (抓漏+算天數)</div>
-            <div style="font-size: 12px; color: var(--text-sub);">支援 Excel / Google Sheet 貼上 ▼</div>
+            <div class="smart-title">🤖 班表智慧匯入 (暴力解析版)</div>
+            <div style="font-size: 12px; color: var(--text-sub);">支援多站點、複雜排班 ▼</div>
         </div>
         <div class="smart-content" id="smartContent">
             <textarea id="pasteArea" placeholder="請直接從 Google Sheet 全選班表區域 (包含日期列)，然後貼上到這裡..."></textarea>
             <div style="display:flex; gap:10px; margin-top:5px;">
                 <input type="number" id="parseYear" value="2026" style="width:60px; padding:5px; border-radius:5px; border:1px solid #555; background:#333; color:#fff;" placeholder="年份">
-                <button class="btn btn-parse" onclick="parseSchedule()">🔍 分析班表並帶入</button>
+                <button class="btn btn-parse" onclick="parseSchedule()">🔍 全域分析並帶入</button>
             </div>
             <div id="parseMsg" style="font-size:12px; color:var(--text-sub); margin-top:5px;"></div>
             <div id="missingBox" class="missing-box"></div>
@@ -157,8 +158,8 @@
         <a href="dashboard.html" class="btn btn-back">⬅️</a>
         <button class="btn btn-clear" onclick="clearTarget()">🗑️</button>
         <button class="btn btn-simple" onclick="generateSimpleFormat()">📋 簡易複製</button>
-        <button class="btn btn-excel1" onclick="generateExcelFormatWithDate()">📊 Excel (含日期天數)</button>
-        <button class="btn btn-excel2" onclick="generateExcelFormatForInsurance()">🛡️ Excel (保險上傳)</button>
+        <button class="btn btn-excel1" onclick="generateExcelFormatWithDate()">📊 結算核對(圖四)</button>
+        <button class="btn btn-excel2" onclick="generateExcelFormatForInsurance()">🛡️ 保險上傳(圖五)</button>
     </div>
 
     <script>
@@ -175,6 +176,9 @@
 
         function toggleSmart() { document.getElementById('smartContent').classList.toggle('show'); }
 
+        // ==========================================
+        // 🚀 V3.0 核彈級解析引擎 (無視一切排版亂象)
+        // ==========================================
         function parseSchedule() {
             const text = document.getElementById('pasteArea').value;
             const year = document.getElementById('parseYear').value || new Date().getFullYear();
@@ -183,57 +187,120 @@
             if (!text.trim()) { msgEl.innerText = "❌ 請先貼上資料"; return; }
 
             const rows = text.split('\n').map(row => row.split('\t'));
-            let dateMap = {}; let foundDateRow = false;
+            
+            // 將所有員工姓名與暱稱整理成陣列，並按「長度由長到短排序」
+            // 這樣匹配 "林威旭" 時，才不會只匹配到 "林威"
+            let allStaffNames = [];
+            staffList.forEach(s => {
+                if (s.name) allStaffNames.push({ name: s.name.toUpperCase(), phone: s.phone });
+                if (s.alias) allStaffNames.push({ name: s.alias.toUpperCase(), phone: s.phone });
+            });
+            allStaffNames.sort((a, b) => b.name.length - a.name.length);
 
-            for(let r=0; r<Math.min(rows.length, 10); r++) {
-                rows[r].forEach((cell, cIdx) => {
+            let currentDateMap = {}; 
+            let tempResults = {}; 
+            let missingNames = new Set();
+
+            // 逐行暴力掃描
+            rows.forEach(row => {
+                let isDateRow = false;
+                let tempDateMap = {};
+                let dateMatchCount = 0;
+
+                // 1. 偵測這行是不是日期 Header
+                row.forEach((cell, cIdx) => {
                     let match = cell.match(/(\d{1,2})[\/\.](\d{1,2})/);
-                    if (match) {
+                    if (match && !cell.includes("時間") && cell.length < 20) {
                         let d = new Date(year, parseInt(match[1])-1, parseInt(match[2]));
-                        dateMap[cIdx] = d; foundDateRow = true;
+                        tempDateMap[cIdx] = d; 
+                        dateMatchCount++;
                     }
                 });
-                if(foundDateRow && Object.keys(dateMap).length > 2) break;
-            }
 
-            if (!foundDateRow) { msgEl.innerText = "⚠️ 找不到日期格式 (如 2/10)，請確認複製範圍包含日期列。"; return; }
+                // 只要這行有 2 個以上的日期，我就認定它是新的站點時間軸！(徹底解決 3/4 抓不到的問題)
+                if(dateMatchCount >= 2) {
+                    currentDateMap = tempDateMap;
+                    isDateRow = true;
+                }
 
-            let tempResults = {}; let missingNames = new Set();
-            rows.forEach(row => {
-                row.forEach((cell, cIdx) => {
-                    let rawName = cell.trim();
-                    if (!rawName || !/^[\u4e00-\u9fa5]{2,4}$/.test(rawName)) return;
-                    if (["早班","晚班","全天","進櫃","撤櫃","盤點"].includes(rawName)) return;
-                    let staff = staffList.find(s => s.name === rawName || (s.alias && s.alias === rawName));
-                    if (staff) {
-                        if (dateMap[cIdx]) {
-                            if (!tempResults[staff.phone]) { tempResults[staff.phone] = { name: staff.name, phone: staff.phone, dates: [] }; }
-                            tempResults[staff.phone].dates.push(dateMap[cIdx].getTime());
+                // 2. 如果這行是排班資料，且我們有目前站點的時間軸
+                if (!isDateRow && Object.keys(currentDateMap).length > 0) {
+                    row.forEach((cell, cIdx) => {
+                        // 只處理「有對應日期」的欄位
+                        if (currentDateMap[cIdx]) {
+                            let cellText = cell.toUpperCase().trim();
+                            if (!cellText || cellText.length < 2) return;
+                            if (["XXX", "X", "休", "休息"].includes(cellText)) return;
+
+                            // 暴力比對：只要字串裡包含這個人，就抓出來！
+                            // 無視斜線 /、無視 +1、無視英文 NICK
+                            allStaffNames.forEach(staff => {
+                                if (cellText.includes(staff.name)) {
+                                    if (!tempResults[staff.phone]) { 
+                                        tempResults[staff.phone] = { dates: [] }; 
+                                    }
+                                    tempResults[staff.phone].dates.push(currentDateMap[cIdx].getTime());
+                                    
+                                    // 抓到就從字串中挖掉，避免影響後續判斷
+                                    cellText = cellText.replace(staff.name, "");
+                                }
+                            });
+
+                            // 抓漏機制：把常見符號、時間、常規詞彙清掉
+                            let leftover = cellText.replace(/[0-9\-\+\/\(\)A-Za-z\.\:\s\{\}]/g, "");
+                            const ignoreWords = ["進櫃", "撤櫃", "時間", "總時數", "當日時數", "上班", "開賣", "閉店"];
+                            ignoreWords.forEach(w => leftover = leftover.replace(w, ""));
+
+                            // 如果剩下的長度還有大於 2 的中文字，代表有我資料庫不認識的人
+                            if (leftover.length >= 2) {
+                                missingNames.add(leftover);
+                            }
                         }
-                    } else { if (dateMap[cIdx]) { missingNames.add(rawName); } }
-                });
+                    });
+                }
             });
 
+            // 計算結果寫入
             let count = 0;
             for (let phone in tempResults) {
                 let data = tempResults[phone];
+                // 陣列去重：即使一天出現兩次 (早晚班)，也只算 1 天
                 let uniqueTimestamps = [...new Set(data.dates)].sort((a,b)=>a-b);
+                
                 if (uniqueTimestamps.length > 0) {
-                    let startTs = uniqueTimestamps[0]; let endTs = uniqueTimestamps[uniqueTimestamps.length - 1];
+                    let startTs = uniqueTimestamps[0]; 
+                    let endTs = uniqueTimestamps[uniqueTimestamps.length - 1];
+                    
+                    // 區間天數 (最後一天 - 第一天 + 1)
                     let rangeDays = Math.ceil(Math.abs(endTs - startTs) / (1000 * 60 * 60 * 24)) + 1; 
+                    // 實際有做天數
                     let workDays = uniqueTimestamps.length;
-                    let sD = new Date(startTs); let eD = new Date(endTs);
+
+                    let sD = new Date(startTs); 
+                    let eD = new Date(endTs);
                     let startStr = `${sD.getFullYear()}-${(sD.getMonth()+1).toString().padStart(2,'0')}-${sD.getDate().toString().padStart(2,'0')}`;
                     let endStr = `${eD.getFullYear()}-${(eD.getMonth()+1).toString().padStart(2,'0')}-${eD.getDate().toString().padStart(2,'0')}`;
+                    
                     selectedStaffData.set(phone, { start: startStr, end: endStr, rangeDays: rangeDays, workDays: workDays });
                     count++;
                 }
             }
-            msgEl.innerText = `✅ 成功解析！已帶入 ${count} 位人員。`; msgEl.style.color = "var(--success)";
-            if (missingNames.size > 0) { missingBox.style.display = 'block'; missingBox.innerHTML = `⚠️ <b>注意：以下名字在班表上，但資料庫找不到人 (請檢查錯字或新增員工)：</b><br>${Array.from(missingNames).join("、")}`; } else { missingBox.style.display = 'none'; }
+
+            msgEl.innerText = `✅ 暴力解析成功！已帶入 ${count} 位人員。`; 
+            msgEl.style.color = "var(--success)";
+            
+            if (missingNames.size > 0) { 
+                missingBox.style.display = 'block'; 
+                missingBox.innerHTML = `⚠️ <b>抓漏警告：以下名串出現在班表，但系統不認識 (請檢查錯字或新增至資料庫)：</b><br>${Array.from(missingNames).join("、")}`; 
+            } else { 
+                missingBox.style.display = 'none'; 
+            }
             renderSource(); renderTarget();
         }
 
+        // ==========================================
+        // UI 渲染與其他功能
+        // ==========================================
         function renderSource() {
             const container = document.getElementById('sourceList'); const keyword = document.getElementById('searchInput').value.toLowerCase(); container.innerHTML = "";
             staffList.forEach(staff => {
@@ -299,20 +366,21 @@
             copyToClipboard(text);
         }
 
-        // === 📊 功能 2：Excel 表格 (含日期天數，如圖四) ===
+        // === 📊 功能 2：舊版 Excel 格式 (對應你的圖四，方便核對) ===
         function generateExcelFormatWithDate() {
             if (selectedStaffData.size === 0) { alert("名單是空的！"); return; }
             
-            // 順序：起始日 | 結束日 | 天數 | 編號 | 姓名 | 生日 | 身分證
+            // 順序：起始日 | 結束日 | 區間天數 | 編號 | 姓名 | 生日 | 身分證
             let text = ""; let index = 1;
 
             selectedStaffData.forEach((data, phone) => {
                 const s = staffList.find(st => st.phone === phone);
                 if (s) {
                     let rocBday = formatRocDate(s.birthday, "/");
-                    let start = data.start || ""; let end = data.end || ""; let rDays = data.rangeDays || "";
+                    let start = data.start ? data.start.replace(/\//g, '-') : ""; 
+                    let end = data.end ? data.end.replace(/\//g, '-') : ""; 
+                    let rDays = data.rangeDays || "";
                     
-                    // Tab分隔，對應圖四的格式
                     text += `${start}\t${end}\t${rDays}\t${index}\t${s.name}\t${rocBday}\t${s.id || ""}\n`;
                     index++;
                 }
@@ -320,11 +388,11 @@
             copyToClipboard(text);
         }
 
-        // === 🛡️ 功能 3：Excel 表格 (保險上傳專用，如圖五) ===
+        // === 🛡️ 功能 3：新版保險格式 (對應你的圖五，上傳保險用) ===
         function generateExcelFormatForInsurance() {
             if (selectedStaffData.size === 0) { alert("名單是空的！"); return; }
             
-            // 格式：被保險人姓名 | 護照號碼 | 同護照之英文名稱 | 出生民國年 | 出生月 | 出生日 | 身分證字號 | 手機號碼 | 電子信箱
+            // 格式：姓名 | (空) | (空) | 民國年 | 月 | 日 | 身分證 | 手機 | 信箱
             let text = ""; 
 
             selectedStaffData.forEach((data, phone) => {
@@ -335,15 +403,14 @@
                     let parts = String(bDayStr).split(/[-/.]/);
                     if (parts.length >= 3) {
                         y = parseInt(parts[0]);
-                        if (y > 1911) y -= 1911; // 轉民國年
+                        if (y > 1911) y -= 1911; 
                         m = parseInt(parts[1]);
                         d = parseInt(parts[2]);
                     }
 
-                    let email = s.email || ""; // 假設有這欄位
+                    let email = s.email || ""; 
                     let id = s.id || "";
 
-                    // Tab 分隔，對應空白欄位
                     text += `${s.name}\t\t\t${y}\t${m}\t${d}\t${id}\t'${s.phone}\t${email}\n`;
                 }
             });
